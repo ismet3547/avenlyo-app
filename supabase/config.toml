@@ -1,0 +1,31 @@
+project_id = "avenlyo-app"
+[api]
+enabled = true
+port = 55321
+schemas = ["public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+auto_expose_new_tables = true
+[db]
+port = 55322
+shadow_port = 55320
+major_version = 15
+[db.migrations]
+enabled = true
+[db.seed]
+enabled = false
+[studio]
+enabled = true
+port = 55323
+api_url = "http://127.0.0.1"
+[inbucket]
+enabled = true
+port = 55324
+[auth]
+enabled = true
+site_url = "http://localhost:3001"
+additional_redirect_urls = ["http://localhost:3001/auth/callback"]
+enable_signup = true
+[auth.email]
+enable_signup = true
+enable_confirmations = true
