@@ -20,7 +20,7 @@ jobs:
           version: 9.15.9
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
@@ -28,7 +28,7 @@ jobs:
       - run: pnpm test
       - run: pnpm build
         env:
-          NEXT_TELEMETRY_DISABLED: '1'
+          NEXT_TELEMETRY_DISABLED: "1"
       - run: pnpm smoke:api
   database:
     name: Database isolation and runtime acceptance
@@ -41,7 +41,7 @@ jobs:
           version: 9.15.9
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - uses: supabase/setup-cli@v1
@@ -59,8 +59,20 @@ jobs:
           if(c.API_URL!=='http://127.0.0.1:55321') throw new Error('Unexpected local stack');
           const publicKey=c.PUBLISHABLE_KEY||c.ANON_KEY;
           if(!publicKey||!c.SERVICE_ROLE_KEY) throw new Error('Local keys unavailable');
-          appendFileSync(process.env.GITHUB_ENV,`SUPABASE_URL=${c.API_URL}\nSUPABASE_PUBLISHABLE_KEY=${publicKey}\nSUPABASE_SERVICE_ROLE_KEY=${c.SERVICE_ROLE_KEY}\n`);
+          appendFileSync(process.env.GITHUB_ENV,`SUPABASE_URL=${c.API_URL}\nSUPABASE_PUBLISHABLE_KEY=${publicKey}\nSUPABASE_SERVICE_ROLE_KEY=${c.SERVICE_ROLE_KEY}\nNEXT_PUBLIC_SUPABASE_URL=${c.API_URL}\nNEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${publicKey}\nNEXT_PUBLIC_APP_URL=http://localhost:3001\nAVENLYO_APP_API_URL=http://127.0.0.1:4001\n`);
           JS
       - run: pnpm test:acceptance
+      - name: Build web for real browser acceptance
+        run: pnpm --filter @avenlyo-app/web build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:browser
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: foundation-browser-qa
+          path: test-results/
+          retention-days: 7
       - if: always()
         run: supabase stop --no-backup

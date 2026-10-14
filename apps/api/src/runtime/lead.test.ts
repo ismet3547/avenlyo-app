@@ -15,6 +15,29 @@ const interest =
   "I'm interested in a custom project but I'm not sure what I need.";
 const contact = "I'm Alex. My email is alex@example.test.";
 describe("server-validated lead evidence", () => {
+  it("does not mistake an interest adjective for a customer name", () => {
+    const lead = validatedLead(
+      defaultSettings,
+      [interest, "My email is alex@example.test."],
+      { ...output, name: "interested" },
+      false,
+    );
+    expect(lead).toMatchObject({
+      name: null,
+      email: "alex@example.test",
+      qualification: "needs_info",
+    });
+  });
+  it("requires service interpretation as well as independent customer evidence", () => {
+    expect(
+      validatedLead(
+        defaultSettings,
+        [interest, contact],
+        { ...output, interest: "general" },
+        false,
+      ),
+    ).toBeNull();
+  });
   it("qualifies a genuine inquiry with required customer-stated facts", () => {
     expect(
       validatedLead(defaultSettings, [interest, contact], output, false),

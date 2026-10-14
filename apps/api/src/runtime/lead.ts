@@ -34,6 +34,12 @@ function escape(text: string): string {
 }
 function statedName(value: string | null, evidence: string): string | null {
   if (!value) return null;
+  if (
+    /^(interested|looking|not|unsure|a|an|just|only|here|ready|happy|fine|okay|ok|curious|wondering|new|from|i)\b/iu.test(
+      value,
+    )
+  )
+    return null;
   return new RegExp(
     `(?:my name is|i am|i'm|name\\s*:|adım|ismim)\\s+${escape(value)}(?=$|[\\s.,!;])`,
     "iu",
@@ -62,7 +68,7 @@ export function validatedLead(
   )
     return null;
   const interest = commercialEvidence(customerTurns);
-  if (!interest || output.interest === "declined") return null;
+  if (!interest || output.interest !== "service") return null;
   const evidence = customerTurns.join("\n");
   const emails =
     evidence.match(
