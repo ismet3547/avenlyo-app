@@ -1,0 +1,35 @@
+{
+  "name": "avenlyo-app",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=22.12.0",
+    "pnpm": "9.15.9"
+  },
+  "scripts": {
+    "dev:web": "pnpm --filter @avenlyo-app/web dev",
+    "dev:api": "pnpm --filter @avenlyo-app/api dev",
+    "typecheck": "pnpm -r typecheck && tsc -p tsconfig.tools.json",
+    "lint": "eslint . && pnpm check:independence",
+    "test": "vitest run",
+    "build": "pnpm -r build",
+    "check:independence": "node scripts/check-independence.mjs",
+    "db:start": "supabase start",
+    "db:reset": "supabase db reset --local",
+    "db:test": "supabase test db",
+    "test:acceptance": "pnpm --filter @avenlyo-app/api exec tsx src/testing/local-acceptance.ts",
+    "smoke:api": "pnpm --filter @avenlyo-app/api exec node scripts/artifact-smoke.mjs",
+    "test:browser": "playwright test"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.64.0",
+    "@types/node": "22.20.5",
+    "eslint": "10.12.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.2",
+    "vitest": "5.0.4"
+  },
+  "type": "module"
+}
