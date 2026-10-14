@@ -14,7 +14,7 @@ export function instructions(settings: AgentSettings): string {
 }
 
 const unsupportedTeamAction =
-  /\b(?:i|we)\s+(?:(?:can|will|['’]ll)\s+(?:send|forward|pass|escalate|notify|alert|message|contact|share)|(?:have|['’]ve)\s+(?:sent|forwarded|passed|escalated|notified|alerted|messaged|contacted|shared))\b[^.!?]*(?:team|staff|someone|colleague|business)[.!?]?/giu;
+  /\b(?:(?:i|we)\s+(?:can|will|have)\s+|(?:i|we)['’](?:ll|ve)\s+)(?:send|sent|forward|forwarded|pass|passed|escalate|escalated|notify|notified|alert|alerted|message|messaged|contact|contacted|share|shared)\b[^.!?]*(?:team|staff|someone|colleague|business)[.!?]?/giu;
 
 export function customerSafeReply(reply: string, leadWillBeSaved: boolean): string {
   const replacement = leadWillBeSaved
@@ -27,8 +27,20 @@ export function customerSafeReply(reply: string, leadWillBeSaved: boolean): stri
 }
 
 export function explicitHumanRequest(text: string): boolean {
-  return /\b(human|real person|someone from (your|the) team|talk to (a person|someone)|speak (to|with) (a person|someone))\b|insanla|yetkiliyle|bir yetkili|ekibinizle/iu.test(
-    text,
+  const normalized = text.trim();
+  return (
+    /\b(?:want|need|prefer|wanna|would like|i['’]d like)\b[^.!?]{0,48}\b(?:a )?(?:human|real (?:person|people)|representative|live agent|someone|staff member)\b/iu.test(
+      normalized,
+    ) ||
+    /\b(?:talk|speak|connect|contact|chat)\b[^.!?]{0,40}\b(?:with |to )?(?:a )?(?:human|real (?:person|people)|person|someone|representative|live agent|team|staff)\b/iu.test(
+      normalized,
+    ) ||
+    /\b(?:human|real person|real people|someone from (?:your|the) team)\b/iu.test(
+      normalized,
+    ) ||
+    /insanla|gerçek (?:biri|bir insan)|müşteri temsilcisi|temsilciyle|yetkiliyle|bir yetkili|ekibinizle|biriyle konuş/iu.test(
+      normalized,
+    )
   );
 }
 export function isGreeting(text: string): boolean {

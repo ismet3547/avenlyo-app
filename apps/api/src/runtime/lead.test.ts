@@ -222,9 +222,21 @@ describe("mandatory policy", () => {
     for (const text of [
       "I want a human",
       "Can I speak with a person?",
+      "I wanna connect real people",
+      "Please connect me with someone from your team",
+      "Can I talk to a representative?",
       "Bir insanla konuşmak istiyorum",
+      "Müşteri temsilcisiyle görüşmek istiyorum",
     ])
       expect(explicitHumanRequest(text)).toBe(true);
+  });
+  it("does not confuse ordinary business language with a human request", () => {
+    for (const text of [
+      "Do you offer human resources consulting?",
+      "Can you connect our CRM systems?",
+      "Tell me about your team services.",
+    ])
+      expect(explicitHumanRequest(text)).toBe(false);
   });
   it("does not treat a project inquiry as a greeting", () => {
     expect(isGreeting(interest)).toBe(false);

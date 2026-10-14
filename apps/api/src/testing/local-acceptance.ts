@@ -293,7 +293,7 @@ try {
   const handoff = await post(a.token, "/v1/agent/turn", {
     ...second,
     idempotencyKey: randomUUID(),
-    content: "I want a human.",
+    content: "I wanna connect real people",
   });
   check(
     handoff.statusCode === 200 && handoff.json<TurnResult>().needsHuman,
