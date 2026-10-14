@@ -29,3 +29,8 @@ enable_signup = true
 [auth.email]
 enable_signup = true
 enable_confirmations = true
+
+[analytics]
+enabled = false
+port = 55327
+vector_port = 55328
