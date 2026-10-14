@@ -50,9 +50,11 @@ const provider: AgentProvider = {
     const email = customer.match(/(?:alex|riley)@example\.test/)?.[0] ?? null;
     return {
       reply: name
-        ? "Thanks. We can discuss the scope of your custom project."
-        : "We provide custom design and manufacturing services. What kind of project are you considering?",
-      request_human: false,
+        ? "Thanks. I've notified the team about your custom project."
+        : "We provide custom design and manufacturing services. Share your name and email and I can pass your inquiry along to the team for follow-up.",
+      // Deliberately wrong provider signal: server policy must not let the model
+      // pause an otherwise grounded, answerable inquiry.
+      request_human: true,
       interest: "service",
       name,
       email,
@@ -171,6 +173,15 @@ try {
     initial.reply.includes("custom design"),
     "Runtime uses published business knowledge",
   );
+  check(
+    !initial.needsHuman,
+    "Model handoff suggestion cannot pause a grounded inquiry",
+  );
+  check(
+    !initial.reply.includes("pass your inquiry") &&
+      initial.reply.includes("can be saved for team follow-up"),
+    "Unsupported future team-action claim is rewritten safely",
+  );
   const second = {
     workspaceId: workspace,
     conversationId: initial.conversationId,
@@ -183,6 +194,15 @@ try {
     "Contact turn succeeds through the same runtime",
   );
   const result = secondResponse.json<TurnResult>();
+  check(
+    !result.needsHuman,
+    "Contact collection remains active despite model handoff suggestion",
+  );
+  check(
+    result.reply.includes("has been saved for team follow-up") &&
+      !result.reply.includes("notified the team"),
+    "Persisted lead is described as saved, never externally notified",
+  );
   check(Boolean(result.leadId), "One durable lead is returned");
   const leads = await a.client
     .from("leads")

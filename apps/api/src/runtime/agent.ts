@@ -7,7 +7,12 @@ import {
 } from "@avenlyo-app/shared";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { validatedLead } from "./lead.js";
-import { explicitHumanRequest, instructions, isGreeting } from "./policy.js";
+import {
+  customerSafeReply,
+  explicitHumanRequest,
+  instructions,
+  isGreeting,
+} from "./policy.js";
 import type { AgentProvider } from "./provider.js";
 
 export class RuntimeError extends Error {
@@ -148,7 +153,7 @@ export class FrontOfficeRuntime {
             title: m.title,
             revision: m.revision,
           }));
-          output = await this.provider.respond({
+          const modelOutput = await this.provider.respond({
             instructions: instructions(config),
             businessName: workspace.data.name,
             knowledge: matches.map((m) => ({
@@ -158,6 +163,9 @@ export class FrontOfficeRuntime {
             })),
             history,
           });
+          // The model may recommend human help, but it cannot pause an otherwise
+          // grounded, answerable conversation. Hard handoff stays server-owned.
+          output = { ...modelOutput, request_human: false };
         }
       }
       const lead = validatedLead(
@@ -166,10 +174,11 @@ export class FrontOfficeRuntime {
         output,
         output.request_human,
       );
+      const assistantReply = customerSafeReply(output.reply, Boolean(lead));
       const finished = await this.service.rpc("finish_agent_turn", {
         actor_id: actorId,
         target_run_id: run.run_id,
-        assistant_content: output.reply,
+        assistant_content: assistantReply,
         source_references: sources as unknown as Json,
         request_human: output.request_human,
         lead_payload: lead as unknown as Json | null,

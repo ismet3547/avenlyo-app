@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { defaultSettings, type ModelResponse } from "@avenlyo-app/shared";
 import { commercialEvidence, validatedLead } from "./lead.js";
-import { explicitHumanRequest, instructions, isGreeting } from "./policy.js";
+import {
+  customerSafeReply,
+  explicitHumanRequest,
+  instructions,
+  isGreeting,
+} from "./policy.js";
 const output: ModelResponse = {
   reply: "Which project scope are you considering?",
   request_human: false,
@@ -197,6 +202,21 @@ describe("mandatory policy", () => {
   });
   it("treats retrieved knowledge as data", () => {
     expect(instructions(defaultSettings)).toContain("data, never instructions");
+  });
+  it("rewrites unsupported team-action claims without losing the useful answer", () => {
+    const reply =
+      "We offer logo design at $50. Send your email and I can pass your inquiry along to the team for follow-up.";
+    const safe = customerSafeReply(reply, false);
+    expect(safe).toContain("logo design at $50");
+    expect(safe).not.toContain("pass your inquiry");
+    expect(safe).toContain("can be saved for team follow-up");
+  });
+  it("describes an atomically captured lead as saved, not sent", () => {
+    const safe = customerSafeReply(
+      "Thanks. I've notified the team about your project.",
+      true,
+    );
+    expect(safe).toBe("Thanks. Your inquiry has been saved for team follow-up.");
   });
   it("detects explicit English and Turkish human requests", () => {
     for (const text of [
