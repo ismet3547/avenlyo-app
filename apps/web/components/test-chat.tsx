@@ -37,6 +37,7 @@ export function TestChat({
   const [id, setId] = useState(conversationId);
   const [leadId, setLeadId] = useState(initialLeadId);
   const [pending, setPending] = useState(false);
+  const [routeSyncing, setRouteSyncing] = useState(false);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(false);
   const request = useRef<RequestInput | null>(null);
@@ -87,9 +88,18 @@ export function TestChat({
       setContent("");
       setRetry(false);
       request.current = null;
-      router.replace(`/app/test-agent?conversation=${result.conversationId}`, {
-        scroll: false,
-      });
+      if (submitted.conversationId === null) {
+        // The first successful turn gives this test its durable conversation URL.
+        // Keep the composer locked until the server page remounts with that ID;
+        // otherwise a fast second input can be lost during router.replace().
+        setRouteSyncing(true);
+        router.replace(`/app/test-agent?conversation=${result.conversationId}`, {
+          scroll: false,
+        });
+      } else if (result.needsHuman) {
+        // Refresh server-owned handoff state so the paused banner/action appear.
+        router.refresh();
+      }
     } catch {
       setRetry(true);
       setError(
@@ -164,9 +174,11 @@ export function TestChat({
               </div>
             </div>
           ))}
-          {pending && (
+          {(pending || routeSyncing) && (
             <p role="status" className="text-xs text-muted-foreground">
-              Avenlyo is preparing an answer…
+              {pending
+                ? "Avenlyo is preparing an answer…"
+                : "Opening the saved conversation…"}
             </p>
           )}
         </div>
@@ -186,7 +198,7 @@ export function TestChat({
             value={content}
             onChange={(e) => setContent(e.target.value)}
             maxLength={2000}
-            disabled={pending || retry}
+            disabled={pending || retry || routeSyncing}
             placeholder="Type a customer question…"
           />
           <div className="mt-3 flex items-center justify-between gap-3">
@@ -196,10 +208,16 @@ export function TestChat({
             <Button
               size="sm"
               type="submit"
-              disabled={pending || !content.trim()}
+              disabled={pending || routeSyncing || !content.trim()}
             >
               {retry ? <RotateCcw aria-hidden /> : <ArrowUp aria-hidden />}
-              {retry ? "Retry same message" : pending ? "Working…" : "Send"}
+              {retry
+                ? "Retry same message"
+                : pending
+                  ? "Working…"
+                  : routeSyncing
+                    ? "Opening…"
+                    : "Send"}
             </Button>
           </div>
           {error && (
