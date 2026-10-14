@@ -1,4 +1,4 @@
-name: Foundation CI
+name: Avenlyo App CI
 on:
   pull_request:
   push:
@@ -47,9 +47,7 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: 2.120.0
-      - run: supabase start -x studio,imgproxy,logflare,vector,supavisor
-      - run: pnpm db:reset
-      - run: pnpm db:test
+      - run: supabase start -x studio,imgproxy,logflare,vector,supavisor > "$RUNNER_TEMP/supabase-start.log"
       - name: Set disposable local connection
         run: |
           supabase status -o json > "$RUNNER_TEMP/supabase-local.json"
@@ -59,9 +57,15 @@ jobs:
           if(c.API_URL!=='http://127.0.0.1:55321') throw new Error('Unexpected local stack');
           const publicKey=c.PUBLISHABLE_KEY||c.ANON_KEY;
           if(!publicKey||!c.SERVICE_ROLE_KEY) throw new Error('Local keys unavailable');
+          console.log(`::add-mask::${c.SERVICE_ROLE_KEY}`);
           appendFileSync(process.env.GITHUB_ENV,`SUPABASE_URL=${c.API_URL}\nSUPABASE_PUBLISHABLE_KEY=${publicKey}\nSUPABASE_SERVICE_ROLE_KEY=${c.SERVICE_ROLE_KEY}\nNEXT_PUBLIC_SUPABASE_URL=${c.API_URL}\nNEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${publicKey}\nNEXT_PUBLIC_APP_URL=http://localhost:3001\nAVENLYO_APP_API_URL=http://127.0.0.1:4001\n`);
           JS
+      - name: Reset disposable stack to Foundation V1 only
+        run: supabase db reset --local --version 20261013221636
       - run: pnpm test:acceptance
+      - run: pnpm db:test:upgrade
+      - run: pnpm db:test
+      - run: pnpm test:channels
       - name: Build web for real browser acceptance
         run: pnpm --filter @avenlyo-app/web build
         env:

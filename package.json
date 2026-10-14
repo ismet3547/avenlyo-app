@@ -20,7 +20,10 @@
     "db:test": "supabase test db",
     "test:acceptance": "pnpm --filter @avenlyo-app/api exec tsx src/testing/local-acceptance.ts",
     "smoke:api": "pnpm --filter @avenlyo-app/api exec node scripts/artifact-smoke.mjs",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "test:channels": "pnpm --filter @avenlyo-app/api exec tsx src/testing/channels-acceptance.ts",
+    "instagram:provision": "pnpm --filter @avenlyo-app/api exec tsx src/channels/provision-cli.ts",
+    "db:test:upgrade": "node scripts/test-foundation-upgrade.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

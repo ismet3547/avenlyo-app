@@ -94,4 +94,54 @@ export type TurnResult = {
   needsHuman: boolean;
   sources: { id: string; title: string }[];
   replayed: boolean;
+  messageId?: string | null;
 };
+
+export const websiteOriginSchema = z
+  .string()
+  .max(240)
+  .refine((value) => {
+    try {
+      const url = new URL(value);
+      return (
+        url.origin === value &&
+        !value.includes("*") &&
+        !url.username &&
+        !url.password &&
+        (url.protocol === "https:" ||
+          (url.protocol === "http:" &&
+            ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)))
+      );
+    } catch {
+      return false;
+    }
+  }, "Use an exact HTTPS origin, or an explicit HTTP localhost origin.");
+export const websiteConfigurationSchema = z
+  .object({
+    enabled: z.boolean(),
+    origins: z.array(websiteOriginSchema).min(1).max(10),
+  })
+  .strict()
+  .refine(
+    (value) => new Set(value.origins).size === value.origins.length,
+    "Origins must be unique.",
+  );
+export const websiteMessageSchema = z
+  .object({
+    clientMessageId: z.uuid(),
+    content: z.string().trim().min(1).max(2000),
+  })
+  .strict();
+export const humanReplySchema = z
+  .object({
+    workspaceId: z.uuid(),
+    clientMessageId: z.uuid(),
+    content: z.string().trim().min(1).max(2000),
+  })
+  .strict();
+export const channelLabels = {
+  test_agent: "Test Agent",
+  website_chat: "Website Chat",
+  instagram: "Instagram",
+} as const;
+export type Channel = keyof typeof channelLabels;

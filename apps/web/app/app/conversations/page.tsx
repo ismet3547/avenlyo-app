@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/empty-state";
 import { dateLabel } from "@/lib/utils";
+import { channelLabels } from "@avenlyo-app/shared";
 export default async function ConversationsPage() {
   const ctx = await requireWorkspace();
   const result = await ctx.supabase
@@ -18,7 +19,7 @@ export default async function ConversationsPage() {
     <>
       <PageHeader
         title="Conversations"
-        description="A clear record of your agent’s test conversations and when human assistance was requested."
+        description="A record of customer and Test Agent conversations, with their channel and human assistance state."
         action={
           <Button asChild variant="outline">
             <Link href="/app/test-agent">New test</Link>
@@ -41,19 +42,19 @@ export default async function ConversationsPage() {
         <Card className="divide-y divide-border">
           {result.data.map((c) => (
             <Link
-              href={`/app/conversations/${c.id}`}
+              href={c.channel === "test_agent" ? `/app/conversations/${c.id}` : `/app/inbox/${c.id}`}
               className="flex flex-wrap items-center justify-between gap-4 px-5 py-5 hover:bg-muted/40"
               key={c.id}
             >
               <div>
                 <p className="text-sm font-medium">
-                  Test conversation{" "}
+                  {c.channel === "test_agent" ? "Test conversation" : "Customer conversation"}{" "}
                   <span className="font-normal text-muted-foreground">
                     · {c.id.slice(0, 8)}
                   </span>
                 </p>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Test Agent · {dateLabel(c.updated_at)}
+                  {channelLabels[c.channel]} · {dateLabel(c.updated_at)}
                 </p>
               </div>
               <Badge

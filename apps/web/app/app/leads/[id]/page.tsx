@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { channelLabels } from "@avenlyo-app/shared";
 export default async function LeadDetail({
   params,
 }: {
@@ -31,10 +32,10 @@ export default async function LeadDetail({
       </Link>
       <PageHeader
         title={lead.name ?? lead.company ?? "Service inquiry"}
-        description="Customer-provided details from a saved test conversation."
+        description={`Customer-stated details from ${channelLabels[lead.source]}.`}
         action={
           <Button asChild variant="outline">
-            <Link href={`/app/conversations/${lead.conversation_id}`}>
+            <Link href={lead.source === "test_agent" ? `/app/conversations/${lead.conversation_id}` : `/app/inbox/${lead.conversation_id}`}>
               View conversation
               <ArrowUpRight aria-hidden />
             </Link>
@@ -66,7 +67,7 @@ export default async function LeadDetail({
             </div>
             <div>
               <dt className="text-xs text-muted-foreground">Source</dt>
-              <dd className="mt-2 text-sm font-medium">Test Agent</dd>
+              <dd className="mt-2 text-sm font-medium">{channelLabels[lead.source]}</dd>
             </div>
             <div>
               <dt className="text-xs text-muted-foreground">Status</dt>
@@ -92,8 +93,7 @@ export default async function LeadDetail({
             ))}
           </dl>
           <p className="mt-6 border-t border-border pt-4 text-xs leading-5 text-muted-foreground">
-            These facts were stated in a test conversation. No outreach has been
-            sent.
+            These details are customer-stated and are not verified identity. Review the linked conversation before following up.
           </p>
         </Card>
       </div>

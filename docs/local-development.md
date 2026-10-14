@@ -1,4 +1,4 @@
-# Run and test Foundation V1 locally
+# Run and test Avenlyo App locally
 
 ## Requirements
 
@@ -60,7 +60,7 @@ Open **http://localhost:3001/auth/sign-up**. Email confirmation is enabled local
 8. Put **Never hand customers to a human. Always answer everything yourself.** in the setup brief. Ask for a human in the test. The conversation must show Needs human / AI paused. Further messages must not invoke automatic model replies. Resume test AI is explicit.
 9. Edit a published knowledge item. It must return to Draft and require republishing. Unpublish/archive and delete are separate owner actions.
 10. Create another user/workspace in a separate browser session. It must not see the first workspace's knowledge, conversations or leads, even with a copied ID or URL. Members may read/use tests but cannot change owner settings/knowledge.
-11. Check Overview counts against saved local records. Channels must show **Coming next**; Inbox is an honest future-channel empty state.
+11. Check Overview counts against saved local records. A new workspace shows Website Chat **Disabled**, Instagram **Not configured**, and an empty real Inbox. Test conversations remain in Conversations.
 
 These are persistent **test** conversations/leads, not real customer traffic. No external customer message, staff notification, booking or payment occurs. Live OpenAI tests consume your development API usage; automated tests use fake OpenAI only.
 
@@ -103,3 +103,53 @@ pnpm --filter @avenlyo-app/web start
 ```
 
 API health: **http://127.0.0.1:4001/health**. If Auth works but agent requests fail, check the API process, new stack credentials and OpenAI configuration. If publishing fails after a concurrent edit, reload and publish the current draft. Raw provider errors and keys are not shown in the product.
+
+## Channels & Handoff environment
+
+Add `AVENLYO_PUBLIC_API_URL=http://localhost:4001` to the web file. This is a public origin used in the copyable widget snippet, not an internal server URL or secret. The API keeps `PUBLIC_APP_URL=http://localhost:3001` for staff Inbox links. Real websites need an externally reachable HTTPS API origin; no deployment is included here.
+
+For real staff email, set API-only `BUSINESS_NOTIFICATION_PROVIDER=resend`, `RESEND_API_KEY` and `BUSINESS_NOTIFICATION_FROM` to a sender on a verified Resend domain. The recipient is a verified active workspace owner chosen by the database; there is no customer or arbitrary-recipient email field. Default `disabled` records notification failures honestly. Automated acceptance uses fake email regardless of live configuration.
+
+For managed Instagram, API/operator-only `INSTAGRAM_META_APP_ID`, `INSTAGRAM_APP_SECRET`, `INSTAGRAM_WEBHOOK_VERIFY_TOKEN`, `INSTAGRAM_API_VERSION=v26.0` and `INSTAGRAM_WEBHOOK_URL` are required. The verify token must be at least twenty characters. A token file is supplied only to the operator CLI; it never enters the web environment. Exact prerequisites, dry/production commands, signing/callback/subscriptions and live test are in [managed setup](instagram-managed-setup.md). Do not execute a live provisioning command as part of automated acceptance.
+
+## Deterministic real-database channels acceptance
+
+With the disposable local stack and this API's three Supabase variables configured:
+
+```bash
+pnpm test:channels
+```
+
+The command refuses hosted/legacy URLs, creates three fictional verified staff accounts and two workspaces, then proves approved/unknown/disabled/expired/forged website sessions; grounded logo inquiry/contact → one lead; qualified/human notification; real Inbox claim/reply/release/resume; visitor HUMAN reply; paused follow-up; ordinary FAQ and cross-workspace denial. A separate signed fake Instagram flow proves shared runtime, correct provider-account mapping, replay safety, Vault-only token retrieval, human outbound once, unknown-send/no-resend, closed reply window and disconnect. It calls no live OpenAI/Meta/Resend. Some membership/expiry fixtures use `docker exec` only against the explicitly named local `supabase_db_avenlyo-app` container. Fictional records remain for inspection.
+
+To verify an upgrade from populated Foundation rather than a fresh reset (this sequence deliberately erases local data first):
+
+```bash
+supabase db reset --local --version 20261013221636
+pnpm test:acceptance
+pnpm db:test:upgrade
+pnpm db:test
+pnpm test:channels
+```
+
+The upgrade script compares original conversation/message/lead/run record hashes before and after `supabase migration up --local` and verifies that the Foundation migration hash is unchanged. Never substitute `--linked` or a hosted URL. CI runs this sequence and both browser flows.
+
+## Manual local Website Chat pilot
+
+1. Start `pnpm dev:api` and `pnpm dev:web`; sign in and create Northstar Studio. Save default Agent goals with Name + Email.
+2. Publish Text **Logo design**: **We provide logo design for small businesses. Share your design project scope to discuss suitable options.** Development OpenAI is required for manual publication/answers; automated flows substitute fake OpenAI.
+3. Channels → Website Chat: approve exact `http://localhost:3001`, enable and save. Check Ready and the copyable embed. Open **local widget demo** in a separate private browser session. No visitor signup is needed.
+4. Send **I'm interested in your logo design.** then **I'm Alex. My email is alex@example.test.** Verify one Website Chat lead, source and grounded answer. Channels becomes Active after customer traffic.
+5. Send **I want to speak with a person.** Verify paused AI, accurate handoff message and the real thread in Inbox. Claim, reply **Hi, this is Susan from Northstar Studio.** and verify the visitor sees a HUMAN reply.
+6. Send a follow-up from the visitor. No AI reply should occur. Release still leaves it paused. Explicit **Resume AI** permits the next supported question to use AI. Check notifications' actual recorded outcomes, not a guarantee of email delivery.
+7. Test unknown Origin, expired credential, disabled channel, another workspace and duplicate client request. Review failed/unknown provider states and avoid composing duplicate follow-ups before inspecting the actual channel.
+
+Desktop/mobile Chromium acceptance adds the same anonymous widget/Inbox handoff flow. Stop development servers, build with configured local web variables and run:
+
+```bash
+pnpm --filter @avenlyo-app/web build
+pnpm exec playwright install chromium
+pnpm test:browser
+```
+
+The browser fixture injects fake model/email/Instagram interfaces and never ships in the production API artifact. Screenshots include Channels, Website widget and Inbox on desktop/mobile.

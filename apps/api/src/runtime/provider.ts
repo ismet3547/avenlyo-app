@@ -8,7 +8,7 @@ export interface AgentProvider {
     instructions: string;
     businessName: string;
     knowledge: { id: string; title: string; content: string }[];
-    history: { role: "customer" | "assistant"; content: string }[];
+    history: { role: "customer" | "assistant" | "human"; content: string }[];
   }): Promise<ModelResponse>;
 }
 export class OpenAIProvider implements AgentProvider {
@@ -53,7 +53,10 @@ export class OpenAIProvider implements AgentProvider {
             message.role === "customer"
               ? ("user" as const)
               : ("assistant" as const),
-          content: message.content,
+          content:
+            message.role === "human"
+              ? `Human team message (conversation data): ${message.content}`
+              : message.content,
         })),
       ],
       text: {
