@@ -210,13 +210,14 @@ describe("mandatory policy", () => {
     expect(safe).toContain("logo design at $50");
     expect(safe).not.toContain("pass your inquiry");
     expect(safe).toContain("can be saved for team follow-up");
+    expect(safe).not.toContain("for follow-up. for follow-up");
   });
   it("describes an atomically captured lead as saved, not sent", () => {
     const safe = customerSafeReply(
       "Thanks. I've notified the team about your project.",
       true,
     );
-    expect(safe).toBe("Thanks. Your inquiry has been saved for team follow-up.");
+    expect(safe).toBe("Thanks. The inquiry has been saved for team follow-up.");
   });
   it("detects explicit English and Turkish human requests", () => {
     for (const text of [
@@ -233,6 +234,7 @@ describe("mandatory policy", () => {
   it("does not confuse ordinary business language with a human request", () => {
     for (const text of [
       "Do you offer human resources consulting?",
+      "Our human resources team handles onboarding.",
       "Can you connect our CRM systems?",
       "Tell me about your team services.",
     ])

@@ -14,14 +14,15 @@ export function instructions(settings: AgentSettings): string {
 }
 
 const unsupportedTeamAction =
-  /\b(?:(?:i|we)\s+(?:can|will|have)\s+|(?:i|we)['’](?:ll|ve)\s+)(?:send|sent|forward|forwarded|pass|passed|escalate|escalated|notify|notified|alert|alerted|message|messaged|contact|contacted|share|shared)\b[^.!?]*(?:team|staff|someone|colleague|business)[.!?]?/giu;
+  /\b(?:(?:i|we)\s+(?:can|will|have)\s+|(?:i|we)['’](?:ll|ve)\s+)(?:send|sent|forward|forwarded|pass|passed|escalate|escalated|notify|notified|alert|alerted|message|messaged|contact|contacted|share|shared)\b[^.!?]*(?:team|staff|someone|colleague|business)\b[^.!?]*[.!?]?/giu;
 
 export function customerSafeReply(reply: string, leadWillBeSaved: boolean): string {
   const replacement = leadWillBeSaved
-    ? "Your inquiry has been saved for team follow-up."
-    : "Share the requested contact details and your inquiry can be saved for team follow-up.";
+    ? "The inquiry has been saved for team follow-up."
+    : "The inquiry can be saved for team follow-up once the requested contact details are provided.";
   return reply
     .replace(unsupportedTeamAction, replacement)
+    .replace(/\band The inquiry\b/g, "and the inquiry")
     .replace(/\s{2,}/g, " ")
     .trim();
 }
@@ -35,7 +36,7 @@ export function explicitHumanRequest(text: string): boolean {
     /\b(?:talk|speak|connect|contact|chat)\b[^.!?]{0,40}\b(?:with |to )?(?:a )?(?:human|real (?:person|people)|person|someone|representative|live agent|team|staff)\b/iu.test(
       normalized,
     ) ||
-    /\b(?:human|real person|real people|someone from (?:your|the) team)\b/iu.test(
+    /^(?:please\s+)?(?:a\s+)?(?:human|real (?:person|people)|representative|live agent|someone)(?:\s+please)?[.!?]*$/iu.test(
       normalized,
     ) ||
     /insanla|gerçek (?:biri|bir insan)|müşteri temsilcisi|temsilciyle|yetkiliyle|bir yetkili|ekibinizle|biriyle konuş/iu.test(
