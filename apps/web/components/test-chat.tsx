@@ -51,13 +51,15 @@ export function TestChat({
         idempotencyKey: crypto.randomUUID(),
       };
     }
+    const submitted = request.current;
+    if (!submitted) return;
     setPending(true);
     setError("");
     try {
       const response = await fetch("/api/agent/turn", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(request.current),
+        body: JSON.stringify(submitted),
       });
       const result = (await response.json()) as TurnResult & { code?: string };
       if (!response.ok) {
@@ -77,7 +79,7 @@ export function TestChat({
       }
       setMessages((previous) => [
         ...previous,
-        { role: "customer", content: request.current!.content },
+        { role: "customer", content: submitted.content },
         { role: "assistant", content: result.reply },
       ]);
       setId(result.conversationId);

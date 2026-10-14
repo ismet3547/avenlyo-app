@@ -1,4 +1,10 @@
 import { defineConfig } from "@playwright/test";
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+for (const name of ["apps/api/.env", "apps/web/.env.local"]) {
+  const path = fileURLToPath(new URL(name, import.meta.url));
+  if (existsSync(path)) process.loadEnvFile(path);
+}
 export default defineConfig({
   testDir: "./apps/api/src/testing/browser",
   workers: 1,

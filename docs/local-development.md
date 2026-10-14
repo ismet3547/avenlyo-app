@@ -19,20 +19,20 @@ supabase status
 
 Copy `apps/web/.env.example` to `apps/web/.env.local` and `apps/api/.env.example` to `apps/api/.env`. Uncomment and fill the appropriate key names. Omit optional secret variables when unused; do not leave them empty.
 
-| File | Variable | Source / purpose |
-| --- | --- | --- |
-| web `.env.local` | `NEXT_PUBLIC_SUPABASE_URL` | This stack's local API URL |
+| File             | Variable                               | Source / purpose                                                                                         |
+| ---------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| web `.env.local` | `NEXT_PUBLIC_SUPABASE_URL`             | This stack's local API URL                                                                               |
 | web `.env.local` | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Local publishable key (local legacy anon key is compatible if the CLI does not expose a publishable key) |
-| web `.env.local` | `NEXT_PUBLIC_APP_URL` | `http://localhost:3001` |
-| web `.env.local` | `AVENLYO_APP_API_URL` | `http://127.0.0.1:4001`; server-only |
-| API `.env` | `SUPABASE_URL` | `http://127.0.0.1:55321` |
-| API `.env` | `SUPABASE_PUBLISHABLE_KEY` | Same local public key |
-| API `.env` | `SUPABASE_SERVICE_ROLE_KEY` | Local backend key; **API only**, never web or `NEXT_PUBLIC_` |
-| API `.env` | `OPENAI_API_KEY` | Development OpenAI credential; **API only** |
-| API `.env` | `OPENAI_AGENT_MODEL` | Defaults to `gpt-5.4-mini`; choose a supported structured-output model available to your account |
-| API `.env` | `OPENAI_EMBEDDING_MODEL` | Defaults to `text-embedding-3-small`; 1536-dimensional vectors |
-| API `.env` | `API_PORT` / `API_HOST` | `4001` / `127.0.0.1` |
-| API `.env` | `API_CORS_ORIGIN` | `http://localhost:3001` |
+| web `.env.local` | `NEXT_PUBLIC_APP_URL`                  | `http://localhost:3001`                                                                                  |
+| web `.env.local` | `AVENLYO_APP_API_URL`                  | `http://127.0.0.1:4001`; server-only                                                                     |
+| API `.env`       | `SUPABASE_URL`                         | `http://127.0.0.1:55321`                                                                                 |
+| API `.env`       | `SUPABASE_PUBLISHABLE_KEY`             | Same local public key                                                                                    |
+| API `.env`       | `SUPABASE_SERVICE_ROLE_KEY`            | Local backend key; **API only**, never web or `NEXT_PUBLIC_`                                             |
+| API `.env`       | `OPENAI_API_KEY`                       | Development OpenAI credential; **API only**                                                              |
+| API `.env`       | `OPENAI_AGENT_MODEL`                   | Defaults to `gpt-5.4-mini`; choose a supported structured-output model available to your account         |
+| API `.env`       | `OPENAI_EMBEDDING_MODEL`               | Defaults to `text-embedding-3-small`; 1536-dimensional vectors                                           |
+| API `.env`       | `API_PORT` / `API_HOST`                | `4001` / `127.0.0.1`                                                                                     |
+| API `.env`       | `API_CORS_ORIGIN`                      | `http://localhost:3001`                                                                                  |
 
 The web app has no OpenAI or service-role key. Knowledge publication and test responses are performed by Fastify. Auth/configuration screens work before OpenAI is configured, but publishing and model-backed test turns require it.
 
@@ -84,7 +84,18 @@ pnpm test:acceptance
 
 This script refuses any URL except `http://127.0.0.1:55321`, creates explicitly fictional local accounts/workspaces, and leaves their test records in the disposable stack for inspection. It tests published Text/FAQ, same-runtime leads, replay, missing knowledge, human pause and cross-workspace denial. It does not call OpenAI or any channel provider. Reset the disposable stack to remove these records.
 
-Production artifacts can be started after `pnpm build`:
+Optional browser verification uses the production web build:
+
+For the desktop/mobile browser acceptance test, stop existing development servers, build with the local web environment configured, then run:
+
+```bash
+pnpm exec playwright install chromium
+pnpm test:browser
+```
+
+The test loads only this repository's app environment files, refuses hosted/legacy database URLs, uses a dedicated fake OpenAI server entry point (never the production artifact), and exercises real signup, owner settings, Text/FAQ publication, conversation-linked leads, human pause and sign-out. It creates fictional local test records and writes screenshots under `test-results/screenshots`. The web process receives neither service-role nor OpenAI credentials. CI also scans browser bundles for the local service-role secret.
+
+Start the production artifacts in separate terminals:
 
 ```bash
 pnpm --filter @avenlyo-app/api start
