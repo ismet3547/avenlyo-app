@@ -50,7 +50,7 @@ The CLI checks the exact workspace name and current owner, queries `/me?fields=u
 
 ## Credential storage
 
-`vault.create_secret`/`vault.update_secret` encrypt the token at rest. A private RLS-protected `channel_credentials` row holds only the Vault UUID for its connection. Workspace channel metadata has no access token or secret reference. Raw Vault schema/table/function access is revoked from anon, authenticated and service roles. Protected backend definer functions access Vault as their owner; only `claim_message_delivery` returns decrypted text to the Fastify transport after a valid delivery claim. The operator provisioning RPC is service-only and is never a web route.
+`vault.create_secret`/`vault.update_secret` encrypt the token at rest. A private RLS-protected `channel_credentials` row holds only the Vault UUID for its connection. Workspace channel metadata has no access token or secret reference. Raw Vault schema/table and supported create/update interfaces are revoked from anon, authenticated and service roles. Supabase-owned C crypto internals are not modified; schema usage denial also blocks their invocation by browser roles. Protected backend definer functions access Vault as their owner; only `claim_message_delivery` returns decrypted text to the Fastify transport after a valid delivery claim. The operator provisioning RPC is service-only and is never a web route.
 
 The database/API host and its administrators remain privileged. Protect database backups/root keys, server credentials and operator machines. See [Supabase Vault](https://supabase.com/docs/guides/database/vault).
 

@@ -2,7 +2,8 @@
 create extension if not exists supabase_vault with schema vault;
 revoke all on schema vault from public,anon,authenticated,service_role;
 revoke all on all tables in schema vault from public,anon,authenticated,service_role;
-revoke all on all functions in schema vault from public,anon,authenticated,service_role;
+-- Supabase owns the Vault C crypto internals; restrict its supported application interfaces.
+revoke all on function vault.create_secret(text,text,text),vault.update_secret(uuid,text,text,text) from public,anon,authenticated,service_role;
 
 create table public.channel_connections (
   id uuid primary key default gen_random_uuid(),
@@ -299,7 +300,7 @@ begin
   select * into r from public.agent_runs where id=target_run_id;
   if not found or r.actor_id is not null or num_nonnulls(r.website_session_id,r.channel_event_id)<>1 then raise exception using errcode='42501',message='Channel turn unavailable'; end if;
   select * into c from public.conversations where id=r.conversation_id and workspace_id=r.workspace_id;
-  select * into ch from public.channel_connections where id=c.channel_connection_id and workspace_id=c.workspace_id and enabled;
+  select * into ch from public.channel_connections where id=c.channel_connection_id and workspace_id=c.workspace_id and enabled for share;
   if not found then raise exception using errcode='42501',message='Channel disabled'; end if;
   if r.website_session_id is not null then
     if c.channel<>'website_chat' or not exists(select 1 from public.website_sessions s where s.id=r.website_session_id and s.workspace_id=c.workspace_id and s.conversation_id=c.id and s.connection_id=ch.id and s.expires_at>now() and s.origin=any(ch.approved_origins)) then raise exception using errcode='42501',message='Visitor authority expired'; end if;
@@ -393,7 +394,7 @@ begin
     select l.id into lead_id from public.leads l where l.conversation_id=c.id;
     if effective_human then update public.leads set qualification='needs_human',updated_at=now() where conversation_id=c.id; end if;
   end if;
-  durable_reply:=case when suppress_reply then '' when c.channel='test_agent' and (c.ai_mode='paused' or not ('answer_questions'=any(settings.goals))) then 'This test conversation is paused for human assistance. No automatic customer answer has been sent.' else assistant_content end;
+  durable_reply:=case when suppress_reply then '' when c.channel='test_agent' and (c.ai_mode='paused' or not ('answer_questions'=any(settings.goals))) then 'This test conversation is paused for human assistance. No automatic customer answer has been sent.' when c.channel<>'test_agent' and not ('answer_questions'=any(settings.goals)) then 'A team member can continue this conversation. Automated answers are paused.' else assistant_content end;
   if not suppress_reply then
     if c.channel='instagram' and octet_length(durable_reply)>1000 then raise exception using errcode='22023',message='Instagram response too large'; end if;
     insert into public.messages(workspace_id,conversation_id,role,content,sources) values(r.workspace_id,c.id,'assistant',durable_reply,source_references) returning id into reply_message_id;
@@ -433,6 +434,7 @@ begin
   update public.agent_runs set status='failed',updated_at=now() where id=r.id and status='processing';
   if not found then return; end if;
   if r.channel_event_id is not null then update public.channel_events set status='failed',updated_at=now() where id=r.channel_event_id; end if;
+  if c.state_version is distinct from r.state_version then return; end if;
   update public.conversations set ai_mode='paused',status='needs_human',handoff_state=case when assignee_id is null then 'requested' else 'claimed' end,handoff_at=coalesce(handoff_at,now()),state_version=state_version+1,updated_at=now() where id=c.id;
   update public.leads set qualification='needs_human',updated_at=now() where conversation_id=c.id;
   if c.ai_mode='active' then perform private.enqueue_business_notification(c.id,'human_assistance'); end if;

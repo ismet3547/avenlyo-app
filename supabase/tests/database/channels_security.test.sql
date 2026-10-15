@@ -8,6 +8,7 @@ select extensions.ok(not has_column_privilege('authenticated','public.website_se
 select extensions.ok(not has_column_privilege('authenticated','public.channel_events','payload_hash','SELECT'),'Members cannot read replay hashes');
 select extensions.ok(not has_table_privilege('authenticated','private.channel_credentials','SELECT'),'Encrypted credential references are server-only');
 select extensions.ok(not has_table_privilege('authenticated','vault.decrypted_secrets','SELECT'),'Decrypted provider credentials are not browser-readable');
+select extensions.ok(not has_schema_privilege('authenticated','vault','USAGE'),'Browser role cannot invoke any Vault schema capability');
 select extensions.ok(not has_table_privilege('service_role','public.messages','INSERT'),'Backend still cannot write unbounded raw messages');
 select extensions.ok(not has_function_privilege('anon','public.create_website_session(uuid,text,text)','EXECUTE'),'Public visitors have no direct service RPC capability');
 select extensions.ok(not has_function_privilege('authenticated','public.provision_instagram_channel(uuid,text,text,text,text,text,text)','EXECUTE'),'Workspace members cannot provision tokens');
@@ -122,6 +123,47 @@ select extensions.lives_ok($$select public.conversation_team_action(current_sett
 select extensions.is((select ai_mode from public.conversations where id=current_setting('ch.web_conversation')::uuid),'paused','Release leaves AI paused');
 select extensions.lives_ok($$select public.conversation_team_action(current_setting('ch.a')::uuid,current_setting('ch.web_conversation')::uuid,'resume')$$,'Explicit team resume restores AI');
 select extensions.is((select ai_mode from public.conversations where id=current_setting('ch.web_conversation')::uuid),'active','Resumed conversation is active');
+
+-- A settings change during a model call can only emit the deterministic handoff notice.
+set local role service_role;
+set local request.jwt.claims='{"role":"service_role"}';
+do $$ declare r record;begin select * into r from public.begin_website_turn(current_setting('ch.public_a')::uuid,'https://northstar.example',repeat('a',64),gen_random_uuid(),'What logo design services do you offer?');perform set_config('ch.settings_race',r.run_id::text,true);end $$;
+set local role authenticated;
+set local request.jwt.claims='{"sub":"ae111111-1111-4111-8111-111111111111","role":"authenticated"}';
+select public.save_agent_settings(current_setting('ch.a')::uuid,'{"tone":"professional","goals":["identify_interest","qualify_inquiries","collect_contact","human_handoff"],"contact_fields":["name","email"],"human_handoff_enabled":true,"setup_brief":""}');
+set local role service_role;
+set local request.jwt.claims='{"role":"service_role"}';
+select extensions.is(public.finish_channel_turn(current_setting('ch.settings_race')::uuid,'Unallowed AI answer.','[]',false,null)->>'reply','A team member can continue this conversation. Automated answers are paused.','Current answering goal wins over an in-flight model result');
+set local role authenticated;
+set local request.jwt.claims='{"sub":"ae111111-1111-4111-8111-111111111111","role":"authenticated"}';
+select public.save_agent_settings(current_setting('ch.a')::uuid,'{"tone":"professional","goals":["answer_questions","identify_interest","qualify_inquiries","collect_contact","human_handoff"],"contact_fields":["name","email"],"human_handoff_enabled":true,"setup_brief":""}');
+select public.conversation_team_action(current_setting('ch.a')::uuid,current_setting('ch.web_conversation')::uuid,'resume');
+set local role service_role;
+set local request.jwt.claims='{"role":"service_role"}';
+do $$ declare r record;begin select * into r from public.begin_website_turn(current_setting('ch.public_a')::uuid,'https://northstar.example',repeat('a',64),gen_random_uuid(),'Another design question.');perform set_config('ch.claim_race',r.run_id::text,true);end $$;
+set local role authenticated;
+set local request.jwt.claims='{"sub":"ce333333-3333-4333-8333-333333333333","role":"authenticated"}';
+select public.conversation_team_action(current_setting('ch.a')::uuid,current_setting('ch.web_conversation')::uuid,'claim');
+set local role service_role;
+set local request.jwt.claims='{"role":"service_role"}';
+select extensions.is(public.finish_channel_turn(current_setting('ch.claim_race')::uuid,'Late model answer.','[]',false,null)->>'reply','','A human claim suppresses an in-flight model answer');
+set local role authenticated;
+set local request.jwt.claims='{"sub":"ce333333-3333-4333-8333-333333333333","role":"authenticated"}';
+select public.conversation_team_action(current_setting('ch.a')::uuid,current_setting('ch.web_conversation')::uuid,'release');
+select public.conversation_team_action(current_setting('ch.a')::uuid,current_setting('ch.web_conversation')::uuid,'resume');
+set local role service_role;
+set local request.jwt.claims='{"role":"service_role"}';
+do $$ declare r record;begin select * into r from public.begin_website_turn(current_setting('ch.public_a')::uuid,'https://northstar.example',repeat('a',64),gen_random_uuid(),'A further design question.');perform set_config('ch.fail_race',r.run_id::text,true);end $$;
+set local role authenticated;
+set local request.jwt.claims='{"sub":"ce333333-3333-4333-8333-333333333333","role":"authenticated"}';
+select public.conversation_team_action(current_setting('ch.a')::uuid,current_setting('ch.web_conversation')::uuid,'claim');
+select public.conversation_team_action(current_setting('ch.a')::uuid,current_setting('ch.web_conversation')::uuid,'resume');
+set local role service_role;
+set local request.jwt.claims='{"role":"service_role"}';
+select public.fail_channel_turn(current_setting('ch.fail_race')::uuid);
+set local role authenticated;
+set local request.jwt.claims='{"sub":"ae111111-1111-4111-8111-111111111111","role":"authenticated"}';
+select extensions.is((select ai_mode from public.conversations where id=current_setting('ch.web_conversation')::uuid),'active','A stale failed model call cannot undo an explicit team resume');
 
 reset role;
 select extensions.is((select count(*)::integer from auth.users where id in ('ae111111-1111-4111-8111-111111111111','be222222-2222-4222-8222-222222222222','ce333333-3333-4333-8333-333333333333')),3,'Only actual fictional staff Auth users exist');
