@@ -22,7 +22,7 @@ Lead proposals pass a strict model schema and server validation. Genuine service
 
 ## Database boundary
 
-Nine small tables: profiles, workspaces, workspace_members, agent_settings, knowledge_items, conversations, messages, leads, agent_runs. RLS covers every table. Authenticated members have scoped reads; raw DML is revoked. Owner RPCs manage business configuration and knowledge. Four backend RPCs handle publication and turn truth with explicit current-actor checks. Private membership helpers use fixed search paths and explicit grants. Composite workspace/conversation foreign keys prevent cross-workspace links. No Auth-schema trigger is installed.
+Foundation provides nine small tables: profiles, workspaces, workspace_members, agent_settings, knowledge_items, conversations, messages, leads and agent_runs. Channels adds the five tables described below. RLS covers every table. Authenticated members have scoped reads; raw DML is revoked. Owner RPCs manage business configuration and knowledge. Protected backend RPCs handle publication and turn truth with explicit authority checks. Private membership helpers use fixed search paths and explicit grants. Composite workspace/conversation foreign keys prevent cross-workspace links. No Auth-schema trigger is installed.
 
 The service-role key exists only in the Fastify environment. The web app never has or needs it. Request logs discard customer bodies, credentials and query strings; provider errors are reduced to bounded codes. No external provider is called by automated tests.
 

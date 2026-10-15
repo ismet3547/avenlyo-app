@@ -3,7 +3,8 @@ create extension if not exists supabase_vault with schema vault;
 revoke all on schema vault from public,anon,authenticated,service_role;
 revoke all on all tables in schema vault from public,anon,authenticated,service_role;
 -- Supabase owns the Vault C crypto internals; restrict its supported application interfaces.
-revoke all on function vault.create_secret(text,text,text),vault.update_secret(uuid,text,text,text) from public,anon,authenticated,service_role;
+-- Use the extension's own name-only form: its supported wrappers include optional key arguments.
+revoke all on function vault.create_secret,vault.update_secret from public,anon,authenticated,service_role;
 
 create table public.channel_connections (
   id uuid primary key default gen_random_uuid(),
