@@ -143,6 +143,10 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
       .locator('[data-role="human"]')
       .filter({ hasText: "Hi, this is Susan from Northstar Studio." }),
   ).toBeVisible();
+  await expect(
+    page.getByText("Hi, this is Susan from Northstar Studio.", { exact: true }),
+  ).toBeInViewport();
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
     path: "test-results/screenshots/inbox-desktop.png",
     fullPage: true,
@@ -193,7 +197,17 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     "http://localhost:3001/app/channels",
   ]) {
     await page.goto(url);
-    await expect(page.getByRole("main")).toBeVisible();
+    if (url === inboxUrl)
+      await expect(page.getByLabel("Your human reply")).toBeVisible();
+    else
+      await expect(
+        page.getByRole("heading", {
+          name: url.endsWith("/app/inbox")
+            ? "Inbox"
+            : "Meet customers where they are",
+          exact: true,
+        }),
+      ).toBeVisible();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth + 1,
@@ -205,6 +219,8 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     fullPage: true,
   });
   await page.goto(inboxUrl);
+  await expect(page.getByLabel("Your human reply")).toBeVisible();
+  await expect(page.getByText("AI active", { exact: true })).toBeVisible();
   await page.screenshot({
     path: "test-results/screenshots/inbox-mobile.png",
     fullPage: true,

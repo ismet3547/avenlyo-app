@@ -41,3 +41,9 @@ Website uses per-instance IP rate limits plus a durable twenty-new-turns/minute 
 Supported Instagram events are customer text DMs only. No attachments, group inbox, comment/private-reply flow, ad-special windows, Human Agent extension, self-service OAuth or automatic token refresh. Reconnect the same verified account through the operator CLI; V1 does not reassign a workspace's historical Instagram connection to another account.
 
 No billing, subscriptions, appointments, CRM, workflow builder, multi-agent routing, campaigns, customer marketing email, Voice/SMS, WhatsApp, TikTok or old application subsystem. Website importer remains a future feature. Provider prerequisites and live test are in [managed setup](instagram-managed-setup.md); authorization/delivery review is in [security review](channels-handoff-security-review.md).
+
+## Verification
+
+The deterministic CI suite covers 91 unit tests, 161 pgTAP database assertions (71 Foundation + 90 Channels), 41 Foundation acceptance assertions and 88 channel acceptance assertions. The populated upgrade preserves the original fields of three existing Test Agent conversations and one lead. Two Chromium browser flows cover Foundation and anonymous Website Chat/Inbox handoff on desktop and mobile; screenshots are inspected after real page content loads. Typecheck, lint/independence, production builds and the plain-Node API artifact smoke are also required.
+
+Acceptance uses real disposable Supabase Auth, PostgreSQL, RLS and the application API with fake OpenAI, Instagram and email interfaces. These checks do not prove live Meta/Resend eligibility or delivery; the manual provider prerequisites remain explicit.

@@ -127,7 +127,7 @@ To verify an upgrade from populated Foundation rather than a fresh reset (this s
 ```bash
 supabase db reset --local --version 20261013221636
 pnpm test:acceptance
-pnpm db:test:upgrade
+SUPABASE_URL=http://127.0.0.1:55321 pnpm db:test:upgrade
 pnpm db:test
 pnpm test:channels
 ```

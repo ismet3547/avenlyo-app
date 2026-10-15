@@ -38,7 +38,13 @@ export function InboxConversation({
   const request = useRef<{ clientMessageId: string; content: string } | null>(
     null,
   );
+  const thread = useRef<HTMLDivElement>(null);
+  const followLatest = useRef(true);
   const id = initial.conversation.id;
+  useEffect(() => {
+    if (thread.current && followLatest.current)
+      thread.current.scrollTop = thread.current.scrollHeight;
+  }, [snapshot.messages]);
   async function refresh(before?: string) {
     const response = await fetch(
       `/api/inbox/${id}${before ? `?before=${before}` : ""}`,
@@ -146,6 +152,7 @@ export function InboxConversation({
               ? "Reply saved. Instagram delivery is unconfirmed; check the thread before sending another reply. AI remains paused."
               : "Reply saved. Check its delivery state in the thread. AI remains paused.",
       );
+      followLatest.current = true;
       await refresh();
     } catch {
       setRetry(true);
@@ -191,6 +198,12 @@ export function InboxConversation({
       <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_260px]">
         <Card className="min-w-0 overflow-hidden">
           <div
+            ref={thread}
+            onScroll={(event) => {
+              const node = event.currentTarget;
+              followLatest.current =
+                node.scrollHeight - node.scrollTop - node.clientHeight < 80;
+            }}
             className="max-h-[580px] space-y-5 overflow-y-auto p-5 sm:p-6"
             aria-label="Conversation thread"
           >
