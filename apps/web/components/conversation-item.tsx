@@ -120,9 +120,13 @@ export function ConversationItem({
           {item.assigneeId && (
             <p className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground">
               <UserRound aria-hidden className="size-3" />
-              {item.assigneeId === actorId
-                ? "Claimed by you"
-                : "Claimed by a team member"}
+              {compact
+                ? item.assigneeId === actorId
+                  ? "Assigned to you"
+                  : "Assigned to a teammate"
+                : item.assigneeId === actorId
+                  ? "Claimed by you"
+                  : "Claimed by a team member"}
             </p>
           )}
           {item.needsAttention && (

@@ -141,6 +141,16 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     .getByRole("button", { name: "Claim conversation", exact: true })
     .click();
   await expect(page.getByText("Claimed by you", { exact: true })).toBeVisible();
+  const conversationList = page.getByRole("navigation", {
+    name: "Customer conversations",
+    exact: true,
+  });
+  await expect(
+    conversationList.getByText("Assigned to you", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    conversationList.getByText("AI paused", { exact: true }),
+  ).toBeVisible();
   await page
     .getByLabel("Your human reply")
     .fill("Hi, this is Susan from Northstar Studio.");

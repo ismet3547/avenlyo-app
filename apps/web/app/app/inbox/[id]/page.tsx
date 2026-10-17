@@ -5,8 +5,6 @@ import type { InboxThread, InboxItem } from "@avenlyo-app/shared";
 import { requireWorkspace } from "@/lib/workspace";
 import { callApi } from "@/lib/api";
 import { InboxConversation } from "@/components/inbox-conversation";
-import { ConversationItem } from "@/components/conversation-item";
-import { Card } from "@/components/ui/card";
 export default async function InboxDetail({
   params,
 }: {
@@ -44,41 +42,13 @@ export default async function InboxDetail({
       >
         ← All customer conversations
       </Link>
-      <div className="inbox-workspace">
-        <Card className="hidden overflow-hidden xl:block">
-          <div className="panel-heading">
-            <h2 className="panel-title">Inbox</h2>
-          </div>
-          <nav
-            aria-label="Customer conversations"
-            className="max-h-[880px] divide-y divide-border overflow-y-auto"
-          >
-            {items.map((item) => (
-              <ConversationItem
-                key={item.id}
-                item={item}
-                actorId={ctx.user.id}
-                selected={item.id === id}
-                compact
-              />
-            ))}
-          </nav>
-          <Link
-            href="/app/inbox"
-            className="block border-t border-border px-5 py-3 text-xs text-primary"
-          >
-            All customer conversations →
-          </Link>
-        </Card>
-        <div className="min-w-0">
-          <InboxConversation
-            key={id}
-            initial={result.data as InboxThread}
-            actorId={ctx.user.id}
-            contact={contact.data}
-          />
-        </div>
-      </div>
+      <InboxConversation
+        key={id}
+        initial={result.data as InboxThread}
+        actorId={ctx.user.id}
+        contact={contact.data}
+        related={items}
+      />
     </>
   );
 }
