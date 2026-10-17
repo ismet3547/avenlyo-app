@@ -344,7 +344,7 @@ export default async function Home() {
         </div>
         {completed < 4 ? (
           <section
-            className="rounded-lg bg-muted px-5 py-5 sm:px-6"
+            className={`rounded-lg bg-muted px-5 py-5 sm:px-6 ${!conversations.error && conversations.count === 0 ? "order-first lg:order-none" : ""}`}
             aria-labelledby="setup-heading"
           >
             <p className="eyebrow">Getting started</p>

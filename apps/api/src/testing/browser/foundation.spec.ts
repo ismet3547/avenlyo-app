@@ -16,12 +16,16 @@ test("new user completes the independent foundation flow on desktop and mobile",
   const email = `browser-${randomUUID()}@example.test`;
   const password = `Local-browser-${randomUUID()}!`;
   const shots = "test-results/screenshots";
+  async function capturePage(options: Parameters<typeof page.screenshot>[0]) {
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.screenshot(options);
+  }
   await mkdir(shots, { recursive: true });
   await page.goto("/auth/sign-up");
   await expect(
     page.getByRole("heading", { name: "Start with your business" }),
   ).toBeVisible();
-  await page.screenshot({
+  await capturePage({
     path: `${shots}/auth-sign-up-desktop.png`,
     fullPage: true,
   });
@@ -56,12 +60,21 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await expect(
     page.getByText("0 of 4 complete", { exact: true }),
   ).toBeVisible();
-  await page.screenshot({
+  await capturePage({
     path: `${shots}/overview-desktop.png`,
     fullPage: true,
   });
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.screenshot({
+  const setupBounds = await page
+    .getByRole("heading", { name: "Set up your AI front office", exact: true })
+    .boundingBox();
+  const attentionBounds = await page
+    .getByRole("heading", { name: "Needs your attention", exact: true })
+    .boundingBox();
+  expect(setupBounds).not.toBeNull();
+  expect(attentionBounds).not.toBeNull();
+  expect(setupBounds!.y).toBeLessThan(attentionBounds!.y);
+  await capturePage({
     path: `${shots}/home-onboarding-mobile.png`,
     fullPage: true,
   });
@@ -88,7 +101,7 @@ test("new user completes the independent foundation flow on desktop and mobile",
     .getByRole("button", { name: "Save settings", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Agent settings saved");
-  await page.screenshot({ path: `${shots}/agent-desktop.png`, fullPage: true });
+  await capturePage({ path: `${shots}/agent-desktop.png`, fullPage: true });
   await page.goto("/app/knowledge/new");
   await page.getByLabel("Title", { exact: true }).fill("Custom projects");
   await page
@@ -102,6 +115,12 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await expect(
     page.getByRole("status").filter({ hasText: "Published." }),
   ).toBeVisible();
+  await expect(
+    page.getByText(
+      "Draft saved. Review the content, then publish it for your agent.",
+      { exact: true },
+    ),
+  ).not.toBeVisible();
   await page.goto("/app/knowledge/new");
   await page.getByRole("radio", { name: "FAQ · question and answer" }).check();
   await page
@@ -115,7 +134,7 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await expect(
     page.getByRole("status").filter({ hasText: "Published." }),
   ).toBeVisible();
-  await page.screenshot({
+  await capturePage({
     path: `${shots}/knowledge-desktop.png`,
     fullPage: true,
   });
@@ -137,7 +156,7 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await expect(
     page.getByRole("link", { name: "View test lead →" }),
   ).toBeVisible();
-  await page.screenshot({
+  await capturePage({
     path: `${shots}/test-agent-desktop.png`,
     fullPage: true,
   });
@@ -150,7 +169,7 @@ test("new user completes the independent foundation flow on desktop and mobile",
   ).toBeVisible();
   await expect(page.getByText("Qualified", { exact: true })).toBeVisible();
   await expect(page.getByText("Test Agent", { exact: true })).toBeVisible();
-  await page.screenshot({ path: `${shots}/lead-desktop.png`, fullPage: true });
+  await capturePage({ path: `${shots}/lead-desktop.png`, fullPage: true });
   const testLeadUrl = page.url();
   await page.goto("/app");
   await expect(page.getByTestId("customer-conversation-count")).toHaveText("0");
@@ -165,7 +184,7 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await expect(
     page.getByText("I'm Alex. My email is alex@example.test.", { exact: true }),
   ).toBeVisible();
-  await page.screenshot({
+  await capturePage({
     path: `${shots}/test-conversation-desktop.png`,
     fullPage: true,
   });
@@ -188,7 +207,7 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await expect(
     page.getByRole("link").filter({ hasText: "Test conversation" }).first(),
   ).toBeVisible();
-  await page.screenshot({
+  await capturePage({
     path: `${shots}/test-history-desktop.png`,
     fullPage: true,
   });
@@ -229,7 +248,7 @@ test("new user completes the independent foundation flow on desktop and mobile",
       { exact: true },
     ),
   ).toBeVisible();
-  await page.screenshot({
+  await capturePage({
     path: `${shots}/overview-mobile.png`,
     fullPage: true,
   });

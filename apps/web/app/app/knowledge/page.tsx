@@ -88,14 +88,15 @@ export default async function KnowledgePage({
           </Link>
         ))}
       </nav>
-      {params.notice === "draft-saved" && (
-        <p
-          role="status"
-          className="mt-5 bg-success-soft px-4 py-3 text-[13px] text-success"
-        >
-          Draft saved. Review the content, then publish it for your agent.
-        </p>
-      )}
+      {params.notice === "draft-saved" &&
+        result.data?.some((item) => item.status === "draft") && (
+          <p
+            role="status"
+            className="mt-5 bg-success-soft px-4 py-3 text-[13px] text-success"
+          >
+            Draft saved. Review the content, then publish it for your agent.
+          </p>
+        )}
       {result.error ? (
         <p role="alert" className="py-6">
           Knowledge could not be loaded. Please try again.

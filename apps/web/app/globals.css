@@ -214,7 +214,7 @@ body:has(.navigation-dialog[open]) {
   align-items: center;
   min-height: 40px;
   padding: 8px 4px;
-  margin-right: 22px;
+  margin-right: 16px;
   border-bottom: 2px solid transparent;
   color: var(--muted-foreground);
   font-size: 13px;

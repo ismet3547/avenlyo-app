@@ -25,12 +25,16 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
       })
     ).error,
   ).toBeNull();
+  async function capturePage(options: Parameters<typeof page.screenshot>[0]) {
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.screenshot(options);
+  }
   await mkdir("test-results/screenshots", { recursive: true });
   await page.goto("/auth/sign-in");
   await expect(
     page.getByRole("heading", { name: "Welcome back", exact: true }),
   ).toBeVisible();
-  await page.screenshot({
+  await capturePage({
     path: "test-results/screenshots/auth-desktop.png",
     fullPage: true,
   });
@@ -88,7 +92,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   expect(snippet).toContain("widget.js");
   expect(snippet).not.toContain(process.env.SUPABASE_SERVICE_ROLE_KEY!);
   const publicId = snippet.match(/data-avenlyo-channel="([a-f0-9-]{36})"/)![1];
-  await page.screenshot({
+  await capturePage({
     path: "test-results/screenshots/channels-desktop.png",
     fullPage: true,
   });
@@ -170,7 +174,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   await expect(
     page.getByRole("heading", { name: "Inbox", exact: true }),
   ).toBeVisible();
-  await page.screenshot({
+  await capturePage({
     path: "test-results/screenshots/inbox-list-desktop.png",
     fullPage: true,
   });
@@ -179,7 +183,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     page.getByRole("link", { name: "View linked lead →" }),
   ).toBeVisible();
   await expect(page.getByText("AI active", { exact: true })).toBeVisible();
-  await page.screenshot({
+  await capturePage({
     path: "test-results/screenshots/inbox-active-desktop.png",
     fullPage: true,
   });
@@ -237,13 +241,13 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   });
   await visitor.setViewportSize({ width: 1200, height: 850 });
   await page.evaluate(() => window.scrollTo(0, 0));
-  await page.screenshot({
+  await capturePage({
     path: "test-results/screenshots/inbox-desktop.png",
     fullPage: true,
   });
   const pausedInboxUrl = page.url();
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.screenshot({
+  await capturePage({
     path: "test-results/screenshots/inbox-paused-mobile.png",
     fullPage: true,
   });
@@ -261,7 +265,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
       .getByRole("link")
       .filter({ hasText: "Alex" }),
   ).toBeVisible();
-  await page.screenshot({
+  await capturePage({
     path: "test-results/screenshots/home-needs-attention-desktop.png",
     fullPage: true,
   });
@@ -333,14 +337,14 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
       ),
     ).toBe(true);
   }
-  await page.screenshot({
+  await capturePage({
     path: "test-results/screenshots/channels-mobile.png",
     fullPage: true,
   });
   await page.goto(inboxUrl);
   await expect(page.getByLabel("Your human reply")).toBeVisible();
   await expect(page.getByText("AI active", { exact: true })).toBeVisible();
-  await page.screenshot({
+  await capturePage({
     path: "test-results/screenshots/inbox-mobile.png",
     fullPage: true,
   });
@@ -364,7 +368,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     exact: true,
   });
   await expect(drawer).toBeVisible();
-  await page.screenshot({
+  await capturePage({
     path: "test-results/screenshots/mobile-navigation-390.png",
     fullPage: false,
   });
@@ -451,7 +455,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
         `No overflow at ${width}px: ${name}`,
       ).toBe(true);
       if (width === 1440 || width === 390)
-        await page.screenshot({
+        await capturePage({
           path: `test-results/screenshots/product-${name}-${width}.png`,
           fullPage: true,
         });
