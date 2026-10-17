@@ -159,6 +159,12 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await page
     .getByRole("link", { name: "Open conversation", exact: true })
     .click();
+  await expect(
+    page.getByRole("heading", { name: "Test conversation", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("I'm Alex. My email is alex@example.test.", { exact: true }),
+  ).toBeVisible();
   await page.screenshot({
     path: `${shots}/test-conversation-desktop.png`,
     fullPage: true,
