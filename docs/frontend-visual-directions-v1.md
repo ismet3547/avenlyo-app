@@ -6,6 +6,8 @@ Visual review date: **17 October 2026**. Branch: `feat/frontend-recreation-v1`. 
 
 **Design only.** No production application, API, database, migration, RLS, authentication, runtime, dependency, CI or route change. No merge, deployment or implementation PR. Do not implement the recommendation without a separate explicit approval.
 
+**Stakeholder update:** Direction 3 is approved as the visual direction. The [Direction 3 refinement](#direction-3-refinement) below is design-only; implementation remains unapproved. Earlier specifications and scores describe the preserved original study.
+
 ## Review entry points
 
 - [Offline review gallery](../design-prototypes/frontend-visual-directions/index.html): open directly; no server or build required.
@@ -391,3 +393,75 @@ Validation performed: all 18 image dimensions; Turkish cmap coverage for nine fo
 Production tests were not run because no production code changed. This work does not claim live browser interaction, provider, backend, runtime or accessibility acceptance. The final git diff must contain only the report and design-only tree. Commit and artifact locations are reported separately after packaging.
 
 **Stop here. Do not implement, merge or deploy the recommended direction.**
+
+## Direction 3 refinement
+
+The stakeholder approved **Direction 3 — Contemporary AI Product** as the visual direction on 17 October 2026, then requested this final design-only refinement. The charcoal navigation, terracotta decision accent, Manrope, warm neutral/porcelain frame, supervision-focused handling strip, 224/320/624/272px Inbox geometry and widget identity are retained. No visual elements are borrowed from Directions 1 or 2. Original artwork and the original three-direction review remain unchanged; the tables above are historical baseline specifications, superseded only for the new refined set by the values below.
+
+[Refinement gallery](../design-prototypes/frontend-visual-directions/refinement-v1/index.html) · [Before/after board](../design-prototypes/frontend-visual-directions/refinement-v1/comparison-direction3-before-after.png) · [Exact tokens](../design-prototypes/frontend-visual-directions/refinement-v1/tokens-refined.css) · [Measurements and validation](../design-prototypes/frontend-visual-directions/refinement-v1/validation-refinement.json).
+
+### Color and surface changes
+
+Ordinary content now uses neutral mineral fills. Selection has a restrained warm wash and a terracotta rule; human attention has explicit text/amber; primary actions retain the original terracotta. The dark handling strip stays in place. The widget keeps its charcoal business header, terracotta Send/launcher and softer geometry, while ordinary visitor/AI messages become quieter.
+
+| Token / role | Original | Refined |
+| --- | --- | --- |
+| `--ai-fill` / Inbox and widget AI messages | `#F4E5DC` | `#F2F0EB` |
+| `--customer-fill` / Inbox customer messages | `#F4F0EA` | `#F4F1EC` |
+| `--selection` / Inbox current row and selected tone | `#F4E5DC` | `#EDE6DF` |
+| `--home-attention-fill` | `#F4E5DC` | `#F1E9E2` |
+| `--summary-fill` / Agent effective behavior | `#F4E5DC` | `#F4F1EC` |
+| `--widget-customer-fill` | `#A6442A` | `#E6E1D9` |
+| Widget customer text | `#FFFFFF` | `#2B2725` |
+| `--handling-text` | `#F5D4BD` | `#E8DDD2` |
+| `--handling-muted` | `#D5C5B9` | `#D8D1CB` |
+| Accent / hover / navigation / canvas / surface | `#A6442A` / `#87341E` / `#272321` / `#F1EEEA` / `#FFFEFC` | Unchanged |
+
+**Warm color exposure falls approximately 22.3% across the six matched views.** This is an area-weighted warm-chroma measurement: sum `R−B` for pixels satisfying `R≥G≥B`, using the same complete canvases before/after. It is not a claim that colored-pixel area fell 22.3%, nor a perceptual/usability score. Widget changes contribute most because ordinary messages previously used solid terracotta. The original action hue remains intact. New contrast pairs include body/AI **12.99:1**, body/widget-customer **11.37:1**, muted/AI **5.32:1**, and white/primary **6.03:1**.
+
+### Radius changes
+
+| Surface / token | Original → refined |
+| --- | --- |
+| Home main plane / `--radius-work` | 18 → 10px |
+| Home needs-human object / `--radius-home-attention` | 14 → 8px |
+| Agent main plane / `--radius-work` | 18 → 10px |
+| Agent summary / `--radius-summary` | 15 → 8px |
+| Inbox selected row / `--radius-selected-row` | 12 → 6px |
+| Inbox message / `--radius-inbox-message` | 15 → 10px |
+| Inbox composer / `--radius-composer` | 12 → 8px |
+| Operational small controls / `--radius-control` | 12 → 10px |
+| Flat Inbox/context work planes | 0px, unchanged |
+| Widget panel / message / controls / launcher | 22 / 15 / 12 / 19px, unchanged |
+
+The large operational fields are more square; the widget deliberately remains softer. No new cards, shadows or containers were added.
+
+### Density changes
+
+Density is gained from padding and spacing, with **no font-size or line-height reductions**. Desktop Inbox remains **14.5/22px**; mobile Inbox remains **13.5/20px**. Widget messages remain **14/20px**, mobile entry text **16px**. Mobile primary buttons remain **44px high**; desktop Claim remains **38px high**. Existing icon geometry is retained, with the same 44px mobile hit-area intent; static artwork does not verify live hit testing.
+
+| Measurement | Original → refined | Capacity gain (`before/after−1`) |
+| --- | --- | --- |
+| Conversation row | 108 → 96px | 12.50% |
+| Desktop handling strip | 81 → 72px | 12.50% |
+| Desktop six-message stack | 473 → 429px | 10.26% |
+| Context fact stack, first label to final helper end | 500 → 441px | 13.38% |
+| Desktop composer footprint | 130 → 116px | 12.07% |
+| Mobile handling strip | 65 → 57px | 14.04% |
+| Mobile six-message stack | 470 → 424px | 10.85% |
+| Mobile composer footprint | 110 → 98px | 12.24% |
+
+Concrete spacing tokens: message gap **13→9px desktop / 8→6px mobile**; author-to-bubble offset **19→17px**; total bubble vertical padding **16→14px desktop / 16→12px mobile**. Widget spacing is unchanged. Freed space remains available for real longer histories; no extra fixture messages or metadata were invented.
+
+### Updated artwork and validation
+
+| Desktop, 1440×900 | Mobile, 390×844 |
+| --- | --- |
+| [Home](../design-prototypes/frontend-visual-directions/refinement-v1/mockups/03-ai-product-refined-home-desktop.png) | [Inbox conversation](../design-prototypes/frontend-visual-directions/refinement-v1/mockups/03-ai-product-refined-inbox-mobile.png) |
+| [Inbox](../design-prototypes/frontend-visual-directions/refinement-v1/mockups/03-ai-product-refined-inbox-desktop.png) | [Widget open](../design-prototypes/frontend-visual-directions/refinement-v1/mockups/03-ai-product-refined-widget-mobile.png) |
+| [Agent](../design-prototypes/frontend-visual-directions/refinement-v1/mockups/03-ai-product-refined-agent-desktop.png) | |
+| [Widget](../design-prototypes/frontend-visual-directions/refinement-v1/mockups/03-ai-product-refined-widget-desktop.png) | |
+
+Each new PNG has a matching portable outlined SVG. The 2952×4028 before/after board compares Home, Inbox, desktop widget and both mobile views; the gallery also pairs Agent. All use the original fictional Northstar Studio data, transcript and unclaimed/paused state. Claim/release/resume semantics and lead qualification behavior are unchanged. Original images are retained and their hashes recorded; Directions 1 and 2 are untouched.
+
+Validation covers six image sizes, fixture/state labels, unchanged message sizes, 44px mobile primary artwork, contrast, measured spacing/color changes and visual inspection of all six renders and the board. This remains static visual validation, without a production browser, keyboard, runtime or backend acceptance claim. **No implementation, production styles/components, dependencies, merge or deployment is authorized or performed. Stop for stakeholder approval.**

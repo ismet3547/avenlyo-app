@@ -1,0 +1,228 @@
+{
+  "base_commit": "09c9a8da5f573731e840c08789cf04284ab40393",
+  "scope": "Direction 3 design-only",
+  "original_artwork_hashes": {
+    "mockups/03-ai-product-home-desktop.png": "c273fc4c3aeb14fe1b394e8efdf4de0c3c85f42d0867ce97bb79486cab8bfdf5",
+    "mockups/03-ai-product-home-desktop.svg": "41761b16df6d66838c19ca1b64a9c27a0cf63ba40c7822b86a503d06afa67ff0",
+    "mockups/03-ai-product-inbox-desktop.png": "b0b8db03db13fc434b2a3e2da2317c3cb2e6ffae90caa4962859fcef6b78068e",
+    "mockups/03-ai-product-inbox-desktop.svg": "43aef8dbca23f33bd50e6a91e38c44f4ac15bc8cde342c26effd851ad0805a2d",
+    "mockups/03-ai-product-agent-desktop.png": "86816a570acbfa5173f3cff60d5efeaad7a828ac7f5941f777f5bcabc06d5128",
+    "mockups/03-ai-product-agent-desktop.svg": "823a2fe4436be76666f5ffb88873db2fc8864387835992d14995efb15a0744b6",
+    "mockups/03-ai-product-widget-desktop.png": "580d1bcb25177624d73e8445d41afed1ed8b269afa151167bcbad32950631b78",
+    "mockups/03-ai-product-widget-desktop.svg": "5ae3025fb90ce23ea45387e94e7571f674c6a63f7a34d67ef30e26aba69956d5",
+    "mockups/03-ai-product-inbox-mobile.png": "fa629991108b9ffd56413de93d1e3a7d732900471fffd1b2957dcd88f829f91a",
+    "mockups/03-ai-product-inbox-mobile.svg": "0a4ff16cdcc2afa731f853b4c7bd0220e76f1dbe9968f92759e59ce44542d2c4",
+    "mockups/03-ai-product-widget-mobile.png": "fa349391b53f790225b2c29a65af32ce67f84ffe6a6a24ef9388d92f8088beea",
+    "mockups/03-ai-product-widget-mobile.svg": "0b11703a274e7556b6b8e90d99de5c9696069434db81f9c9364098c64729e997"
+  },
+  "image_dimensions": "6 matched compositions passed",
+  "fixture_state": "same data and unclaimed/paused state",
+  "font_sizes": "unchanged",
+  "mobile_primary_height": 44,
+  "contrast_ratios": {
+    "body / AI": 12.99,
+    "body / customer": 13.13,
+    "body / widget customer": 11.37,
+    "body / selection": 11.96,
+    "body / Home attention": 12.32,
+    "muted / AI": 5.32,
+    "white / primary": 6.03,
+    "handling label / charcoal": 11.64,
+    "handling muted / charcoal": 10.31
+  },
+  "warm_color_metric": {
+    "definition": "Sum of (R-B) over all RGB pixels where R>=G>=B, across six matched full canvases. Area-weighted warm chroma exposure; not simple colored-pixel area, saturation percentage or usability measure.",
+    "before": 49381805,
+    "after": 38353261,
+    "reduction_pct": 22.33,
+    "per_scene": [
+      {
+        "screen": "home-desktop",
+        "before": 11255884,
+        "after": 9550281,
+        "reduction_pct": 15.15
+      },
+      {
+        "screen": "inbox-desktop",
+        "before": 11115576,
+        "after": 9430437,
+        "reduction_pct": 15.16
+      },
+      {
+        "screen": "agent-desktop",
+        "before": 10227421,
+        "after": 8386475,
+        "reduction_pct": 18.0
+      },
+      {
+        "screen": "widget-desktop",
+        "before": 7444324,
+        "after": 5113877,
+        "reduction_pct": 31.31
+      },
+      {
+        "screen": "inbox-mobile",
+        "before": 4446244,
+        "after": 3311524,
+        "reduction_pct": 25.52
+      },
+      {
+        "screen": "widget-mobile",
+        "before": 4892356,
+        "after": 2560667,
+        "reduction_pct": 47.66
+      }
+    ]
+  },
+  "density": {
+    "03-ai-product-refined-inbox-desktop": {
+      "before_message_stack": 473,
+      "after_message_stack": 429,
+      "height_reduction_pct": 9.3,
+      "capacity_increase_pct": 10.26,
+      "messages": [
+        {
+          "role": "customer",
+          "text": "Hi, I'm interested in your logo design.",
+          "size": 14.5,
+          "line_height": 22,
+          "y": 170,
+          "end": 223,
+          "radius": 10,
+          "fill": "#F4F1EC",
+          "vertical_padding": 14
+        },
+        {
+          "role": "assistant",
+          "text": "Absolutely. Our published pricing lists logo design at $50.\nIf you'd like, share your name and email and I can save your inquiry for team follow-up.",
+          "size": 14.5,
+          "line_height": 22,
+          "y": 232,
+          "end": 329,
+          "radius": 10,
+          "fill": "#F2F0EB",
+          "vertical_padding": 14
+        },
+        {
+          "role": "customer",
+          "text": "I'm Alex. My email is alex@example.test.",
+          "size": 14.5,
+          "line_height": 22,
+          "y": 338,
+          "end": 391,
+          "radius": 10,
+          "fill": "#F4F1EC",
+          "vertical_padding": 14
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, Alex. Your inquiry has been saved for team follow-up.",
+          "size": 14.5,
+          "line_height": 22,
+          "y": 400,
+          "end": 453,
+          "radius": 10,
+          "fill": "#F2F0EB",
+          "vertical_padding": 14
+        },
+        {
+          "role": "customer",
+          "text": "I'd like to speak with a person.",
+          "size": 14.5,
+          "line_height": 22,
+          "y": 462,
+          "end": 515,
+          "radius": 10,
+          "fill": "#F4F1EC",
+          "vertical_padding": 14
+        },
+        {
+          "role": "assistant",
+          "text": "A team member can continue this conversation.\nAutomated answers are paused.",
+          "size": 14.5,
+          "line_height": 22,
+          "y": 524,
+          "end": 599,
+          "radius": 10,
+          "fill": "#F2F0EB",
+          "vertical_padding": 14
+        }
+      ]
+    },
+    "03-ai-product-refined-inbox-mobile": {
+      "before_message_stack": 470,
+      "after_message_stack": 424,
+      "height_reduction_pct": 9.79,
+      "capacity_increase_pct": 10.85,
+      "messages": [
+        {
+          "role": "customer",
+          "text": "Hi, I'm interested in your logo design.",
+          "size": 13.5,
+          "line_height": 20,
+          "y": 135,
+          "end": 184,
+          "radius": 10,
+          "fill": "#F4F1EC",
+          "vertical_padding": 12
+        },
+        {
+          "role": "assistant",
+          "text": "Absolutely. Our published pricing lists logo design at $50.\nIf you'd like, share your name and email and I can save your inquiry for team follow-up.",
+          "size": 13.5,
+          "line_height": 20,
+          "y": 190,
+          "end": 299,
+          "radius": 10,
+          "fill": "#F2F0EB",
+          "vertical_padding": 12
+        },
+        {
+          "role": "customer",
+          "text": "I'm Alex. My email is alex@example.test.",
+          "size": 13.5,
+          "line_height": 20,
+          "y": 305,
+          "end": 354,
+          "radius": 10,
+          "fill": "#F4F1EC",
+          "vertical_padding": 12
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, Alex. Your inquiry has been saved for team follow-up.",
+          "size": 13.5,
+          "line_height": 20,
+          "y": 360,
+          "end": 429,
+          "radius": 10,
+          "fill": "#F2F0EB",
+          "vertical_padding": 12
+        },
+        {
+          "role": "customer",
+          "text": "I'd like to speak with a person.",
+          "size": 13.5,
+          "line_height": 20,
+          "y": 435,
+          "end": 484,
+          "radius": 10,
+          "fill": "#F4F1EC",
+          "vertical_padding": 12
+        },
+        {
+          "role": "assistant",
+          "text": "A team member can continue this conversation.\nAutomated answers are paused.",
+          "size": 13.5,
+          "line_height": 20,
+          "y": 490,
+          "end": 559,
+          "radius": 10,
+          "fill": "#F2F0EB",
+          "vertical_padding": 12
+        }
+      ]
+    }
+  },
+  "remaining_limit": "Static artwork does not verify live focus, touch hit testing or virtual-keyboard behavior."
+}

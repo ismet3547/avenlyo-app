@@ -1,0 +1,37 @@
+/* Design-only handoff. Production does not import this file. */
+.direction3-refined {
+  --canvas: #F1EEEA;
+  --surface: #FFFEFC;
+  --navigation: #272321;
+  --accent: #A6442A;
+  --accent-hover: #87341E;
+  --font-ui: "Manrope", system-ui, sans-serif;
+  --selection: #EDE6DF;
+  --customer-fill: #F4F1EC;
+  --ai-fill: #F2F0EB;
+  --home-attention-fill: #F1E9E2;
+  --summary-fill: #F4F1EC;
+  --widget-customer-fill: #E6E1D9;
+  --handling-text: #E8DDD2;
+  --handling-muted: #D8D1CB;
+  --radius-control: 10px;
+  --radius-work: 10px;
+  --radius-home-attention: 8px;
+  --radius-summary: 8px;
+  --radius-selected-row: 6px;
+  --radius-inbox-message: 10px;
+  --radius-composer: 8px;
+  --radius-widget: 22px;
+  --radius-widget-message: 15px;
+  --radius-widget-control: 12px;
+  --conversation-row-height: 96px;
+  --handling-height: 72px;
+  --mobile-handling-height: 57px;
+  --composer-height: 116px;
+  --mobile-composer-height: 98px;
+  --message-gap: 9px;
+  --mobile-message-gap: 6px;
+  --message-author-offset: 17px;
+  --message-vertical-padding: 14px;
+  --mobile-message-vertical-padding: 12px;
+}
