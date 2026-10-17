@@ -1,0 +1,511 @@
+{
+  "title": "New-generation UI research references \u2014 not Avenlyo designs",
+  "purpose": "Internal comparative product design analysis. Copyright remains with the respective owners; reference copies are not production assets.",
+  "retrieved_date": "2026-10-17",
+  "references": [
+    {
+      "product": "Granola",
+      "file": "01-granola.jpg",
+      "source_page_url": "https://www.granola.ai/blog/a-new-look-for-granola",
+      "asset_url": "https://www.granola.ai/blogImages/brand-announcement/Granola-Final-Identity-15124.png",
+      "source_publication_date": "2026-02-02",
+      "product_event_date": "2026-02-02",
+      "retrieved_date": "2026-10-17",
+      "evidence": "V official image/poster",
+      "note": "Official redesign screenshot; campaign backdrop is outside the app.",
+      "original_dimensions": [
+        3840,
+        2160
+      ],
+      "saved_dimensions": [
+        1600,
+        900
+      ],
+      "source_file_sha256": "d997b835e83c3a6e7d7234fc01f7493a38598d3a9c29c99e4a2c7502f2dfffab",
+      "saved_sha256": "6da9f37aed0099286fff063af03b94703a168f532da10711a730eacc22d0db7d",
+      "transformation": "Selected frame if animated; resized proportionally; flattened transparency; JPEG compression. No UI reconstruction."
+    },
+    {
+      "product": "Dia",
+      "file": "02-dia.jpg",
+      "source_page_url": "https://www.diabrowser.com/",
+      "asset_url": "https://image.mux.com/AfVIo00zNCeCXbiFeHQ7RuHZUfzl3agTCOno01XBF01lRs/thumbnail.webp?width=1200&fit_mode=preserve&time=0",
+      "source_publication_date": "Undated tour",
+      "product_event_date": "2025 launch / 2026 refreshes",
+      "retrieved_date": "2026-10-17",
+      "evidence": "V official image/poster",
+      "note": "Official new-tab video poster; not a captured 2026 build or motion evidence.",
+      "original_dimensions": [
+        1200,
+        854
+      ],
+      "saved_dimensions": [
+        1200,
+        854
+      ],
+      "source_file_sha256": "bd11fbe2e7e656a24922b7785dad3c0d7e2af3769bf07590e98a07f1c68bf229",
+      "saved_sha256": "5b7d3ffc6296feac78b7be52138692ba590667e1cf9a6b62f39476cb41b55274",
+      "transformation": "Selected frame if animated; resized proportionally; flattened transparency; JPEG compression. No UI reconstruction."
+    },
+    {
+      "product": "Wispr Flow",
+      "file": "03-wispr-demo.jpg",
+      "source_page_url": "https://wisprflow.ai/android",
+      "asset_url": "https://pub-52b834d421f14411919b1865799bb51a.r2.dev/Andorid_landing_page_high.mp4",
+      "source_publication_date": "Undated current demo",
+      "product_event_date": "2026-02-23 Android launch",
+      "retrieved_date": "2026-10-17",
+      "evidence": "Q frame",
+      "note": "Official edited Android demo frame at 4.229 seconds; native latency unverified.",
+      "original_dimensions": [
+        1280,
+        1280
+      ],
+      "saved_dimensions": [
+        1200,
+        1200
+      ],
+      "source_file_sha256": "024f399c0d88e8625245d1af5eebd2763ac8470d8bae0cea666e3cfcc617db86",
+      "saved_sha256": "6d1badb4392df3ee416b9699b8c4e20f9d546fab90251d82251916a00dbffcba",
+      "transformation": "Selected frame if animated; resized proportionally; flattened transparency; JPEG compression. No UI reconstruction."
+    },
+    {
+      "product": "Superhuman Docs",
+      "file": "04-docs-ui.jpg",
+      "source_page_url": "https://superhuman.com/docs",
+      "asset_url": "https://superhumanstatic.com/vwfkeyj6n9ac/uVbFVYFt5oSa6xjaAu8ES/accbc575300a55dea0e2370ab11e2d13/UI_Spotlight_Feature.png?w=1600",
+      "source_publication_date": "Undated current product crop",
+      "product_event_date": "2026-07-08 redesign",
+      "retrieved_date": "2026-10-17",
+      "evidence": "V official image/poster",
+      "note": "Official product UI crop, not the brand reel.",
+      "original_dimensions": [
+        1321,
+        942
+      ],
+      "saved_dimensions": [
+        1321,
+        942
+      ],
+      "source_file_sha256": "ef4d8d45c9b3b1cdbe2da14f906978c44c1943a68ed63aacab9e3a1210a38738",
+      "saved_sha256": "51d599ed4b5f46f16185c2264a210c4ebc99a9776bf9725206c9a464a1825b5e",
+      "transformation": "Selected frame if animated; resized proportionally; flattened transparency; JPEG compression. No UI reconstruction."
+    },
+    {
+      "product": "Superhuman Go",
+      "file": "05-go-suggestions.jpg",
+      "source_page_url": "https://blog.superhuman.com/go-1-0/",
+      "asset_url": "https://storage.ghost.io/c/c7/8e/c78e4b36-4930-4765-917f-f40bc2da20ee/content/media/2026/08/01_Suggestions_60fps.mp4",
+      "source_publication_date": "2026-08-12",
+      "product_event_date": "2026-08-12 Go 1.0",
+      "retrieved_date": "2026-10-17",
+      "evidence": "Q frame",
+      "note": "Official edited suggestion demo frame at 8.38 seconds.",
+      "original_dimensions": [
+        1280,
+        853
+      ],
+      "saved_dimensions": [
+        1280,
+        853
+      ],
+      "source_file_sha256": "0cc255d637a24ff3c48ab281c079fb24b82cd954254787464641eb729ca9c968",
+      "saved_sha256": "9a0d9d5893df7b772601f403497c27da7d12be81adb8fbe801303222634b1605",
+      "transformation": "Selected frame if animated; resized proportionally; flattened transparency; JPEG compression. No UI reconstruction."
+    },
+    {
+      "product": "Notion 2026",
+      "file": "06-notion-mobile.jpg",
+      "source_page_url": "https://www.notion.com/releases/2026-01-20",
+      "asset_url": "https://images.ctfassets.net/spoqsaf9291f/4pUcFp2Ym0ftJU1mYUuj1O/f0255b3da90f02bb3d34d31eba2d1b0c/01_AI_better_on_mobile.png",
+      "source_publication_date": "2026-01-20",
+      "product_event_date": "2026-01-20 / 2026-02-24",
+      "retrieved_date": "2026-10-17",
+      "evidence": "V official image/poster",
+      "note": "Official mobile Agent and recording state; not proof of complete mobile Home.",
+      "original_dimensions": [
+        2400,
+        1800
+      ],
+      "saved_dimensions": [
+        1600,
+        1200
+      ],
+      "source_file_sha256": "52cd5e74b1fd4425c6298b82393ac74053c98e70f30ff32db3bf798500f00792",
+      "saved_sha256": "6ca355fc16a9897819ed05076892c11e56e37a846ede36e38674737d285dff47",
+      "transformation": "Selected frame if animated; resized proportionally; flattened transparency; JPEG compression. No UI reconstruction."
+    },
+    {
+      "product": "Claude Cowork",
+      "file": "07-cowork2.jpg",
+      "source_page_url": "https://claude.com/product/cowork",
+      "asset_url": "https://assets.claude.com/e0035a095d8888c9739f8acb305f517b25d469eb.jpg",
+      "source_publication_date": "Undated current product image",
+      "product_event_date": "2026-01-12 / 2026-09-16",
+      "retrieved_date": "2026-10-17",
+      "evidence": "V official image/poster",
+      "note": "Official browser/task screenshot; September unification is documented separately.",
+      "original_dimensions": [
+        2800,
+        1575
+      ],
+      "saved_dimensions": [
+        1600,
+        900
+      ],
+      "source_file_sha256": "c4145334f62bc889ff7d6a019bf1c749f265f4d8835b35e7e7c8188dfbb4b388",
+      "saved_sha256": "e929523debba854a146ba997bf11bb24f704c33e0c15f6680e3c1cf206e729db",
+      "transformation": "Selected frame if animated; resized proportionally; flattened transparency; JPEG compression. No UI reconstruction."
+    },
+    {
+      "product": "Codex desktop launch",
+      "file": "08-codex.jpg",
+      "source_page_url": "https://openai.com/index/introducing-the-codex-app/",
+      "asset_url": "https://i.vimeocdn.com/video/2116374900-3001aee7af7ec8de12e7aeb11e6d6543ebee11f8bedc02f6a1b97533c44a7240-d",
+      "source_publication_date": "2026-02-02 launch context",
+      "product_event_date": "2026-02-02",
+      "retrieved_date": "2026-10-17",
+      "evidence": "V official image/poster",
+      "note": "Official embedded launch-video thumbnail; poster only, no interaction inspection.",
+      "original_dimensions": [
+        1600,
+        900
+      ],
+      "saved_dimensions": [
+        1600,
+        900
+      ],
+      "source_file_sha256": "63ac209b0466fa7e83905a07a282274b840f4a2fd9ac3fbccabc26e3e7d0ed25",
+      "saved_sha256": "1d6ab8239121646cb00b62953c8dd914a28a140dabb9dfc679963b6b656520be",
+      "transformation": "Selected frame if animated; resized proportionally; flattened transparency; JPEG compression. No UI reconstruction."
+    },
+    {
+      "product": "Perplexity Computer",
+      "file": "09-computer.jpg",
+      "source_page_url": "https://www.perplexity.ai/products/computer",
+      "asset_url": "https://pplx-res.cloudinary.com/image/upload/t_w1600/pplx-web/Computer/images/step-02.webp",
+      "source_publication_date": "Undated current product crop",
+      "product_event_date": "2026-02-25",
+      "retrieved_date": "2026-10-17",
+      "evidence": "V official image/poster",
+      "note": "Official execution crop; complete shell not visible.",
+      "original_dimensions": [
+        1600,
+        1000
+      ],
+      "saved_dimensions": [
+        1600,
+        1000
+      ],
+      "source_file_sha256": "ec9fb8dd520045f7f30c61e4e72ab73798c6f06d094e3bd744897b26eb9e5e4b",
+      "saved_sha256": "80c6e71ba09782e455cb73f6252e927e446bd47f979df9d1b14cd74e5c33cd39",
+      "transformation": "Selected frame if animated; resized proportionally; flattened transparency; JPEG compression. No UI reconstruction."
+    },
+    {
+      "product": "New Tana",
+      "file": "10-tana.jpg",
+      "source_page_url": "https://tana.inc/blog/tana-takes-it-from-here",
+      "asset_url": "https://eyl4fkc8ens6x2hl.public.blob.vercel-storage.com/tana/images/library-space-home-a3a21a08.png",
+      "source_publication_date": "2026-06-05",
+      "product_event_date": "2026-03-31 new product",
+      "retrieved_date": "2026-10-17",
+      "evidence": "V official image/poster",
+      "note": "Official space home; distinct from Tana Outliner.",
+      "original_dimensions": [
+        1568,
+        965
+      ],
+      "saved_dimensions": [
+        1568,
+        965
+      ],
+      "source_file_sha256": "b9309e93cb6952ac5ce9c728e755db250615ce98cb89a68a1a360e573ec9d2bd",
+      "saved_sha256": "c3533f3abc31d670e256317f8176f34e640411b802bc57086b160ede27f041d3",
+      "transformation": "Selected frame if animated; resized proportionally; flattened transparency; JPEG compression. No UI reconstruction."
+    },
+    {
+      "product": "Notion Mail",
+      "file": "11-mail.jpg",
+      "source_page_url": "https://www.notion.com/releases/2025-04-15",
+      "asset_url": "https://images.ctfassets.net/spoqsaf9291f/1VHva4DFSlDOD9SiNPUFKe/1edf530f6dbb2969f55f06834041434a/Mail_CustomViews_Professionals_v001.gif",
+      "source_publication_date": "2025-04-15",
+      "product_event_date": "2025-04-15",
+      "retrieved_date": "2026-10-17",
+      "evidence": "Q frame",
+      "note": "Official custom-view GIF, frame 30; launch reference.",
+      "original_dimensions": [
+        1200,
+        900
+      ],
+      "saved_dimensions": [
+        1200,
+        900
+      ],
+      "source_file_sha256": "9e9e4bcfda541fcf285e67d3f2483e210cf029fa11f7e763439483f0aa0b8fc9",
+      "saved_sha256": "f66859691770babee227e24a65501db37d235d1900909cb4f043f388c34ddb88",
+      "transformation": "Selected frame if animated; resized proportionally; flattened transparency; JPEG compression. No UI reconstruction."
+    },
+    {
+      "product": "Raycast for iOS",
+      "file": "12-raycast.jpg",
+      "source_page_url": "https://www.raycast.com/blog/raycast-for-ios",
+      "asset_url": "https://www.raycast.com/uploads/blog-ios/home.jpeg",
+      "source_publication_date": "2025-04-30",
+      "product_event_date": "2025-04-30",
+      "retrieved_date": "2026-10-17",
+      "evidence": "V official image/poster",
+      "note": "Official angled Home imagery; exact geometry cannot be measured from it.",
+      "original_dimensions": [
+        7728,
+        5152
+      ],
+      "saved_dimensions": [
+        1600,
+        1067
+      ],
+      "source_file_sha256": "d4d678007c6104c9ad7a502595dd0afb83d27b1293d643cac4d1d907f0f0cd34",
+      "saved_sha256": "94ad50712ccd418287627011151ac11c88389e58223479955673f286bf4090e8",
+      "transformation": "Selected frame if animated; resized proportionally; flattened transparency; JPEG compression. No UI reconstruction."
+    },
+    {
+      "product": "Figma Make",
+      "file": "13-figma.jpg",
+      "source_page_url": "https://www.figma.com/blog/introducing-figma-make/",
+      "asset_url": "https://cdn.sanity.io/images/599r6htc/regionalized/ec904960a5d46447f31afe6e7abab92f97ec444e-3840x2160.png?w=1600",
+      "source_publication_date": "2025-05-07",
+      "product_event_date": "2025-05-07",
+      "retrieved_date": "2026-10-17",
+      "evidence": "V official image/poster",
+      "note": "Make prompt on the left; generated settings design on the right is output, not Make chrome.",
+      "original_dimensions": [
+        1600,
+        900
+      ],
+      "saved_dimensions": [
+        1600,
+        900
+      ],
+      "source_file_sha256": "71529cfc166492d73a2c4d81f7cdafb050903b887992b6512b2b45e331666374",
+      "saved_sha256": "39c4655fde5c6196a805bbc99ba0eb6d904f5ead1f9b14e9507c4314d1dd067c",
+      "transformation": "Selected frame if animated; resized proportionally; flattened transparency; JPEG compression. No UI reconstruction."
+    },
+    {
+      "product": "Adobe Firefly Boards",
+      "file": "14-firefly.jpg",
+      "source_page_url": "https://blog.adobe.com/en/publish/2025/09/24/firefly-boards-launches-globally-now-with-runway-aleph-moonvalley-marey-models-new-powerful-ideation-features-flexible-offers",
+      "asset_url": "https://blog.adobe.com/en/publish/2025/09/24/media_128e973b954f399929843f672853dfc66bebe7495.png?width=750&format=png&optimize=medium",
+      "source_publication_date": "2025-09-24",
+      "product_event_date": "2025-09-24 worldwide release",
+      "retrieved_date": "2026-10-17",
+      "evidence": "V official image/poster",
+      "note": "Official spatial board screenshot.",
+      "original_dimensions": [
+        750,
+        402
+      ],
+      "saved_dimensions": [
+        750,
+        402
+      ],
+      "source_file_sha256": "1cd64b217d40c59f796da232e641a7cf181be493a3dc6b6b187a11f22515bbe9",
+      "saved_sha256": "fa8fd7b8582d514b21e6d06c1bf2ff8dffcd9cd0c8cea20d717faa726ab3b7b5",
+      "transformation": "Selected frame if animated; resized proportionally; flattened transparency; JPEG compression. No UI reconstruction."
+    },
+    {
+      "product": "Opera Neon",
+      "file": "15-opera.jpg",
+      "source_page_url": "https://blogs.opera.com/news/2025/09/opera-neon-agentic-ai-browser-release/",
+      "asset_url": "https://www-static-blogs.operacdn.com/news/wp-content/uploads/sites/2/2025/09/neon_Start_Page_dark-2.jpg",
+      "source_publication_date": "2025-09-30",
+      "product_event_date": "2025-09-30 first invitations",
+      "retrieved_date": "2026-10-17",
+      "evidence": "V official image/poster",
+      "note": "Official browser start screenshot; staged scene is not an Avenlyo proposal.",
+      "original_dimensions": [
+        2560,
+        1440
+      ],
+      "saved_dimensions": [
+        1600,
+        900
+      ],
+      "source_file_sha256": "d394825c93e87fa6c6695df910d5ef6ac8600ad7683096d026773743ad469f00",
+      "saved_sha256": "1a11dac72914d8d52742f54b8f7bc54eefd460ac5b7f4e3dfbc92f3befbebd06",
+      "transformation": "Selected frame if animated; resized proportionally; flattened transparency; JPEG compression. No UI reconstruction."
+    },
+    {
+      "product": "Notion agent sources/settings",
+      "file": "notion-settings.jpg",
+      "source_page_url": "https://www.notion.com/releases/2026-02-24",
+      "asset_url": "https://images.ctfassets.net/spoqsaf9291f/4JwXi9KXB7T8PAUG7OmSUp/08d43e7dd321c38c272fb555af9b800d/7_Settings.jpg",
+      "source_publication_date": "2026-02-24",
+      "retrieved_date": "2026-10-17",
+      "evidence": "V official image",
+      "note": "Supplementary inspected official product reference.",
+      "original_dimensions": [
+        2400,
+        1800
+      ],
+      "saved_dimensions": [
+        1600,
+        1200
+      ],
+      "saved_sha256": "7fa5bd2ddb32ad62a7eb55488e8f20e0418a576a27d71ea15d7a76b890630d7c"
+    },
+    {
+      "product": "Tana meeting create menu",
+      "file": "tana-meeting.jpg",
+      "source_page_url": "https://tana.inc/blog/tana-takes-it-from-here",
+      "asset_url": "https://eyl4fkc8ens6x2hl.public.blob.vercel-storage.com/tana/images/meeting-create-menu-784f8876.png",
+      "source_publication_date": "2026-06-05",
+      "retrieved_date": "2026-10-17",
+      "evidence": "V official image",
+      "note": "Supplementary inspected official product reference.",
+      "original_dimensions": [
+        1532,
+        1264
+      ],
+      "saved_dimensions": [
+        1454,
+        1200
+      ],
+      "saved_sha256": "cfecd2b040246c22c8e07b8325ce212a3b70c34f90055585dbf7be7de0ff7808"
+    },
+    {
+      "product": "Tana meeting digest/outcomes",
+      "file": "tana-outcomes.jpg",
+      "source_page_url": "https://tana.inc/blog/tana-takes-it-from-here",
+      "asset_url": "https://eyl4fkc8ens6x2hl.public.blob.vercel-storage.com/tana/images/meeting-digest-56c5823a.png",
+      "source_publication_date": "2026-06-05",
+      "retrieved_date": "2026-10-17",
+      "evidence": "V official image",
+      "note": "Supplementary inspected official product reference.",
+      "original_dimensions": [
+        1568,
+        749
+      ],
+      "saved_dimensions": [
+        1568,
+        749
+      ],
+      "saved_sha256": "1b3710d7569cd90af5e08e1f4fb379ba4f0560d66a30e20537fc5c456c0af124"
+    },
+    {
+      "product": "Tana mobile",
+      "file": "tana-mobile.jpg",
+      "source_page_url": "https://tana.inc/blog/tana-app-for-ios",
+      "asset_url": "https://eyl4fkc8ens6x2hl.public.blob.vercel-storage.com/tana/images/ios-lock-screen-and-call-88f822f4.png",
+      "source_publication_date": "2026-10-08",
+      "retrieved_date": "2026-10-17",
+      "evidence": "V official image",
+      "note": "Supplementary inspected official product reference.",
+      "original_dimensions": [
+        1568,
+        882
+      ],
+      "saved_dimensions": [
+        1568,
+        882
+      ],
+      "saved_sha256": "16773acd22c38e23f04596e2dbde51ef3d4bebcc31be4a848e29979249c5dce1"
+    },
+    {
+      "product": "Raycast iOS AI",
+      "file": "raycast-ai.jpg",
+      "source_page_url": "https://www.raycast.com/blog/raycast-for-ios",
+      "asset_url": "https://www.raycast.com/uploads/blog-ios/ai.jpeg",
+      "source_publication_date": "2025-04-30",
+      "retrieved_date": "2026-10-17",
+      "evidence": "V official image",
+      "note": "Supplementary inspected official product reference.",
+      "original_dimensions": [
+        7728,
+        5152
+      ],
+      "saved_dimensions": [
+        1600,
+        1067
+      ],
+      "saved_sha256": "fad0625c517ccd62ad2c7118e6aebcc8ceced790c2b1b3092c0381109cd517a7"
+    },
+    {
+      "product": "Raycast iOS Notes",
+      "file": "raycast-notes.jpg",
+      "source_page_url": "https://www.raycast.com/blog/raycast-for-ios",
+      "asset_url": "https://www.raycast.com/uploads/blog-ios/notes.jpeg",
+      "source_publication_date": "2025-04-30",
+      "retrieved_date": "2026-10-17",
+      "evidence": "V official image",
+      "note": "Supplementary inspected official product reference.",
+      "original_dimensions": [
+        7374,
+        4916
+      ],
+      "saved_dimensions": [
+        1600,
+        1067
+      ],
+      "saved_sha256": "9873a0dafff3ebbf26625a7913e2624d9adc5a2adec2d32104de58348c9587a0"
+    },
+    {
+      "product": "Superhuman Docs AI demo",
+      "file": "docs-ai-00s.jpg",
+      "source_page_url": "https://blog.superhuman.com/introducing-superhuman-docs/",
+      "asset_url": "https://storage.ghost.io/c/c7/8e/c78e4b36-4930-4765-917f-f40bc2da20ee/content/media/2026/07/dc100dae2535792033e8660f45711e3a8c20d3b5b3bebba40b7d616f45427dab4f3372df656273b639bd14bd29eb2707aa82d6b3765ccc31ba292994a497ae4f5dc5fe5c10aebfc8652b57e56955030e52bba08a5f2a2095747c322b7dc045639732e608-1.mp4",
+      "source_publication_date": "2026-07-08",
+      "retrieved_date": "2026-10-17",
+      "evidence": "Q sampled official demo",
+      "sample_time_seconds": 0,
+      "note": "Frame extracted at the stated seek time from an edited official demonstration; not native animation timing.",
+      "saved_sha256": "2a97c6b317fe88908f6864c29a95b02eca10e85c3aac3c495c517072284cc9ce"
+    },
+    {
+      "product": "Superhuman Docs AI demo",
+      "file": "docs-ai-09s.jpg",
+      "source_page_url": "https://blog.superhuman.com/introducing-superhuman-docs/",
+      "asset_url": "https://storage.ghost.io/c/c7/8e/c78e4b36-4930-4765-917f-f40bc2da20ee/content/media/2026/07/dc100dae2535792033e8660f45711e3a8c20d3b5b3bebba40b7d616f45427dab4f3372df656273b639bd14bd29eb2707aa82d6b3765ccc31ba292994a497ae4f5dc5fe5c10aebfc8652b57e56955030e52bba08a5f2a2095747c322b7dc045639732e608-1.mp4",
+      "source_publication_date": "2026-07-08",
+      "retrieved_date": "2026-10-17",
+      "evidence": "Q sampled official demo",
+      "sample_time_seconds": 9,
+      "note": "Frame extracted at the stated seek time from an edited official demonstration; not native animation timing.",
+      "saved_sha256": "ecffe017af7ce3c1dc21034f45b8875c72980d12bffc8c3039d9ae345323308f"
+    },
+    {
+      "product": "Superhuman Docs AI demo",
+      "file": "docs-ai-12s.jpg",
+      "source_page_url": "https://blog.superhuman.com/introducing-superhuman-docs/",
+      "asset_url": "https://storage.ghost.io/c/c7/8e/c78e4b36-4930-4765-917f-f40bc2da20ee/content/media/2026/07/dc100dae2535792033e8660f45711e3a8c20d3b5b3bebba40b7d616f45427dab4f3372df656273b639bd14bd29eb2707aa82d6b3765ccc31ba292994a497ae4f5dc5fe5c10aebfc8652b57e56955030e52bba08a5f2a2095747c322b7dc045639732e608-1.mp4",
+      "source_publication_date": "2026-07-08",
+      "retrieved_date": "2026-10-17",
+      "evidence": "Q sampled official demo",
+      "sample_time_seconds": 12,
+      "note": "Frame extracted at the stated seek time from an edited official demonstration; not native animation timing.",
+      "saved_sha256": "9ff44a927de9aa51b632165cbbf26361be99098bbd9002676b0ebfb0bb29ac27"
+    },
+    {
+      "product": "Superhuman Docs AI demo",
+      "file": "docs-ai-15s.jpg",
+      "source_page_url": "https://blog.superhuman.com/introducing-superhuman-docs/",
+      "asset_url": "https://storage.ghost.io/c/c7/8e/c78e4b36-4930-4765-917f-f40bc2da20ee/content/media/2026/07/dc100dae2535792033e8660f45711e3a8c20d3b5b3bebba40b7d616f45427dab4f3372df656273b639bd14bd29eb2707aa82d6b3765ccc31ba292994a497ae4f5dc5fe5c10aebfc8652b57e56955030e52bba08a5f2a2095747c322b7dc045639732e608-1.mp4",
+      "source_publication_date": "2026-07-08",
+      "retrieved_date": "2026-10-17",
+      "evidence": "Q sampled official demo",
+      "sample_time_seconds": 15,
+      "note": "Frame extracted at the stated seek time from an edited official demonstration; not native animation timing.",
+      "saved_sha256": "744a05e5298b19060cbe7631575187662a434fa6b0cc36bf9f5cdc16264c2b0c"
+    },
+    {
+      "product": "Superhuman Docs AI demo",
+      "file": "docs-ai-18s.jpg",
+      "source_page_url": "https://blog.superhuman.com/introducing-superhuman-docs/",
+      "asset_url": "https://storage.ghost.io/c/c7/8e/c78e4b36-4930-4765-917f-f40bc2da20ee/content/media/2026/07/dc100dae2535792033e8660f45711e3a8c20d3b5b3bebba40b7d616f45427dab4f3372df656273b639bd14bd29eb2707aa82d6b3765ccc31ba292994a497ae4f5dc5fe5c10aebfc8652b57e56955030e52bba08a5f2a2095747c322b7dc045639732e608-1.mp4",
+      "source_publication_date": "2026-07-08",
+      "retrieved_date": "2026-10-17",
+      "evidence": "Q sampled official demo",
+      "sample_time_seconds": 18,
+      "note": "Frame extracted at the stated seek time from an edited official demonstration; not native animation timing.",
+      "saved_sha256": "2ba2a433453ca2ccecacd3d3d25ba06ea3b7127f16f0bcbee9b237868ad5428f"
+    }
+  ]
+}
