@@ -56,8 +56,12 @@ export default async function ConversationDetail({
         }
       />
       <div className="mb-5 flex flex-wrap gap-3">
-        <Badge>Test mode</Badge>
-        <Badge>
+        <Badge tone="test">Test mode</Badge>
+        <Badge
+          tone={
+            conversation.data.ai_mode === "paused" ? "attention" : "success"
+          }
+        >
           {conversation.data.ai_mode === "paused"
             ? "Needs human · AI paused"
             : "AI active"}
@@ -86,7 +90,7 @@ export default async function ConversationDetail({
                   {m.role === "assistant" ? "Avenlyo" : "Test customer"}
                 </span>
                 <time
-                  className="text-[10px] text-muted-foreground"
+                  className="text-[11px] text-muted-foreground"
                   dateTime={m.created_at}
                 >
                   {dateLabel(m.created_at)}

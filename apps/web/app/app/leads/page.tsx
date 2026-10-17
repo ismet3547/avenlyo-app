@@ -1,12 +1,12 @@
 import Link from "next/link";
+import { ArrowUpRight, UsersRound } from "lucide-react";
 import { requireWorkspace } from "@/lib/workspace";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ChannelLabel, Qualification } from "@/components/conversation-item";
 import { dateLabel } from "@/lib/utils";
-import { channelLabels } from "@avenlyo-app/shared";
 export default async function LeadsPage({
   searchParams,
 }: {
@@ -36,10 +36,9 @@ export default async function LeadsPage({
       <PageHeader
         eyebrow="Useful inquiries"
         title="Leads"
-        description="Service interest with customer-stated contact details. Every inquiry keeps its original channel source."
-        action={<Badge>Customer-stated details</Badge>}
+        description="Customer interest, useful context and the contact details your team needs to follow up."
       />
-      <div className="mb-6 flex flex-wrap gap-2">
+      <div className="mb-5 flex flex-wrap gap-1 border-b border-border pb-3">
         {[
           ["all", "All leads"],
           ["qualified", "Qualified"],
@@ -49,10 +48,11 @@ export default async function LeadsPage({
           <Button
             key={key}
             size="sm"
-            variant={qualification === key ? "default" : "ghost"}
+            variant={qualification === key ? "outline" : "ghost"}
             asChild
           >
             <Link
+              aria-current={qualification === key ? "page" : undefined}
               href={`/app/leads${key === "all" ? "" : `?qualification=${key}`}`}
             >
               {label}
@@ -64,8 +64,8 @@ export default async function LeadsPage({
         <p role="alert">Leads could not be loaded.</p>
       ) : !result.data.length ? (
         <EmptyState
-          title="Useful inquiries will appear here"
-          description="Try a service inquiry in Test Agent, then provide the requested contact details. Greetings and ordinary FAQs are not leads."
+          title="Qualified customer inquiries will appear here."
+          description="When someone shows genuine service interest and provides contact details, their inquiry stays linked to the conversation. Try the experience in Test Agent."
           action={
             <Button asChild>
               <Link href="/app/test-agent">Test your agent</Link>
@@ -73,63 +73,71 @@ export default async function LeadsPage({
           }
         />
       ) : (
-        <Card className="overflow-x-auto">
-          <table className="w-full min-w-[650px] text-left text-sm">
-            <thead className="border-b border-border bg-muted/50 text-xs text-muted-foreground">
-              <tr>
-                <th className="px-5 py-4 font-medium">Contact</th>
-                <th className="px-5 py-4 font-medium">Source</th>
-                <th className="px-5 py-4 font-medium">Qualification</th>
-                <th className="px-5 py-4 font-medium">Updated</th>
-                <th className="px-5 py-4 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {result.data.map((lead) => (
-                <tr key={lead.id} className="hover:bg-muted/40">
-                  <td className="px-5 py-4">
-                    <Link
-                      href={`/app/leads/${lead.id}`}
-                      className="font-medium hover:text-primary"
-                    >
+        <Card className="overflow-hidden">
+          <div className="hidden grid-cols-[1.4fr_1fr_1fr_1fr] gap-5 border-b border-border bg-muted/40 px-6 py-3 text-[11px] text-muted-foreground lg:grid">
+            <span>Customer / contact</span>
+            <span>Inquiry</span>
+            <span>Qualification / source</span>
+            <span>Last activity</span>
+          </div>
+          <div className="divide-y divide-border">
+            {result.data.map((lead) => (
+              <Link
+                key={lead.id}
+                href={`/app/leads/${lead.id}`}
+                className="group grid gap-4 p-5 transition-colors hover:bg-muted/40 sm:p-6 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:items-center lg:gap-5"
+              >
+                <div className="flex min-w-0 items-start gap-3">
+                  <span
+                    aria-hidden
+                    className="grid size-9 shrink-0 place-items-center rounded-md border border-border bg-success-soft text-primary"
+                  >
+                    <UsersRound className="size-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium group-hover:text-primary">
                       {lead.name ?? lead.company ?? "Service inquiry"}
-                    </Link>
-                    <p className="mt-1 text-xs text-muted-foreground">
+                    </p>
+                    <p className="mt-1 break-words text-xs leading-5 text-muted-foreground">
                       {lead.email ??
                         lead.phone ??
                         "Contact details in progress"}
                     </p>
-                  </td>
-                  <td className="px-5 py-4 text-xs text-muted-foreground">
-                    {channelLabels[lead.source]}
-                  </td>
-                  <td className="px-5 py-4">
-                    <Badge
-                      className={
-                        lead.qualification === "qualified"
-                          ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-                          : lead.qualification === "needs_human"
-                            ? "border-amber-100 bg-amber-50 text-amber-800"
-                            : ""
-                      }
-                    >
-                      {lead.qualification === "qualified"
-                        ? "Qualified"
-                        : lead.qualification === "needs_human"
-                          ? "Needs human"
-                          : "Needs info"}
-                    </Badge>
-                  </td>
-                  <td className="px-5 py-4 text-xs text-muted-foreground">
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-medium">Service inquiry</p>
+                  <p className="mt-1 line-clamp-2 break-words text-xs leading-5 text-muted-foreground">
+                    {lead.summary}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-3 lg:block">
+                  <Qualification value={lead.qualification} />
+                  <div className="lg:mt-2">
+                    <ChannelLabel channel={lead.source} />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <time
+                    dateTime={lead.updated_at}
+                    className="text-xs tabular-nums text-muted-foreground"
+                  >
                     {dateLabel(lead.updated_at)}
-                  </td>
-                  <td className="px-5 py-4 text-xs">New</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </time>
+                  <ArrowUpRight
+                    aria-hidden
+                    className="size-3.5 text-muted-foreground"
+                  />
+                </div>
+              </Link>
+            ))}
+          </div>
         </Card>
       )}
+      <p className="mt-5 text-xs leading-6 text-muted-foreground">
+        Contact details are customer-stated. Test Agent inquiries are labeled
+        separately from customer channels.
+      </p>
     </>
   );
 }

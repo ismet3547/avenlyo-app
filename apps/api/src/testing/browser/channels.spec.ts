@@ -27,6 +27,13 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   ).toBeNull();
   await mkdir("test-results/screenshots", { recursive: true });
   await page.goto("/auth/sign-in");
+  await expect(
+    page.getByRole("heading", { name: "Welcome back", exact: true }),
+  ).toBeVisible();
+  await page.screenshot({
+    path: "test-results/screenshots/auth-desktop.png",
+    fullPage: true,
+  });
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
@@ -64,6 +71,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     .click();
   await expect(page.getByRole("status")).toContainText("ready");
   await expect(page.getByText("Ready", { exact: true })).toBeVisible();
+  await page.getByText("Website embed", { exact: true }).click();
   const snippet = await page.locator("pre code").innerText();
   expect(snippet).toContain("widget.js");
   expect(snippet).not.toContain(process.env.SUPABASE_SERVICE_ROLE_KEY!);
@@ -111,6 +119,10 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   await expect(
     page.getByRole("heading", { name: "Inbox", exact: true }),
   ).toBeVisible();
+  await page.screenshot({
+    path: "test-results/screenshots/inbox-list-desktop.png",
+    fullPage: true,
+  });
   await page.getByRole("link").filter({ hasText: "Alex" }).first().click();
   await expect(
     page.getByRole("link", { name: "View linked lead →" }),
@@ -190,6 +202,9 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   expect(bounds!.x).toBeGreaterThanOrEqual(0);
   expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(391);
   const inboxUrl = page.url();
+  const leadUrl = await page
+    .getByRole("link", { name: "View linked lead →", exact: true })
+    .getAttribute("href");
   await page.setViewportSize({ width: 390, height: 844 });
   for (const url of [
     inboxUrl,
@@ -225,6 +240,66 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     path: "test-results/screenshots/inbox-mobile.png",
     fullPage: true,
   });
+  await page
+    .getByRole("button", { name: "Open navigation", exact: true })
+    .click();
+  const drawer = page.getByRole("dialog", {
+    name: "Workspace navigation",
+    exact: true,
+  });
+  await expect(drawer).toBeVisible();
+  await page.keyboard.press("Tab");
+  expect(
+    await drawer.evaluate((node) => node.contains(document.activeElement)),
+  ).toBe(true);
+  await page.keyboard.press("Escape");
+  await expect(drawer).not.toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Open navigation", exact: true }),
+  ).toBeFocused();
+  await page
+    .getByRole("button", { name: "Open navigation", exact: true })
+    .click();
+  await drawer.getByRole("link", { name: "Agent", exact: true }).click();
+  await expect(drawer).not.toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Agent", exact: true }),
+  ).toBeVisible();
+  const routes = [
+    ["/app", "Your AI front office", "overview-active"],
+    ["/app/inbox", "Inbox", "inbox-list"],
+    [inboxUrl, "Alex", "inbox-conversation"],
+    ["/app/agent", "Agent", "agent"],
+    ["/app/knowledge", "Business knowledge", "knowledge"],
+    ["/app/channels", "Meet customers where they are", "channels"],
+    ["/app/leads", "Leads", "leads"],
+    [leadUrl!, "Alex", "lead"],
+    ["/app/conversations", "Conversations", "conversations"],
+    ["/app/test-agent", "Try a customer conversation", "test-agent"],
+    ["/app/settings", "Workspace settings", "settings"],
+  ];
+  for (const width of [1440, 1280, 1024, 768, 390]) {
+    await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 });
+    for (const [route, heading, name] of routes) {
+      await page.goto(route);
+      await expect(
+        page.getByRole("heading", { name: heading, exact: true }),
+      ).toBeVisible();
+      if (route === inboxUrl)
+        await expect(page.getByLabel("Your human reply")).toBeVisible();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= window.innerWidth + 1,
+        ),
+        `No overflow at ${width}px: ${name}`,
+      ).toBe(true);
+      if (width === 1440 || width === 390)
+        await page.screenshot({
+          path: `test-results/screenshots/product-${name}-${width}.png`,
+          fullPage: true,
+        });
+    }
+  }
   await visitor.goto(inboxUrl);
   await expect(visitor).toHaveURL(/\/auth\/sign-in$/);
   await visitorContext.close();

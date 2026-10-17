@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
-import type { InboxThread } from "@avenlyo-app/shared";
+import type { InboxThread, InboxItem } from "@avenlyo-app/shared";
 import { requireWorkspace } from "@/lib/workspace";
 import { callApi } from "@/lib/api";
 import { InboxConversation } from "@/components/inbox-conversation";
+import { ConversationItem } from "@/components/conversation-item";
+import { Card } from "@/components/ui/card";
 export default async function InboxDetail({
   params,
 }: {
@@ -19,6 +21,21 @@ export default async function InboxDetail({
   if (result.status === 403) notFound();
   if (result.status !== 200)
     throw new Error("Conversation could not be loaded");
+  const [list, contact] = await Promise.all([
+    ctx.supabase.rpc("inbox_snapshot", {
+      target_workspace_id: ctx.workspace.id,
+      page_offset: 0,
+    }),
+    ctx.supabase
+      .from("leads")
+      .select("*")
+      .eq("workspace_id", ctx.workspace.id)
+      .eq("conversation_id", id)
+      .maybeSingle(),
+  ]);
+  const items = list.error
+    ? []
+    : ((list.data as unknown as InboxItem[] | null) ?? []);
   return (
     <>
       <Link
@@ -27,11 +44,41 @@ export default async function InboxDetail({
       >
         ← All customer conversations
       </Link>
-      <InboxConversation
-        key={id}
-        initial={result.data as InboxThread}
-        actorId={ctx.user.id}
-      />
+      <div className="inbox-workspace">
+        <Card className="hidden overflow-hidden xl:block">
+          <div className="panel-heading">
+            <h2 className="panel-title">Inbox</h2>
+          </div>
+          <nav
+            aria-label="Customer conversations"
+            className="max-h-[880px] divide-y divide-border overflow-y-auto"
+          >
+            {items.map((item) => (
+              <ConversationItem
+                key={item.id}
+                item={item}
+                actorId={ctx.user.id}
+                selected={item.id === id}
+                compact
+              />
+            ))}
+          </nav>
+          <Link
+            href="/app/inbox"
+            className="block border-t border-border px-5 py-3 text-xs text-primary"
+          >
+            All customer conversations →
+          </Link>
+        </Card>
+        <div className="min-w-0">
+          <InboxConversation
+            key={id}
+            initial={result.data as InboxThread}
+            actorId={ctx.user.id}
+            contact={contact.data}
+          />
+        </div>
+      </div>
     </>
   );
 }

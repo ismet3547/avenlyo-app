@@ -1,13 +1,12 @@
 import Link from "next/link";
-import { Globe, MessageCircle, UserRound, ArrowRight } from "lucide-react";
-import { channelLabels, type InboxItem } from "@avenlyo-app/shared";
+import { MessageSquare, UserRound, Play, ArrowRight } from "lucide-react";
+import type { InboxItem } from "@avenlyo-app/shared";
 import { requireWorkspace } from "@/lib/workspace";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { dateLabel } from "@/lib/utils";
+import { ConversationItem } from "@/components/conversation-item";
 export default async function InboxPage({
   searchParams,
 }: {
@@ -29,7 +28,7 @@ export default async function InboxPage({
       <PageHeader
         eyebrow="Customer conversations"
         title="Inbox"
-        description="Questions, useful inquiries and conversations that need your team. Claim a thread to continue it personally."
+        description="Every customer question, with the context your team needs to continue."
         action={
           <Button asChild variant="outline">
             <Link href="/app/channels">Manage channels</Link>
@@ -40,8 +39,8 @@ export default async function InboxPage({
         <p role="alert">Inbox could not be loaded.</p>
       ) : !conversations?.length ? (
         <EmptyState
-          title="Your next conversation starts here"
-          description="Enable Website Chat or complete managed Instagram setup. Real customer messages will appear here; Test Agent conversations stay in Conversations."
+          title="Customer conversations will appear here."
+          description="Enable Website Chat or complete managed Instagram setup. Real messages arrive here; Test Agent conversations stay in Conversations."
           action={
             <Button asChild>
               <Link href="/app/channels">Set up a channel</Link>
@@ -49,74 +48,70 @@ export default async function InboxPage({
           }
         />
       ) : (
-        <Card className="divide-y divide-border">
-          {conversations.map((c) => {
-            const Icon = c.channel === "website_chat" ? Globe : MessageCircle;
-            return (
-              <Link
-                key={c.id}
-                href={`/app/inbox/${c.id}`}
-                className="group flex gap-4 p-5 hover:bg-muted/30 sm:p-6"
-              >
-                <span className="mt-1 grid size-10 shrink-0 place-items-center rounded-full bg-[#efeffd] text-primary">
-                  <Icon className="size-4" aria-hidden />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="truncate text-sm font-semibold">
-                      {c.channel === "website_chat" &&
-                      c.customerRef.includes("-")
-                        ? `Website visitor · ${c.customerRef.slice(0, 8)}`
-                        : c.customerRef}
+        <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(260px,1fr)]">
+          <Card className="overflow-hidden">
+            <div className="panel-heading">
+              <h2 className="panel-title">Recent conversations</h2>
+              <span className="text-xs tabular-nums text-muted-foreground">
+                {conversations.length} shown
+              </span>
+            </div>
+            <div className="divide-y divide-border">
+              {conversations.map((item) => (
+                <ConversationItem
+                  key={item.id}
+                  item={item}
+                  actorId={ctx.user.id}
+                />
+              ))}
+            </div>
+          </Card>
+          <Card className="hidden p-6 xl:block">
+            <span className="grid size-10 place-items-center rounded-lg border border-border bg-success-soft">
+              <MessageSquare aria-hidden className="size-5 text-primary" />
+            </span>
+            <h2 className="mt-5 text-lg font-medium tracking-tight">
+              A conversation, with a clear next step.
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
+              Open a thread to see the customer’s question, inquiry details and
+              the current AI state.
+            </p>
+            <div className="mt-6 space-y-5 border-t border-border pt-5">
+              {[
+                {
+                  icon: UserRound,
+                  title: "Continue personally",
+                  description:
+                    "Claim the conversation before sending a human reply.",
+                },
+                {
+                  icon: Play,
+                  title: "Stay in control",
+                  description:
+                    "AI stays paused until your team explicitly resumes it.",
+                },
+              ].map(({ icon: Icon, title, description }) => (
+                <div className="flex gap-3" key={title}>
+                  <Icon aria-hidden className="mt-1 size-4 text-primary" />
+                  <div>
+                    <p className="text-[13px] font-medium">{title}</p>
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                      {description}
                     </p>
-                    <time className="text-[10px] text-muted-foreground">
-                      {dateLabel(c.updatedAt)}
-                    </time>
-                  </div>
-                  <p className="mt-2 line-clamp-2 break-words text-sm leading-6 text-muted-foreground">
-                    {c.preview ?? "Waiting for the first customer message."}
-                  </p>
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <span className="mr-1 text-xs text-muted-foreground">
-                      {channelLabels[c.channel]}
-                    </span>
-                    {c.aiMode === "paused" && (
-                      <Badge className="border-amber-100 bg-amber-50 text-amber-800">
-                        Needs human · AI paused
-                      </Badge>
-                    )}
-                    {c.qualification && (
-                      <Badge>
-                        {c.qualification === "qualified"
-                          ? "Qualified lead"
-                          : c.qualification === "needs_human"
-                            ? "Lead needs human"
-                            : "Lead needs info"}
-                      </Badge>
-                    )}
-                    {c.assigneeId && (
-                      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                        <UserRound className="size-3" aria-hidden />
-                        {c.assigneeId === ctx.user.id
-                          ? "Claimed by you"
-                          : "Claimed by a team member"}
-                      </span>
-                    )}
-                    {c.needsAttention && (
-                      <Badge className="border-red-100 bg-red-50 text-red-700">
-                        Delivery needs attention
-                      </Badge>
-                    )}
                   </div>
                 </div>
-                <ArrowRight
-                  className="mt-2 size-4 shrink-0 text-muted-foreground group-hover:text-primary"
-                  aria-hidden
-                />
-              </Link>
-            );
-          })}
-        </Card>
+              ))}
+            </div>
+            <Link
+              href="/app/conversations"
+              className="mt-6 inline-flex items-center gap-2 text-xs text-primary"
+            >
+              Looking for a test conversation?
+              <ArrowRight aria-hidden className="size-3" />
+            </Link>
+          </Card>
+        </div>
       )}
       {(page > 0 || conversations?.length === 50) && (
         <div className="mt-5 flex gap-3">

@@ -29,8 +29,8 @@ export default async function AgentPage() {
     <>
       <PageHeader
         eyebrow="Your agent"
-        title="Helpful by design"
-        description="Define how Avenlyo helps your customers, with clear goals and sensible boundaries."
+        title="Agent"
+        description="Control what Avenlyo helps with and what information it collects."
         action={
           <Button asChild variant="outline">
             <Link href="/app/test-agent">

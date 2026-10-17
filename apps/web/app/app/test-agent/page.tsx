@@ -58,8 +58,8 @@ export default async function TestAgentPage({
         }
       />
       {conversation?.data?.ai_mode === "paused" && (
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm text-amber-900">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-attention/20 bg-attention-soft p-4">
+          <p className="text-sm text-attention">
             This test needs human assistance. Automated answers are paused.
           </p>
           <form action={resumeTest}>
@@ -74,7 +74,12 @@ export default async function TestAgentPage({
         key={authorizedId ?? "new"}
         workspaceId={ctx.workspace.id}
         conversationId={authorizedId}
-        initialMessages={messages?.data?.map(m => ({role: m.role === "customer" ? "customer" : "assistant", content: m.content})) ?? []}
+        initialMessages={
+          messages?.data?.map((m) => ({
+            role: m.role === "customer" ? "customer" : "assistant",
+            content: m.content,
+          })) ?? []
+        }
         initialLeadId={lead?.data?.id ?? null}
       />
     </>

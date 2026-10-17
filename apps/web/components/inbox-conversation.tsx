@@ -6,8 +6,9 @@ import {
   channelLabels,
   type InboxThread,
   type Message,
+  type Lead,
 } from "@avenlyo-app/shared";
-import { PageHeader } from "./page-header";
+import { Qualification, ChannelLabel } from "./conversation-item";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Card } from "./ui/card";
@@ -24,9 +25,11 @@ function mergeMessages(current: Message[], incoming: Message[]) {
 export function InboxConversation({
   initial,
   actorId,
+  contact,
 }: {
   initial: InboxThread;
   actorId: string;
+  contact: Lead | null;
 }) {
   const [snapshot, setSnapshot] = useState(initial);
   const [content, setContent] = useState("");
@@ -165,38 +168,43 @@ export function InboxConversation({
   }
   return (
     <>
-      <PageHeader
-        eyebrow={channelLabels[c.channel]}
-        title={
-          snapshot.lead?.name ??
-          (instagram ? "Instagram conversation" : "Website conversation")
-        }
-        description={`Customer channel reference · ${c.external_customer_ref?.slice(0, 32) ?? ""}`}
-      />
-      <div className="mb-5 flex flex-wrap gap-2">
-        <Badge
-          className={
-            c.ai_mode === "paused"
-              ? "border-amber-100 bg-amber-50 text-amber-800"
-              : "border-emerald-100 bg-emerald-50 text-emerald-700"
-          }
-        >
-          {c.ai_mode === "paused" ? "Needs human · AI paused" : "AI active"}
-        </Badge>
-        {c.assignee_id && (
-          <Badge>{mine ? "Claimed by you" : "Claimed by a team member"}</Badge>
-        )}
-        {snapshot.lead && (
-          <Link
-            href={`/app/leads/${snapshot.lead.id}`}
-            className="ml-2 pt-1 text-xs font-medium text-primary"
+      <header className="mb-5 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <span
+            aria-hidden
+            className="grid size-10 shrink-0 place-items-center rounded-md border border-border bg-muted text-sm font-medium text-primary"
           >
-            View linked lead →
-          </Link>
-        )}
-      </div>
-      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_260px]">
-        <Card className="min-w-0 overflow-hidden">
+            {(snapshot.lead?.name ?? "Visitor").slice(0, 2).toUpperCase()}
+          </span>
+          <div className="min-w-0">
+            <h1 className="text-xl font-medium tracking-tight">
+              {snapshot.lead?.name ??
+                (instagram ? "Instagram conversation" : "Website conversation")}
+            </h1>
+            <div className="mt-1">
+              <ChannelLabel channel={c.channel} />
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Badge tone={c.ai_mode === "paused" ? "attention" : "success"}>
+            {c.ai_mode === "paused" ? "Needs human · AI paused" : "AI active"}
+          </Badge>
+          {c.assignee_id && (
+            <Badge tone="test">
+              {mine ? "Claimed by you" : "Claimed by a team member"}
+            </Badge>
+          )}
+        </div>
+      </header>
+      <div className="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_240px]">
+        <Card className="overflow-hidden">
+          <div className="panel-heading">
+            <h2 className="panel-title">Conversation</h2>
+            <span className="text-[11px] text-muted-foreground">
+              {channelLabels[c.channel]}
+            </span>
+          </div>
           <div
             ref={thread}
             onScroll={(event) => {
@@ -204,7 +212,7 @@ export function InboxConversation({
               followLatest.current =
                 node.scrollHeight - node.scrollTop - node.clientHeight < 80;
             }}
-            className="max-h-[580px] space-y-5 overflow-y-auto p-5 sm:p-6"
+            className="inbox-thread space-y-5"
             aria-label="Conversation thread"
           >
             {hasEarlier && (
@@ -232,52 +240,71 @@ export function InboxConversation({
               const delivery = snapshot.deliveries.find(
                 (d) => d.message_id === m.id,
               );
+              const deliveryLabel =
+                delivery?.status === "available"
+                  ? "Available to visitor"
+                  : delivery?.status === "sent"
+                    ? "Accepted by Instagram"
+                    : delivery?.status === "unknown"
+                      ? "Delivery unconfirmed · automatic resend stopped"
+                      : delivery?.status === "failed"
+                        ? "Delivery failed · automatic resend stopped"
+                        : delivery?.status === "blocked"
+                          ? "Delivery blocked"
+                          : "Delivery pending";
+              const reason =
+                delivery?.error_code === "REPLY_WINDOW_CLOSED"
+                  ? "The reply window has ended"
+                  : delivery?.error_code === "AI_PAUSED"
+                    ? "AI paused before sending"
+                    : delivery?.error_code === "CHANNEL_DISCONNECTED"
+                      ? "Instagram is disconnected"
+                      : delivery?.error_code === "CHANNEL_UNAVAILABLE"
+                        ? "The channel is unavailable"
+                        : delivery?.error_code === "CREDENTIAL_UNAVAILABLE"
+                          ? "The connection needs attention"
+                          : "";
               return (
                 <article
                   key={m.id}
-                  className={`max-w-[94%] rounded-xl p-4 ${m.role === "customer" ? "bg-muted/70" : m.role === "human" ? "ml-auto border border-blue-100 bg-blue-50/60" : "ml-auto border border-[#e8e2fc] bg-[#f7f5ff]"}`}
+                  className="message-bubble"
+                  data-role={m.role}
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-3 text-[10px] text-muted-foreground">
-                    <span className="font-semibold">
+                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                    <span className="font-medium">
                       {m.role === "customer"
                         ? "Customer"
                         : m.role === "human"
                           ? "Team · human reply"
                           : "Avenlyo"}
                     </span>
-                    <time dateTime={m.created_at}>
+                    <time
+                      className="tabular-nums text-muted-foreground"
+                      dateTime={m.created_at}
+                    >
                       {dateLabel(m.created_at)}
                     </time>
                   </div>
-                  <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-7">
+                  <p className="whitespace-pre-wrap text-[13px] leading-6">
                     {m.content}
                   </p>
                   {delivery && (
                     <p
-                      className={`mt-3 text-[10px] ${["unknown", "failed", "blocked"].includes(delivery.status) ? "text-red-700" : "text-muted-foreground"}`}
+                      className={`mt-2.5 text-[11px] leading-5 ${["unknown", "failed", "blocked"].includes(delivery.status) ? "text-attention" : "text-muted-foreground"}`}
                     >
-                      {delivery.status === "available"
-                        ? "Available to visitor"
-                        : delivery.status === "sent"
-                          ? "Accepted by Instagram"
-                          : delivery.status === "unknown"
-                            ? "Delivery unconfirmed · automatic resend stopped"
-                            : delivery.status === "failed"
-                              ? "Delivery failed · automatic resend stopped"
-                              : delivery.status === "blocked"
-                                ? "Delivery blocked"
-                                : "Delivery pending"}
-                      {delivery.error_code
-                        ? ` · ${delivery.error_code.replaceAll("_", " ").toLowerCase()}`
-                        : ""}
+                      {deliveryLabel}
+                      {reason ? ` · ${reason}` : ""}
                     </p>
                   )}
                 </article>
               );
             })}
           </div>
-          <form onSubmit={reply} className="border-t border-border p-5 sm:p-6">
-            <label htmlFor="human-reply" className="text-sm font-semibold">
+          <form
+            onSubmit={reply}
+            className="border-t border-border bg-card p-4 sm:p-5"
+          >
+            <label htmlFor="human-reply" className="text-xs font-medium">
               Your human reply
             </label>
             <Textarea
@@ -292,10 +319,10 @@ export function InboxConversation({
               disabled={!mine || pending || retry}
               maxLength={2000}
               rows={3}
-              className="mt-3"
+              className="mt-2 min-h-24 resize-y"
             />
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[11px] text-muted-foreground">
                 {instagram
                   ? `${bytes}/1000 bytes · Instagram reply window applies.`
                   : "Your reply appears in the visitor’s chat."}
@@ -318,92 +345,150 @@ export function InboxConversation({
                     : "Send human reply"}
               </Button>
             </div>
+            {error && (
+              <p role="alert" className="mt-3 text-xs leading-6 text-danger">
+                {error}
+              </p>
+            )}
+            {notice && (
+              <p role="status" className="mt-3 text-xs leading-6 text-success">
+                {notice}
+              </p>
+            )}
           </form>
         </Card>
-        <Card className="p-5">
-          <h2 className="text-sm font-semibold">Conversation ownership</h2>
-          <p className="mt-3 text-xs leading-6 text-muted-foreground">
-            Claiming pauses AI. Human replies and release keep it paused. Resume
-            AI explicitly when your team is ready.
-          </p>
-          <div className="mt-5 flex flex-col gap-3">
-            {!mine && (
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={pending || other}
-                onClick={() => void action("claim")}
-              >
-                <UserRound aria-hidden />
-                {other ? "Already claimed" : "Claim conversation"}
-              </Button>
-            )}
-            {mine && (
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={pending}
-                onClick={() => void action("release")}
-              >
-                <LogOut aria-hidden />
-                Release conversation
-              </Button>
-            )}
-            {c.ai_mode === "paused" && (
-              <Button
-                size="sm"
-                disabled={pending || other || retry}
-                onClick={() => void action("resume")}
-              >
-                <Play aria-hidden />
-                Resume AI
-              </Button>
-            )}
-          </div>
-          {instagram && (
-            <p className="mt-5 border-t border-border pt-4 text-xs leading-6 text-muted-foreground">
-              V1 replies must be within 24 hours of the customer’s last
-              Instagram message. An expired window is blocked and shown in the
-              thread.
+        <aside
+          className="min-w-0 space-y-4"
+          aria-label="Customer and conversation context"
+        >
+          <Card className="p-5">
+            <h2 className="panel-title">Customer details</h2>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              Customer-stated information
             </p>
-          )}
-          {snapshot.notifications.length > 0 && (
-            <div className="mt-5 border-t border-border pt-4">
-              <h3 className="text-xs font-semibold">Staff notifications</h3>
-              {snapshot.notifications.map((n) => (
-                <p
-                  key={n.id}
-                  className="mt-3 text-xs leading-5 text-muted-foreground"
-                >
-                  {n.kind === "qualified_lead"
-                    ? "Qualified inquiry"
-                    : "Human assistance"}{" "}
-                  ·{" "}
-                  {n.status === "sent"
-                    ? "email accepted"
-                    : n.status === "unknown"
-                      ? "delivery unconfirmed"
-                      : n.status === "failed"
-                        ? "email failed"
-                        : n.status === "suppressed"
-                          ? "no verified owner recipient"
-                          : n.status}
+            {contact ? (
+              <dl className="mt-3">
+                {[
+                  ["Name", snapshot.lead?.name ?? contact.name],
+                  ["Email", contact.email],
+                  ["Phone", contact.phone],
+                  ["Company", contact.company],
+                ].map(([label, value]) => (
+                  <div className="context-field" key={label}>
+                    <dt>{label}</dt>
+                    <dd>{value ?? "Not provided"}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : (
+              <p className="mt-4 text-xs leading-6 text-muted-foreground">
+                Contact information appears with a linked lead when the customer
+                provides it.
+              </p>
+            )}
+            {snapshot.lead && (
+              <div className="mt-4 space-y-3">
+                <Qualification value={snapshot.lead.qualification} />
+                <p className="text-xs text-muted-foreground">
+                  Intent · Service inquiry
                 </p>
-              ))}
+                <Link
+                  href={`/app/leads/${snapshot.lead.id}`}
+                  className="block text-xs font-medium text-primary hover:underline"
+                >
+                  View linked lead →
+                </Link>
+              </div>
+            )}
+            <div className="mt-4 border-t border-border pt-3">
+              <p className="eyebrow">Source</p>
+              <p className="mt-1 text-xs">{channelLabels[c.channel]}</p>
+              <p className="mt-3 break-all text-[11px] leading-5 text-muted-foreground">
+                Channel reference · {c.external_customer_ref}
+              </p>
             </div>
+          </Card>
+          <Card className="p-5">
+            <h2 className="panel-title">Conversation ownership</h2>
+            <p className="mt-2 text-xs leading-6 text-muted-foreground">
+              Claiming pauses AI. Replies and release keep it paused. Resume AI
+              when your team is ready.
+            </p>
+            <div className="mt-4 flex flex-col gap-2.5">
+              {!mine && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={pending || other}
+                  onClick={() => void action("claim")}
+                >
+                  <UserRound aria-hidden />
+                  {other ? "Already claimed" : "Claim conversation"}
+                </Button>
+              )}
+              {mine && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={pending}
+                  onClick={() => void action("release")}
+                >
+                  <LogOut aria-hidden />
+                  Release conversation
+                </Button>
+              )}
+              {c.ai_mode === "paused" && (
+                <Button
+                  size="sm"
+                  disabled={pending || other || retry}
+                  onClick={() => void action("resume")}
+                >
+                  <Play aria-hidden />
+                  Resume AI
+                </Button>
+              )}
+            </div>
+            {instagram && (
+              <p className="mt-4 border-t border-border pt-3 text-xs leading-6 text-muted-foreground">
+                V1 replies must be within 24 hours of the customer’s last
+                Instagram message. Expired replies are blocked.
+              </p>
+            )}
+          </Card>
+          {snapshot.notifications.length > 0 && (
+            <details className="rounded-lg border border-border bg-card px-5 py-4">
+              <summary className="cursor-pointer text-xs font-medium text-muted-foreground">
+                Staff notifications · {snapshot.notifications.length}
+              </summary>
+              <div className="mt-3 space-y-2">
+                {snapshot.notifications.map((n) => (
+                  <p
+                    key={n.id}
+                    className="text-[11px] leading-5 text-muted-foreground"
+                  >
+                    {n.kind === "qualified_lead"
+                      ? "Qualified inquiry"
+                      : "Human assistance"}{" "}
+                    ·{" "}
+                    {n.status === "sent"
+                      ? "email accepted"
+                      : n.status === "unknown"
+                        ? "delivery unconfirmed"
+                        : n.status === "failed" &&
+                            n.error_code === "NOTIFICATION_NOT_CONFIGURED"
+                          ? "email not configured"
+                          : n.status === "failed"
+                            ? "email not sent"
+                            : n.status === "suppressed"
+                              ? "no verified owner recipient"
+                              : n.status}
+                  </p>
+                ))}
+              </div>
+            </details>
           )}
-        </Card>
+        </aside>
       </div>
-      {error && (
-        <p role="alert" className="mt-4 text-sm leading-6 text-red-700">
-          {error}
-        </p>
-      )}
-      {notice && (
-        <p role="status" className="mt-4 text-sm leading-6 text-emerald-700">
-          {notice}
-        </p>
-      )}
     </>
   );
 }

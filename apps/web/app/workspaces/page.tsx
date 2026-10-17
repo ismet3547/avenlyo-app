@@ -1,3 +1,4 @@
+import { Brand } from "@/components/brand";
 import { requireUser } from "@/lib/workspace";
 import { WorkspaceForm } from "@/components/workspace-form";
 import { Card } from "@/components/ui/card";
@@ -13,7 +14,7 @@ export default async function WorkspacesPage() {
   return (
     <main className="mx-auto max-w-xl px-6 py-16">
       <div className="flex items-center justify-between">
-        <span className="text-xl font-semibold">Avenlyo</span>
+        <Brand />
         <form action={signOut}>
           <Button variant="ghost" size="sm">
             Sign out

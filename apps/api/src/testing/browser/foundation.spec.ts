@@ -21,6 +21,10 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await expect(
     page.getByRole("heading", { name: "Start with your business" }),
   ).toBeVisible();
+  await page.screenshot({
+    path: `${shots}/auth-sign-up-desktop.png`,
+    fullPage: true,
+  });
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page
@@ -67,6 +71,7 @@ test("new user completes the independent foundation flow on desktop and mobile",
     .getByRole("button", { name: "Save settings", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Agent settings saved");
+  await page.screenshot({ path: `${shots}/agent-desktop.png`, fullPage: true });
   await page.goto("/app/knowledge/new");
   await page.getByLabel("Title", { exact: true }).fill("Custom projects");
   await page
@@ -148,17 +153,19 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await expect(page.getByText("Disabled", { exact: true })).toBeVisible();
   await expect(page.getByText("Not configured", { exact: true })).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
-  for (const route of [
-    "/app",
-    "/app/agent",
-    "/app/knowledge",
-    "/app/test-agent",
-    "/app/leads",
-    "/app/channels",
-    "/app/settings",
+  for (const [route, heading] of [
+    ["/app", "Your AI front office"],
+    ["/app/agent", "Agent"],
+    ["/app/knowledge", "Business knowledge"],
+    ["/app/test-agent", "Try a customer conversation"],
+    ["/app/leads", "Leads"],
+    ["/app/channels", "Meet customers where they are"],
+    ["/app/settings", "Workspace settings"],
   ]) {
     await page.goto(route);
-    await expect(page.getByRole("main")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: heading, exact: true }),
+    ).toBeVisible();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth + 1,
@@ -167,6 +174,9 @@ test("new user completes the independent foundation flow on desktop and mobile",
     ).toBe(true);
   }
   await page.goto("/app");
+  await expect(
+    page.getByRole("heading", { name: "Your AI front office", exact: true }),
+  ).toBeVisible();
   await page.screenshot({
     path: `${shots}/overview-mobile.png`,
     fullPage: true,

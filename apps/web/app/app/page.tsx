@@ -2,20 +2,26 @@ import Link from "next/link";
 import {
   ArrowRight,
   BookOpen,
-  Check,
+  Globe,
+  MessageCircle,
+  Play,
+  SlidersHorizontal,
   MessageSquare,
-  Sparkles,
   UsersRound,
+  UserRound,
 } from "lucide-react";
+import type { InboxItem } from "@avenlyo-app/shared";
 import { requireWorkspace } from "@/lib/workspace";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/empty-state";
+import { ConversationItem } from "@/components/conversation-item";
 export default async function Overview() {
-  const { supabase, workspace } = await requireWorkspace();
-  const [knowledge, conversations, qualified, human, agent, channels] = await Promise.all(
-    [
+  const { supabase, workspace, user } = await requireWorkspace();
+  const [knowledge, conversations, qualified, human, agent, channels, recent] =
+    await Promise.all([
       supabase
         .from("knowledge_items")
         .select("id", { count: "exact", head: true })
@@ -40,105 +46,163 @@ export default async function Overview() {
         .select("setup_brief,updated_at")
         .eq("workspace_id", workspace.id)
         .single(),
-      supabase.from("channel_connections").select("id", {count: "exact", head: true}).eq("workspace_id", workspace.id).eq("enabled", true),
-    ],
-  );
+      supabase
+        .from("channel_connections")
+        .select("channel,enabled,status,verified_at,last_activity_at")
+        .eq("workspace_id", workspace.id),
+      supabase.rpc("inbox_snapshot", {
+        target_workspace_id: workspace.id,
+        page_offset: 0,
+      }),
+    ]);
   const published = knowledge.error ? null : (knowledge.count ?? 0);
   const configured = Boolean(
     agent.data &&
       (agent.data.setup_brief.trim() ||
         new Date(agent.data.updated_at) > new Date(workspace.created_at)),
   );
+  const website = channels.data?.find((c) => c.channel === "website_chat");
+  const instagram = channels.data?.find((c) => c.channel === "instagram");
+  const connected = Boolean(
+    instagram?.enabled &&
+      instagram.status === "connected" &&
+      instagram.verified_at,
+  );
+  const activity = recent.data as unknown as InboxItem[] | null;
+  const next = !configured
+    ? {
+        title: "Give your agent a clear objective",
+        description:
+          "Choose its goals, communication style and the details it should collect.",
+        href: "/app/agent",
+        action: "Configure agent",
+        step: "01",
+      }
+    : published === 0
+      ? {
+          title: "Give Avenlyo the information it can safely use",
+          description:
+            "Publish a service description or a helpful FAQ to make the first answer useful.",
+          href: "/app/knowledge/new",
+          action: "Add knowledge",
+          step: "02",
+        }
+      : !website?.enabled && !channels.error
+        ? {
+            title: "Open the door to customer questions",
+            description:
+              "Approve your website’s origin and install your chat widget.",
+            href: "/app/channels",
+            action: "Enable Website Chat",
+            step: "03",
+          }
+        : {
+            title: "See the experience through your customer’s eyes",
+            description:
+              "Try a genuine question, check the answer and review the conversation outcome.",
+            href: "/app/test-agent",
+            action: "Test agent",
+            step: "04",
+          };
+  const states = [
+    {
+      title: "Agent",
+      label: agent.error
+        ? "Unavailable"
+        : configured
+          ? "Configured"
+          : "Needs setup",
+      good: configured && !agent.error,
+      href: "/app/agent",
+      icon: SlidersHorizontal,
+    },
+    {
+      title: "Knowledge",
+      label: published === null ? "Unavailable" : `${published} published`,
+      good: Boolean(published),
+      href: "/app/knowledge",
+      icon: BookOpen,
+    },
+    {
+      title: "Website Chat",
+      label: channels.error
+        ? "Unavailable"
+        : !website?.enabled
+          ? "Disabled"
+          : website.last_activity_at
+            ? "Active"
+            : "Ready",
+      good: Boolean(website?.enabled),
+      href: "/app/channels",
+      icon: Globe,
+    },
+    {
+      title: "Instagram",
+      label: channels.error
+        ? "Unavailable"
+        : connected
+          ? "Connected"
+          : instagram?.status === "needs_attention"
+            ? "Needs attention"
+            : "Setup required",
+      good: connected,
+      href: "/app/channels",
+      icon: MessageCircle,
+    },
+  ];
   return (
     <>
       <PageHeader
         eyebrow={workspace.name}
         title="Your AI front office"
-        description="A place for better answers, useful inquiries, and a clear view of every conversation."
+        description="A clear view of your agent, your customers and what needs your team."
         action={
           <Button asChild>
             <Link href="/app/test-agent">
-              <Sparkles aria-hidden />
+              <Play aria-hidden />
               Test agent
             </Link>
           </Button>
         }
       />
-      <section className="grid gap-4 lg:grid-cols-3">
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <span className="grid size-9 place-items-center rounded-lg bg-[#efeffd] text-primary">
-              <Sparkles className="size-4" aria-hidden />
-            </span>
-            <Badge
-              className={
-                configured
-                  ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-                  : ""
-              }
-            >
-              {configured ? "Configured" : "Needs setup"}
-            </Badge>
-          </div>
-          <h2 className="mt-5 font-semibold">Your agent</h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Set its goals, tone and the details that make an inquiry useful.
-          </p>
+      <section
+        aria-label="Operational status"
+        className="grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2 xl:grid-cols-4"
+      >
+        {states.map(({ title, label, good, href, icon: Icon }) => (
           <Link
-            className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-primary"
-            href="/app/agent"
+            key={title}
+            href={href}
+            className="flex items-center gap-3 bg-card p-5 transition-colors hover:bg-muted"
           >
-            Configure agent
-            <ArrowRight className="size-3" aria-hidden />
+            <Icon aria-hidden className="size-[18px] text-muted-foreground" />
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground">{title}</p>
+              <p className="mt-1 flex items-center gap-2 text-[13px] font-medium">
+                <span
+                  aria-hidden
+                  className={`size-1.5 rounded-full ${good ? "bg-success" : label === "Needs attention" ? "bg-attention" : "bg-muted-foreground/40"}`}
+                />
+                {label}
+              </p>
+            </div>
+            <ArrowRight
+              aria-hidden
+              className="ml-auto size-3.5 text-muted-foreground"
+            />
           </Link>
-        </Card>
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <span className="grid size-9 place-items-center rounded-lg bg-[#eff7f2] text-emerald-700">
-              <BookOpen className="size-4" aria-hidden />
-            </span>
-            <Badge>
-              {published === null ? "Unavailable" : `${published} published`}
-            </Badge>
-          </div>
-          <h2 className="mt-5 font-semibold">Business knowledge</h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Add services and FAQs. Your agent uses only what you publish.
-          </p>
-          <Link
-            className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-primary"
-            href="/app/knowledge/new"
-          >
-            Add knowledge
-            <ArrowRight className="size-3" aria-hidden />
-          </Link>
-        </Card>
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <span className="grid size-9 place-items-center rounded-lg bg-muted text-muted-foreground">
-              <MessageSquare className="size-4" aria-hidden />
-            </span>
-            <Badge>{channels.error ? "Unavailable" : `${channels.count ?? 0} enabled`}</Badge>
-          </div>
-          <h2 className="mt-5 font-semibold">Customer channels</h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Website Chat and managed Instagram conversations, with your team in Inbox.
-          </p>
-          <Link
-            className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-primary"
-            href="/app/channels"
-          >
-            View channels
-            <ArrowRight className="size-3" aria-hidden />
-          </Link>
-        </Card>
+        ))}
       </section>
-      <section className="mt-8">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold">Workspace activity</h2>
-          <Badge>All channels · includes tests</Badge>
+      <section className="mt-7" aria-labelledby="activity-heading">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 id="activity-heading" className="panel-title">
+            Workspace activity
+          </h2>
+          <span className="text-xs text-muted-foreground">
+            All channels · includes tests
+          </span>
         </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-3">
           {[
             {
               title: "Conversations",
@@ -153,42 +217,81 @@ export default async function Overview() {
             {
               title: "Needs human",
               value: human.error ? "—" : (human.count ?? 0),
-              icon: UsersRound,
+              icon: UserRound,
             },
           ].map(({ title, value, icon: Icon }) => (
             <Card key={title} className="p-5">
-              <p className="flex items-center justify-between text-sm text-muted-foreground">
-                {title}
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>{title}</span>
                 <Icon aria-hidden className="size-4" />
-              </p>
-              <p className="mt-4 text-3xl font-semibold tracking-tight">
+              </div>
+              <p className="mt-3 text-[32px] font-medium leading-none tracking-tight tabular-nums">
                 {value}
               </p>
             </Card>
           ))}
         </div>
       </section>
-      <Card className="mt-8 flex flex-wrap items-center justify-between gap-5 bg-[#f0f0fc] p-6">
-        <div>
-          <h2 className="font-semibold">
-            A useful first conversation starts with good knowledge.
+      <div className="mt-7 grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <section>
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h2 className="panel-title">Recent customer activity</h2>
+            <Link
+              href="/app/inbox"
+              className="text-xs text-primary hover:underline"
+            >
+              Open Inbox →
+            </Link>
+          </div>
+          {recent.error ? (
+            <Card className="p-6 text-sm text-muted-foreground">
+              Recent activity is unavailable. Open Inbox to try again.
+            </Card>
+          ) : activity?.length ? (
+            <Card className="divide-y divide-border overflow-hidden">
+              {activity.slice(0, 4).map((item) => (
+                <ConversationItem key={item.id} item={item} actorId={user.id} />
+              ))}
+            </Card>
+          ) : (
+            <EmptyState
+              title="Customer conversations will appear here."
+              description="Connect an approved website or Instagram account to bring real questions and useful inquiries into Inbox."
+              action={
+                <Button asChild variant="outline">
+                  <Link href="/app/channels">
+                    Set up a channel
+                    <ArrowRight aria-hidden />
+                  </Link>
+                </Button>
+              }
+            />
+          )}
+        </section>
+        <Card className="border-success/15 bg-success-soft p-6">
+          <div className="flex items-center justify-between">
+            <p className="eyebrow">Next best action</p>
+            <span className="text-xs tabular-nums text-muted-foreground">
+              {next.step}
+            </span>
+          </div>
+          <h2 className="mt-5 text-lg font-medium leading-7 tracking-tight">
+            {next.title}
           </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            No website required. Add a service description and a FAQ, then try a
-            customer question.
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">
+            {next.description}
           </p>
-          <p className="mt-4 flex items-center gap-2 text-xs text-primary">
-            <Check className="size-3.5" aria-hidden />
-            Published knowledge stays under your control.
-          </p>
-        </div>
-        <Button variant="outline" asChild>
-          <Link href="/app/knowledge/new">
-            Add your first item
-            <ArrowRight aria-hidden />
-          </Link>
-        </Button>
-      </Card>
+          <Button asChild className="mt-5" variant="outline">
+            <Link href={next.href}>
+              {next.action}
+              <ArrowRight aria-hidden />
+            </Link>
+          </Button>
+          <div className="mt-6 border-t border-success/15 pt-4">
+            <Badge tone="test">Your knowledge. Your team.</Badge>
+          </div>
+        </Card>
+      </div>
     </>
   );
 }

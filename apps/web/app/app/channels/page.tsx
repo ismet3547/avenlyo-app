@@ -43,26 +43,21 @@ export default async function ChannelsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Channels"
         title="Meet customers where they are"
         description="Your agent settings and published knowledge power every channel. Real customer conversations come together in Inbox."
       />
       <div className="grid items-start gap-5 xl:grid-cols-2">
         <Card className="min-w-0 p-6">
           <div className="flex items-center justify-between">
-            <span className="grid size-11 place-items-center rounded-xl border border-border bg-muted">
+            <span className="grid size-10 place-items-center rounded-lg border border-border bg-muted">
               <Globe className="size-5" aria-hidden />
             </span>
-            <Badge
-              className={
-                website?.enabled
-                  ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-                  : ""
-              }
-            >
+            <Badge tone={website?.enabled ? "success" : "neutral"}>
               {websiteState}
             </Badge>
           </div>
-          <h2 className="mt-5 text-lg font-semibold tracking-tight">
+          <h2 className="mt-4 text-base font-medium tracking-tight">
             Website Chat
           </h2>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -95,20 +90,22 @@ export default async function ChannelsPage() {
         </Card>
         <Card className="min-w-0 p-6">
           <div className="flex items-center justify-between">
-            <span className="grid size-11 place-items-center rounded-xl border border-border bg-muted">
+            <span className="grid size-10 place-items-center rounded-lg border border-border bg-muted">
               <MessageCircle className="size-5" aria-hidden />
             </span>
             <Badge
-              className={
+              tone={
                 connected
-                  ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-                  : ""
+                  ? "success"
+                  : instagram?.status === "needs_attention"
+                    ? "attention"
+                    : "neutral"
               }
             >
               {instagramState}
             </Badge>
           </div>
-          <h2 className="mt-5 text-lg font-semibold tracking-tight">
+          <h2 className="mt-4 text-base font-medium tracking-tight">
             Instagram
           </h2>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -116,7 +113,7 @@ export default async function ChannelsPage() {
             same agent, with human replies from Inbox.
           </p>
           {connected ? (
-            <div className="mt-6 rounded-lg border border-emerald-100 bg-emerald-50/60 p-4">
+            <div className="mt-6 rounded-lg border border-success/15 bg-success-soft/60 p-4">
               <p className="text-sm font-semibold">
                 @{instagram?.provider_username}
               </p>
@@ -143,8 +140,8 @@ export default async function ChannelsPage() {
           )}
         </Card>
       </div>
-      <div className="mt-7 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-white p-5">
-        <p className="max-w-xl text-sm leading-6 text-muted-foreground">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-muted/30 p-5">
+        <p className="max-w-2xl text-xs leading-6 text-muted-foreground">
           When a real inquiry qualifies or needs a person, a staff email is
           recorded for a verified workspace owner. Delivery status appears with
           the conversation.

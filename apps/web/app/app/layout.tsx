@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { requireWorkspace } from "@/lib/workspace";
 import { Sidebar } from "@/components/sidebar";
+import { MobileNavigation } from "@/components/mobile-navigation";
+import { Building2, LogOut } from "lucide-react";
 import { signOut } from "../auth/actions";
 import { switchWorkspace } from "../workspaces/actions";
 import { Button } from "@/components/ui/button";
@@ -9,32 +11,32 @@ export const dynamic = "force-dynamic";
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const ctx = await requireWorkspace();
   return (
-    <div className="min-h-screen md:grid md:grid-cols-[224px_minmax(0,1fr)]">
-      <aside className="sticky top-0 hidden h-screen flex-col border-r border-border bg-white p-4 md:flex">
+    <div className="min-h-screen lg:grid lg:grid-cols-[208px_minmax(0,1fr)]">
+      <a href="#workspace-content" className="skip-link">
+        Skip to content
+      </a>
+      <aside className="sticky top-0 hidden h-dvh flex-col border-r border-border bg-sidebar px-3 py-5 lg:flex">
         <Sidebar />
       </aside>
       <div className="min-w-0">
-        <header className="flex h-16 items-center justify-between gap-4 border-b border-border bg-white/90 px-5 lg:px-9">
-          <details className="relative md:hidden">
-            <summary className="cursor-pointer text-sm font-semibold">
-              Avenlyo · Menu
-            </summary>
-            <div className="absolute left-0 top-9 z-30 w-60 rounded-xl border border-border bg-white p-4 shadow-lg">
-              <Sidebar />
-            </div>
-          </details>
+        <header className="flex h-16 items-center justify-between gap-2 border-b border-border bg-card px-4 sm:px-7 lg:px-8">
+          <MobileNavigation />
           <form
             action={switchWorkspace}
-            className="flex min-w-0 items-center gap-2"
+            className="mr-auto flex min-w-0 items-center gap-2.5"
           >
             <label htmlFor="workspace-select" className="sr-only">
               Current workspace
             </label>
+            <Building2
+              aria-hidden
+              className="hidden size-4 text-muted-foreground sm:block"
+            />
             <select
               id="workspace-select"
               name="workspaceId"
               defaultValue={ctx.workspace.id}
-              className="max-w-44 rounded-md bg-transparent py-1 text-sm font-medium focus-visible:outline-primary"
+              className="max-w-40 rounded-md bg-transparent py-2 text-[13px] font-medium focus-visible:outline-primary sm:max-w-56"
             >
               {ctx.workspaces.map((w) => (
                 <option key={w.id} value={w.id}>
@@ -48,24 +50,29 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
               </Button>
             )}
           </form>
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-3">
             <Link
               href="/workspaces"
               className="hidden text-xs text-muted-foreground hover:text-primary sm:inline"
             >
               Manage workspaces
             </Link>
-            <span className="hidden text-xs capitalize text-muted-foreground lg:inline">
+            <span className="hidden border-l border-border pl-3 text-xs capitalize text-muted-foreground xl:inline">
               {ctx.role}
             </span>
             <form action={signOut}>
               <Button size="sm" variant="ghost">
+                <LogOut aria-hidden className="hidden sm:block" />
                 Sign out
               </Button>
             </form>
           </div>
         </header>
-        <main className="mx-auto max-w-[1240px] px-5 py-8 lg:px-10 lg:py-10">
+        <main
+          id="workspace-content"
+          tabIndex={-1}
+          className="mx-auto max-w-[1680px] px-5 py-7 sm:px-7 lg:px-8 lg:py-8"
+        >
           {children}
         </main>
       </div>

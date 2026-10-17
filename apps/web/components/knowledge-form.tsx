@@ -1,4 +1,5 @@
 "use client";
+import { FileText, CircleHelp } from "lucide-react";
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import type { KnowledgeItem } from "@avenlyo-app/shared";
@@ -15,29 +16,43 @@ export function KnowledgeForm({ item }: { item?: KnowledgeItem }) {
     status: "idle",
   } as FormState);
   return (
-    <form action={action} className="max-w-3xl">
+    <form action={action} className="page-narrow">
       <Card className="space-y-6 p-6">
         <input type="hidden" name="id" value={item?.id ?? ""} />
         <input type="hidden" name="revision" value={item?.revision ?? ""} />
         <fieldset>
           <legend className="text-sm font-semibold">Knowledge type</legend>
-          <div className="mt-3 flex gap-3">
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
             {(["text", "faq"] as const).map((t) => (
-              <label
-                className={`flex flex-1 items-center gap-3 rounded-lg border p-4 text-sm ${type === t ? "border-primary bg-[#f4f3ff] text-primary" : "border-border"}`}
-                key={t}
-              >
+              <label className="choice-card items-center" key={t}>
                 <input
                   name="type"
+                  aria-label={
+                    t === "text"
+                      ? "Text · services and information"
+                      : "FAQ · question and answer"
+                  }
                   type="radio"
                   value={t}
                   checked={type === t}
                   onChange={() => setType(t)}
                   className="accent-primary"
                 />
-                {t === "text"
-                  ? "Text · services and information"
-                  : "FAQ · question and answer"}
+                {t === "text" ? (
+                  <FileText aria-hidden className="size-5 text-primary" />
+                ) : (
+                  <CircleHelp aria-hidden className="size-5 text-primary" />
+                )}
+                <span>
+                  <span className="block text-sm font-medium">
+                    {t === "text" ? "Text" : "FAQ"}
+                  </span>
+                  <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+                    {t === "text"
+                      ? "Services and business information"
+                      : "A clear question and answer"}
+                  </span>
+                </span>
               </label>
             ))}
           </div>
@@ -93,7 +108,7 @@ export function KnowledgeForm({ item }: { item?: KnowledgeItem }) {
         </Button>
       </div>
       {state.message && (
-        <p role="status" className="mt-4 text-sm text-red-700">
+        <p role="status" className="mt-4 text-sm text-danger">
           {state.message}
         </p>
       )}

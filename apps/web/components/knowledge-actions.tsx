@@ -48,7 +48,7 @@ export function KnowledgeActions({
           <summary className="cursor-pointer px-2 text-xs text-muted-foreground">
             Delete
           </summary>
-          <span className="mt-2 inline-flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 p-2 text-xs text-red-700">
+          <span className="mt-2 inline-flex items-center gap-2 rounded-lg border border-danger/15 bg-danger-soft p-2 text-xs text-danger">
             Permanently delete?
             <Button
               size="sm"
@@ -65,7 +65,7 @@ export function KnowledgeActions({
       {state.message && (
         <p
           role="status"
-          className={`mt-3 text-xs ${state.status === "error" ? "text-red-700" : "text-emerald-700"}`}
+          className={`mt-3 text-xs ${state.status === "error" ? "text-danger" : "text-success"}`}
         >
           {state.message}
         </p>

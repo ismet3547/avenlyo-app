@@ -22,8 +22,8 @@ export function WebsiteChannelForm({
     status: "idle",
   } as FormState);
   return (
-    <form action={action} className="mt-6 space-y-5">
-      <label className="flex items-center gap-3 text-sm font-medium">
+    <form action={action} className="mt-5 space-y-4">
+      <label className="flex items-center gap-3 rounded-md border border-border bg-muted/40 p-3 text-[13px] font-medium">
         <input
           type="checkbox"
           name="enabled"
@@ -43,10 +43,10 @@ export function WebsiteChannelForm({
           defaultValue={origins.join("\n")}
           disabled={!editable}
           required
-          rows={3}
+          rows={2}
           placeholder={"https://example.com\nhttps://www.example.com"}
           maxLength={2500}
-          className="mt-2 font-mono text-xs"
+          className="mt-2 min-h-20 font-mono text-xs"
         />
         <p className="mt-2 text-xs leading-5 text-muted-foreground">
           One exact origin per line. Include https:// and each www variant you
@@ -59,7 +59,7 @@ export function WebsiteChannelForm({
       {state.message && (
         <p
           role="status"
-          className={`text-sm ${state.status === "error" ? "text-red-700" : "text-emerald-700"}`}
+          className={`text-sm ${state.status === "error" ? "text-danger" : "text-success"}`}
         >
           {state.message}
         </p>
@@ -70,9 +70,12 @@ export function WebsiteChannelForm({
 export function EmbedSnippet({ snippet }: { snippet: string }) {
   const [copied, setCopied] = useState(false);
   return (
-    <div className="mt-6 border-t border-border pt-5">
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="text-sm font-semibold">Website embed</h3>
+    <details className="mt-5 rounded-md border border-border bg-muted/30 px-4 py-3">
+      <summary className="cursor-pointer text-xs font-medium">
+        Website embed
+      </summary>
+      <div className="mt-3 flex items-center justify-between gap-3">
+        <p className="text-xs text-muted-foreground">Install on your website</p>
         <Button
           variant="ghost"
           size="sm"
@@ -96,7 +99,7 @@ export function EmbedSnippet({ snippet }: { snippet: string }) {
         Add this before your website’s closing body tag. Visitors can chat
         without an Avenlyo account.
       </p>
-    </div>
+    </details>
   );
 }
 export function DisconnectInstagram({ editable }: { editable: boolean }) {

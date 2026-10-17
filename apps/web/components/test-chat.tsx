@@ -93,9 +93,12 @@ export function TestChat({
         // Keep the composer locked until the server page remounts with that ID;
         // otherwise a fast second input can be lost during router.replace().
         setRouteSyncing(true);
-        router.replace(`/app/test-agent?conversation=${result.conversationId}`, {
-          scroll: false,
-        });
+        router.replace(
+          `/app/test-agent?conversation=${result.conversationId}`,
+          {
+            scroll: false,
+          },
+        );
       } else if (result.needsHuman) {
         // Refresh server-owned handoff state so the paused banner/action appear.
         router.refresh();
@@ -111,10 +114,10 @@ export function TestChat({
   }
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
-      <section className="overflow-hidden rounded-xl border border-border bg-white shadow-xs">
+      <section className="overflow-hidden rounded-lg border border-border bg-card">
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div className="flex items-center gap-3">
-            <span className="grid size-8 place-items-center rounded-lg bg-[#efeffd] text-primary">
+            <span className="grid size-8 place-items-center rounded-lg bg-success-soft text-primary">
               <Sparkles aria-hidden className="size-4" />
             </span>
             <div>
@@ -124,7 +127,7 @@ export function TestChat({
               </p>
             </div>
           </div>
-          <Badge>Test mode</Badge>
+          <Badge tone="test">Test mode</Badge>
         </div>
         <div
           aria-live="polite"
@@ -161,10 +164,10 @@ export function TestChat({
               key={index}
             >
               <div
-                className={`max-w-[90%] rounded-xl px-4 py-3 ${message.role === "customer" ? "bg-primary text-white" : "border border-border bg-[#fafafe]"}`}
+                className={`max-w-[90%] rounded-xl px-4 py-3 ${message.role === "customer" ? "bg-primary text-primary-foreground" : "border border-border bg-muted"}`}
               >
                 <p
-                  className={`mb-1.5 text-[10px] font-semibold uppercase tracking-wider ${message.role === "customer" ? "text-white/70" : "text-muted-foreground"}`}
+                  className={`mb-1.5 text-[11px] font-semibold uppercase tracking-wider ${message.role === "customer" ? "text-primary-foreground/75" : "text-muted-foreground"}`}
                 >
                   {message.role === "customer" ? "Test customer" : "Avenlyo"}
                 </p>
@@ -202,7 +205,7 @@ export function TestChat({
             placeholder="Type a customer question…"
           />
           <div className="mt-3 flex items-center justify-between gap-3">
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-[11px] text-muted-foreground">
               Test conversation · saved in this workspace
             </p>
             <Button
@@ -223,7 +226,7 @@ export function TestChat({
           {error && (
             <p
               role="alert"
-              className="mt-3 rounded-lg bg-red-50 p-3 text-xs leading-5 text-red-700"
+              className="mt-3 rounded-lg bg-danger-soft p-3 text-xs leading-5 text-danger"
             >
               {error}
             </p>
@@ -231,7 +234,7 @@ export function TestChat({
         </form>
       </section>
       <aside className="space-y-4">
-        <div className="rounded-xl border border-border bg-white p-5">
+        <div className="rounded-lg border border-border bg-card p-5">
           <h2 className="text-sm font-semibold">What to look for</h2>
           <div className="mt-4 space-y-3 text-xs leading-5 text-muted-foreground">
             {[
@@ -250,7 +253,7 @@ export function TestChat({
             ))}
           </div>
         </div>
-        <div className="rounded-xl border border-border bg-[#f2f2fd] p-5">
+        <div className="rounded-lg border border-border bg-success-soft p-5">
           <h2 className="text-sm font-semibold">Conversation outcome</h2>
           {leadId ? (
             <>

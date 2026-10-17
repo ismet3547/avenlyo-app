@@ -36,7 +36,7 @@ export function BusinessForm({
       {state.message && (
         <p
           role="status"
-          className={`mt-4 text-sm ${state.status === "error" ? "text-red-700" : "text-emerald-700"}`}
+          className={`mt-4 text-sm ${state.status === "error" ? "text-danger" : "text-success"}`}
         >
           {state.message}
         </p>

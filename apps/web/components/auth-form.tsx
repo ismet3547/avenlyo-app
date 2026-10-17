@@ -47,7 +47,7 @@ export function AuthForm({
       {!configured && (
         <p
           role="status"
-          className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
+          className="rounded-lg border border-attention/20 bg-attention-soft p-3 text-sm text-attention"
         >
           Local setup required. Add your Supabase URL and publishable key to the
           environment file.
@@ -56,7 +56,7 @@ export function AuthForm({
       {state.message && (
         <p
           role="status"
-          className={`rounded-lg p-3 text-sm ${state.status === "error" ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-800"}`}
+          className={`rounded-lg p-3 text-sm ${state.status === "error" ? "bg-danger-soft text-danger" : "bg-success-soft text-success"}`}
         >
           {state.message}
         </p>
