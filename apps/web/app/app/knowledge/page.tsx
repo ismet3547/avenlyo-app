@@ -73,7 +73,7 @@ export default async function KnowledgePage({
         aria-label="Knowledge status filters"
       >
         {[
-          ["all", "All knowledge"],
+          ["all", "All"],
           ["published", "Published"],
           ["draft", "Drafts"],
           ["archived", "Archived"],

@@ -92,6 +92,9 @@ export default async function Home() {
   const attention = activity.filter(
     (item) => item.aiMode === "paused" || item.needsAttention,
   );
+  const visibleAttention = attention.slice(0, 3);
+  const attentionIds = new Set(visibleAttention.map((item) => item.id));
+  const otherRecent = activity.filter((item) => !attentionIds.has(item.id));
   const steps = [
     {
       title: "Configure your agent",
@@ -227,7 +230,7 @@ export default async function Home() {
             </dd>
           </div>
           <div>
-            <dt>Qualified inquiries</dt>
+            <dt>Qualified</dt>
             <dd data-testid="customer-qualified-count">
               {qualified.error ? "—" : (qualified.count ?? 0)}
             </dd>
@@ -264,7 +267,7 @@ export default async function Home() {
               </p>
             ) : attention.length ? (
               <div className="divide-y divide-border border-y border-border">
-                {attention.slice(0, 3).map((item) => (
+                {visibleAttention.map((item) => (
                   <ConversationItem
                     key={item.id}
                     item={item}
@@ -303,9 +306,9 @@ export default async function Home() {
               <p className="py-5 text-sm text-muted-foreground">
                 Recent conversations are unavailable.
               </p>
-            ) : activity.length ? (
+            ) : otherRecent.length ? (
               <div className="divide-y divide-border border-y border-border">
-                {activity.slice(0, 4).map((item) => (
+                {otherRecent.slice(0, 4).map((item) => (
                   <ConversationItem
                     key={item.id}
                     item={item}
@@ -313,20 +316,26 @@ export default async function Home() {
                   />
                 ))}
               </div>
+            ) : activity.length ? (
+              <p className="border-t border-border py-5 text-[13px] leading-6 text-muted-foreground">
+                Your latest conversations are shown above because they need
+                attention.
+              </p>
             ) : (
               <div className="border-t border-border py-6">
                 <p className="text-sm font-medium">
                   Your next customer conversation starts here.
                 </p>
                 <p className="mt-2 max-w-md text-[13px] leading-6 text-muted-foreground">
-                  Once a channel is connected, real questions and useful
-                  inquiries will appear in Inbox.
+                  {ready
+                    ? "Your channels are ready. Customer questions and useful inquiries will appear in Inbox as they arrive."
+                    : "Once a channel is connected, real questions and useful inquiries will appear in Inbox."}
                 </p>
                 <Link
-                  href="/app/channels"
+                  href={ready ? "/app/inbox" : "/app/channels"}
                   className="mt-4 inline-flex items-center gap-2 text-[13px] font-medium text-primary"
                 >
-                  Connect a channel
+                  {ready ? "Open inbox" : "Connect a channel"}
                   <ArrowRight aria-hidden className="size-4" />
                 </Link>
               </div>

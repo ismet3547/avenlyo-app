@@ -110,10 +110,36 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   await expect(
     visitor.getByRole("button", { name: "Open business chat" }),
   ).toBeFocused();
+  await visitor.screenshot({
+    path: "test-results/screenshots/website-widget-launcher-desktop.png",
+    fullPage: true,
+  });
+  await visitor.setViewportSize({ width: 390, height: 844 });
+  await visitor.screenshot({
+    path: "test-results/screenshots/website-widget-launcher-mobile.png",
+    fullPage: true,
+  });
+  await visitor.setViewportSize({ width: 1200, height: 850 });
   await visitor.getByRole("button", { name: "Open business chat" }).click();
   await expect(
     visitor.getByRole("dialog", { name: "Business chat" }),
   ).toBeVisible();
+  await expect(
+    visitor.getByRole("heading", { name: "Northstar Studio", exact: true }),
+  ).toBeVisible();
+  await expect(
+    visitor.getByLabel("Your message", { exact: true }),
+  ).toBeEnabled();
+  await visitor.screenshot({
+    path: "test-results/screenshots/website-widget-welcome-desktop.png",
+    fullPage: true,
+  });
+  await visitor.setViewportSize({ width: 390, height: 844 });
+  await visitor.screenshot({
+    path: "test-results/screenshots/website-widget-welcome-mobile.png",
+    fullPage: true,
+  });
+  await visitor.setViewportSize({ width: 1200, height: 850 });
   await visitor
     .getByLabel("Your message", { exact: true })
     .fill("I'm interested in your logo design.");
@@ -318,6 +344,18 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     path: "test-results/screenshots/inbox-mobile.png",
     fullPage: true,
   });
+  // Mobile ownership is reachable from the composer, with unchanged pause/resume semantics.
+  await page
+    .getByRole("button", { name: "Claim conversation", exact: true })
+    .click();
+  await expect(page.getByText("Claimed by you", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Your human reply")).toBeEnabled();
+  await page
+    .getByRole("button", { name: "Release conversation", exact: true })
+    .click();
+  await expect(page.getByRole("status")).toContainText("AI remains paused");
+  await page.getByRole("button", { name: "Resume AI", exact: true }).click();
+  await expect(page.getByText("AI active", { exact: true })).toBeVisible();
   await page
     .getByRole("button", { name: "Open navigation", exact: true })
     .click();

@@ -41,7 +41,7 @@ export default async function LeadsPage({
         aria-label="Lead qualification filters"
       >
         {[
-          ["all", "All leads"],
+          ["all", "All"],
           ["qualified", "Qualified"],
           ["needs_info", "Needs info"],
           ["needs_human", "Needs human"],

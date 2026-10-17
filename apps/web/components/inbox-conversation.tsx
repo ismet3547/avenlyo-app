@@ -246,7 +246,7 @@ export function InboxConversation({
                 </span>
               </div>
             </div>
-            <div className="space-y-1 text-right">
+            <div className="space-y-1 sm:text-right">
               <p
                 className="status-text"
                 data-tone={c.ai_mode === "paused" ? "attention" : "success"}
@@ -372,11 +372,23 @@ export function InboxConversation({
               className="mt-2 min-h-20 resize-y"
             />
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-              <p className="text-xs text-muted-foreground">
+              <p className="w-full text-xs text-muted-foreground lg:w-auto">
                 {instagram
                   ? `${bytes}/1000 bytes · Instagram reply window applies.`
                   : "Your reply appears in the visitor’s chat."}
               </p>
+              {!mine && (
+                <Button
+                  type="button"
+                  size="sm"
+                  className="lg:hidden"
+                  disabled={pending || other}
+                  onClick={() => void action("claim")}
+                >
+                  <UserRound aria-hidden />
+                  {other ? "Already claimed" : "Claim conversation"}
+                </Button>
+              )}
               <Button
                 type="submit"
                 size="sm"
@@ -494,6 +506,7 @@ export function InboxConversation({
               {!mine && (
                 <Button
                   size="sm"
+                  className="hidden lg:flex"
                   disabled={pending || other}
                   onClick={() => void action("claim")}
                 >

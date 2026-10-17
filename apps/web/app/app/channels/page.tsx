@@ -35,9 +35,11 @@ export default async function ChannelsPage() {
     ? "Connected"
     : instagram?.status === "needs_attention"
       ? "Needs attention"
-      : instagram
-        ? "Managed setup required"
-        : "Not configured";
+      : instagram?.status === "disconnected"
+        ? "Disconnected"
+        : instagram
+          ? "Managed setup required"
+          : "Not configured";
   return (
     <div className="max-w-[1120px]">
       <PageHeader
@@ -160,7 +162,9 @@ export default async function ChannelsPage() {
                 </h3>
                 {connected ? (
                   <p className="mt-2 text-[13px]">
-                    @{instagram?.provider_username}
+                    {instagram?.provider_username
+                      ? "@" + instagram.provider_username
+                      : "Connected professional account"}
                   </p>
                 ) : (
                   <p className="mt-2 max-w-xl text-[13px] leading-6 text-muted-foreground">

@@ -115,7 +115,7 @@ export function AgentForm({
               {(["professional", "warm", "concise"] as const).map((value) => (
                 <label key={value}>
                   <input
-                    className="sr-only"
+                    className="absolute inset-0 size-full cursor-pointer opacity-0 disabled:cursor-default"
                     type="radio"
                     name="tone"
                     value={value}
@@ -123,7 +123,9 @@ export function AgentForm({
                     onChange={() => setTone(value)}
                     disabled={!editable}
                   />
-                  <span className="capitalize">{value}</span>
+                  <span className="pointer-events-none">
+                    {value.charAt(0).toUpperCase() + value.slice(1)}
+                  </span>
                 </label>
               ))}
             </div>
@@ -164,7 +166,9 @@ export function AgentForm({
                     disabled={!editable}
                     className="size-4"
                   />
-                  <span className="text-[13px] capitalize">{field}</span>
+                  <span className="text-[13px]">
+                    {field.charAt(0).toUpperCase() + field.slice(1)}
+                  </span>
                 </label>
               ))}
             </div>
@@ -206,8 +210,8 @@ export function AgentForm({
       </form>
       <aside className="agent-summary" aria-label="Configuration preview">
         <p className="eyebrow">Your agent</p>
-        <h2 className="mt-2 text-xl font-medium capitalize tracking-tight">
-          {tone}
+        <h2 className="mt-2 text-xl font-medium tracking-tight">
+          {tone.charAt(0).toUpperCase() + tone.slice(1)}
         </h2>
         <p className="mt-2 text-xs leading-5 text-muted-foreground">
           Configuration preview. Changes take effect after you save settings.
