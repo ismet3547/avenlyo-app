@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { requireWorkspace } from "@/lib/workspace";
 import { PageHeader } from "@/components/page-header";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { dateLabel } from "@/lib/utils";
@@ -42,7 +41,7 @@ export default async function ConversationDetail({
         href="/app/conversations"
         className="mb-5 inline-block text-xs text-muted-foreground hover:text-primary"
       >
-        ← All conversations
+        ← Test conversation history
       </Link>
       <PageHeader
         title="Test conversation"
@@ -75,14 +74,18 @@ export default async function ConversationDetail({
           </Link>
         )}
       </div>
-      <Card className="max-w-4xl divide-y divide-border">
+      <div className="max-w-4xl space-y-7 border-t border-border py-6">
         {messages.error ? (
           <p role="alert" className="p-6">
             Messages could not be loaded.
           </p>
         ) : (
           messages.data.map((m) => (
-            <article key={m.id} className="p-5 sm:p-6">
+            <article
+              key={m.id}
+              className="conversation-entry"
+              data-role={m.role}
+            >
               <div className="flex items-center justify-between gap-4">
                 <span
                   className={`text-xs font-semibold ${m.role === "assistant" ? "text-primary" : ""}`}
@@ -115,7 +118,7 @@ export default async function ConversationDetail({
             </article>
           ))
         )}
-      </Card>
+      </div>
     </>
   );
 }

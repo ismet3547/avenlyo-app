@@ -15,7 +15,7 @@ export function KnowledgeActions({
     status: "idle",
   } as FormState);
   return (
-    <div className="mt-4">
+    <div>
       <form action={action} className="flex flex-wrap gap-2">
         <input type="hidden" name="id" value={id} />
         {status !== "published" ? (
@@ -25,7 +25,7 @@ export function KnowledgeActions({
         ) : (
           <Button
             size="sm"
-            variant="outline"
+            variant="ghost"
             name="intent"
             value="draft"
             disabled={pending}
@@ -33,33 +33,40 @@ export function KnowledgeActions({
             Unpublish
           </Button>
         )}
-        {status !== "archived" && (
-          <Button
-            size="sm"
-            variant="ghost"
-            name="intent"
-            value="archived"
-            disabled={pending}
-          >
-            Archive
-          </Button>
-        )}
         <details className="self-center">
-          <summary className="cursor-pointer px-2 text-xs text-muted-foreground">
-            Delete
+          <summary className="cursor-pointer px-2 py-2 text-xs text-muted-foreground">
+            More
           </summary>
-          <span className="mt-2 inline-flex items-center gap-2 rounded-lg border border-danger/15 bg-danger-soft p-2 text-xs text-danger">
-            Permanently delete?
-            <Button
-              size="sm"
-              variant="destructive"
-              name="intent"
-              value="delete"
-              disabled={pending}
-            >
-              Confirm delete
-            </Button>
-          </span>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {status !== "archived" && (
+              <Button
+                size="sm"
+                variant="ghost"
+                name="intent"
+                value="archived"
+                disabled={pending}
+              >
+                Archive
+              </Button>
+            )}
+            <details className="self-center">
+              <summary className="cursor-pointer px-2 text-xs text-muted-foreground">
+                Delete
+              </summary>
+              <span className="mt-2 inline-flex items-center gap-2 rounded-lg border border-danger/15 bg-danger-soft p-2 text-xs text-danger">
+                Permanently delete?
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  name="intent"
+                  value="delete"
+                  disabled={pending}
+                >
+                  Confirm delete
+                </Button>
+              </span>
+            </details>
+          </div>
         </details>
       </form>
       {state.message && (

@@ -47,6 +47,18 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   await expect(
     page.getByRole("heading", { name: "Your AI front office", exact: true }),
   ).toBeVisible();
+  await page.goto("/app/agent");
+  await page
+    .getByLabel("What should Avenlyo help your customers with?", {
+      exact: true,
+    })
+    .fill(
+      "Help small businesses understand our design services, identify useful inquiries and connect them with our team.",
+    );
+  await page
+    .getByRole("button", { name: "Save settings", exact: true })
+    .click();
+  await expect(page.getByRole("status")).toContainText("Agent settings saved");
   await page.goto("/app/knowledge/new");
   await page.getByLabel("Title", { exact: true }).fill("Logo design");
   await page
@@ -90,6 +102,19 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     visitor.getByRole("dialog", { name: "Business chat" }),
   ).toBeVisible();
   await visitor
+    .getByRole("button", { name: "Close chat", exact: true })
+    .click();
+  await expect(
+    visitor.getByRole("dialog", { name: "Business chat" }),
+  ).not.toBeVisible();
+  await expect(
+    visitor.getByRole("button", { name: "Open business chat" }),
+  ).toBeFocused();
+  await visitor.getByRole("button", { name: "Open business chat" }).click();
+  await expect(
+    visitor.getByRole("dialog", { name: "Business chat" }),
+  ).toBeVisible();
+  await visitor
     .getByLabel("Your message", { exact: true })
     .fill("I'm interested in your logo design.");
   await visitor.getByRole("button", { name: "Send", exact: true }).click();
@@ -127,6 +152,11 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   await expect(
     page.getByRole("link", { name: "View linked lead →" }),
   ).toBeVisible();
+  await expect(page.getByText("AI active", { exact: true })).toBeVisible();
+  await page.screenshot({
+    path: "test-results/screenshots/inbox-active-desktop.png",
+    fullPage: true,
+  });
   await visitor
     .getByLabel("Your message", { exact: true })
     .fill("I want to speak with a person.");
@@ -185,6 +215,34 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     path: "test-results/screenshots/inbox-desktop.png",
     fullPage: true,
   });
+  const pausedInboxUrl = page.url();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({
+    path: "test-results/screenshots/inbox-paused-mobile.png",
+    fullPage: true,
+  });
+  expect(
+    await page
+      .getByLabel("Conversation thread", { exact: true })
+      .evaluate((node) => getComputedStyle(node).overflowY),
+  ).toBe("visible");
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/app");
+  await expect(page.getByTestId("customer-conversation-count")).toHaveText("1");
+  await expect(
+    page
+      .getByRole("region", { name: "Needs your attention", exact: true })
+      .getByRole("link")
+      .filter({ hasText: "Alex" }),
+  ).toBeVisible();
+  await page.screenshot({
+    path: "test-results/screenshots/home-needs-attention-desktop.png",
+    fullPage: true,
+  });
+  await page.goto(pausedInboxUrl);
+  await expect(
+    page.getByRole("button", { name: "Release conversation", exact: true }),
+  ).toBeVisible();
   const assistantCount = await visitor
     .locator('[data-role="assistant"]')
     .count();
@@ -239,9 +297,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     else
       await expect(
         page.getByRole("heading", {
-          name: url.endsWith("/app/inbox")
-            ? "Inbox"
-            : "Meet customers where they are",
+          name: url.endsWith("/app/inbox") ? "Inbox" : "Channels",
           exact: true,
         }),
       ).toBeVisible();
@@ -272,7 +328,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   await expect(drawer).toBeVisible();
   await page.screenshot({
     path: "test-results/screenshots/mobile-navigation-390.png",
-    fullPage: true,
+    fullPage: false,
   });
   await page.keyboard.press("Tab");
   expect(
@@ -291,16 +347,27 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   await expect(
     page.getByRole("heading", { name: "Agent", exact: true }),
   ).toBeVisible();
+  await expect(
+    page
+      .getByRole("navigation", { name: "Main navigation", exact: true })
+      .getByRole("link", { name: "Conversations", exact: true }),
+  ).toHaveCount(0);
+  await page
+    .getByRole("link", { name: "Test conversation history", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Test conversations", exact: true }),
+  ).toBeVisible();
   const routes = [
-    ["/app", "Your AI front office", "overview-active"],
+    ["/app", "Your AI front office", "home-active"],
     ["/app/inbox", "Inbox", "inbox-list"],
     [inboxUrl, "Alex", "inbox-conversation"],
     ["/app/agent", "Agent", "agent"],
     ["/app/knowledge", "Business knowledge", "knowledge"],
-    ["/app/channels", "Meet customers where they are", "channels"],
+    ["/app/channels", "Channels", "channels"],
     ["/app/leads", "Leads", "leads"],
     [leadUrl!, "Alex", "lead"],
-    ["/app/conversations", "Conversations", "conversations"],
+    ["/app/conversations", "Test conversations", "conversations"],
     ["/app/test-agent", "Try a customer conversation", "test-agent"],
     ["/app/settings", "Workspace settings", "settings"],
   ];
@@ -311,8 +378,34 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
       await expect(
         page.getByRole("heading", { name: heading, exact: true }),
       ).toBeVisible();
-      if (route === inboxUrl)
+      if (route === inboxUrl) {
         await expect(page.getByLabel("Your human reply")).toBeVisible();
+        if (width === 1440) {
+          const list = await page
+            .getByRole("navigation", {
+              name: "Customer conversations",
+              exact: true,
+            })
+            .boundingBox();
+          const center = await page
+            .getByLabel("Customer conversation", { exact: true })
+            .boundingBox();
+          const context = await page
+            .getByLabel("Customer and conversation context", { exact: true })
+            .boundingBox();
+          expect(list).not.toBeNull();
+          expect(center).not.toBeNull();
+          expect(context).not.toBeNull();
+          expect(list!.x + list!.width).toBeLessThanOrEqual(center!.x + 1);
+          expect(center!.x + center!.width).toBeLessThanOrEqual(context!.x + 1);
+        }
+        if (width === 390)
+          expect(
+            await page
+              .getByLabel("Conversation thread", { exact: true })
+              .evaluate((node) => getComputedStyle(node).overflowY),
+          ).toBe("visible");
+      }
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= window.innerWidth + 1,

@@ -45,16 +45,24 @@ export default async function TestAgentPage({
   return (
     <>
       <PageHeader
-        eyebrow="Test Agent"
+        eyebrow="Test mode"
         title="Try a customer conversation"
-        description="Test your effective settings and published knowledge. Conversations and leads are test data; no external customer message or team notification is sent."
+        description="Try your saved settings and published knowledge. No external customer messages or team notifications are sent."
         action={
-          <Button asChild variant="outline">
-            <Link href="/app/test-agent">
-              <Plus aria-hidden />
-              New test
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/app/conversations"
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              Test history
             </Link>
-          </Button>
+            <Button asChild variant="outline">
+              <Link href="/app/test-agent">
+                <Plus aria-hidden />
+                New test
+              </Link>
+            </Button>
+          </div>
         }
       />
       {conversation?.data?.ai_mode === "paused" && (

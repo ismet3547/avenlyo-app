@@ -3,7 +3,7 @@ import { useRef } from "react";
 import { Menu, X } from "lucide-react";
 import { Sidebar } from "./sidebar";
 import { Button } from "./ui/button";
-export function MobileNavigation() {
+export function MobileNavigation({ workspaceName }: { workspaceName: string }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   function close() {
@@ -40,7 +40,7 @@ export function MobileNavigation() {
         >
           <X aria-hidden />
         </Button>
-        <Sidebar onNavigate={close} />
+        <Sidebar onNavigate={close} workspaceName={workspaceName} />
       </dialog>
     </div>
   );

@@ -1,11 +1,8 @@
 import Link from "next/link";
-import { MessageSquare, UserRound, Play, ArrowRight } from "lucide-react";
 import type { InboxItem } from "@avenlyo-app/shared";
 import { requireWorkspace } from "@/lib/workspace";
-import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { ConversationItem } from "@/components/conversation-item";
 export default async function InboxPage({
   searchParams,
@@ -24,23 +21,24 @@ export default async function InboxPage({
   });
   const conversations = result.data as unknown as InboxItem[] | null;
   return (
-    <>
-      <PageHeader
-        eyebrow="Customer conversations"
-        title="Inbox"
-        description="Every customer question, with the context your team needs to continue."
-        action={
-          <Button asChild variant="outline">
-            <Link href="/app/channels">Manage channels</Link>
-          </Button>
-        }
-      />
+    <div className="max-w-[1120px]">
+      <header className="mb-7 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-[30px] font-medium tracking-[-.035em]">Inbox</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Real customer conversations. Your team steps in when needed.
+          </p>
+        </div>
+        <Button asChild variant="ghost">
+          <Link href="/app/channels">Manage channels</Link>
+        </Button>
+      </header>
       {result.error ? (
         <p role="alert">Inbox could not be loaded.</p>
       ) : !conversations?.length ? (
         <EmptyState
           title="Customer conversations will appear here."
-          description="Enable Website Chat or complete managed Instagram setup. Real messages arrive here; Test Agent conversations stay in Conversations."
+          description="Connect an approved website or Instagram account. Customer messages arrive here with their inquiry, contact details and current AI state."
           action={
             <Button asChild>
               <Link href="/app/channels">Set up a channel</Link>
@@ -48,85 +46,44 @@ export default async function InboxPage({
           }
         />
       ) : (
-        <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(260px,1fr)]">
-          <Card className="overflow-hidden">
-            <div className="panel-heading">
-              <h2 className="panel-title">Recent conversations</h2>
-              <span className="text-xs tabular-nums text-muted-foreground">
-                {conversations.length} shown
-              </span>
-            </div>
-            <div className="divide-y divide-border">
-              {conversations.map((item) => (
-                <ConversationItem
-                  key={item.id}
-                  item={item}
-                  actorId={ctx.user.id}
-                />
-              ))}
-            </div>
-          </Card>
-          <Card className="hidden p-6 xl:block">
-            <span className="grid size-10 place-items-center rounded-lg border border-border bg-success-soft">
-              <MessageSquare aria-hidden className="size-5 text-primary" />
-            </span>
-            <h2 className="mt-5 text-lg font-medium tracking-tight">
-              A conversation, with a clear next step.
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
+            <h2 className="text-[13px] font-medium">
+              All customer conversations
             </h2>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              Open a thread to see the customer’s question, inquiry details and
-              the current AI state.
-            </p>
-            <div className="mt-6 space-y-5 border-t border-border pt-5">
-              {[
-                {
-                  icon: UserRound,
-                  title: "Continue personally",
-                  description:
-                    "Claim the conversation before sending a human reply.",
-                },
-                {
-                  icon: Play,
-                  title: "Stay in control",
-                  description:
-                    "AI stays paused until your team explicitly resumes it.",
-                },
-              ].map(({ icon: Icon, title, description }) => (
-                <div className="flex gap-3" key={title}>
-                  <Icon aria-hidden className="mt-1 size-4 text-primary" />
-                  <div>
-                    <p className="text-[13px] font-medium">{title}</p>
-                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                      {description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <Link
-              href="/app/conversations"
-              className="mt-6 inline-flex items-center gap-2 text-xs text-primary"
-            >
-              Looking for a test conversation?
-              <ArrowRight aria-hidden className="size-3" />
-            </Link>
-          </Card>
-        </div>
+            <span className="text-xs text-muted-foreground">
+              {conversations.length} shown · latest activity first
+            </span>
+          </div>
+          <div className="divide-y divide-border border-b border-border">
+            {conversations.map((item) => (
+              <ConversationItem
+                key={item.id}
+                item={item}
+                actorId={ctx.user.id}
+              />
+            ))}
+          </div>
+          <p className="mt-5 text-xs leading-6 text-muted-foreground">
+            Claim a conversation to reply personally. AI stays paused until your
+            team explicitly resumes it.
+          </p>
+        </>
       )}
       {(page > 0 || conversations?.length === 50) && (
         <div className="mt-5 flex gap-3">
           {page > 0 && (
             <Button asChild variant="outline" size="sm">
-              <Link href={`/app/inbox?page=${page - 1}`}>Previous</Link>
+              <Link href={"/app/inbox?page=" + (page - 1)}>Previous</Link>
             </Button>
           )}
           {conversations?.length === 50 && (
             <Button asChild variant="outline" size="sm">
-              <Link href={`/app/inbox?page=${page + 1}`}>Next</Link>
+              <Link href={"/app/inbox?page=" + (page + 1)}>Next</Link>
             </Button>
           )}
         </div>
       )}
-    </>
+    </div>
   );
 }

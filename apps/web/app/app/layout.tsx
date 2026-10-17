@@ -11,16 +11,16 @@ export const dynamic = "force-dynamic";
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const ctx = await requireWorkspace();
   return (
-    <div className="min-h-screen lg:grid lg:grid-cols-[208px_minmax(0,1fr)]">
+    <div className="min-h-screen lg:grid lg:grid-cols-[232px_minmax(0,1fr)]">
       <a href="#workspace-content" className="skip-link">
         Skip to content
       </a>
-      <aside className="sticky top-0 hidden h-dvh flex-col border-r border-border bg-sidebar px-3 py-5 lg:flex">
-        <Sidebar />
+      <aside className="sticky top-0 hidden h-dvh flex-col bg-sidebar px-3 py-5 lg:flex">
+        <Sidebar workspaceName={ctx.workspace.name} />
       </aside>
       <div className="min-w-0">
-        <header className="flex h-16 items-center justify-between gap-2 border-b border-border bg-card px-4 sm:px-7 lg:px-8">
-          <MobileNavigation />
+        <header className="workspace-topbar flex h-14 items-center justify-between gap-2 border-b border-border bg-background px-4 sm:px-7">
+          <MobileNavigation workspaceName={ctx.workspace.name} />
           <form
             action={switchWorkspace}
             className="mr-auto flex min-w-0 items-center gap-2.5"
@@ -71,7 +71,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         <main
           id="workspace-content"
           tabIndex={-1}
-          className="mx-auto max-w-[1680px] px-5 py-7 sm:px-7 lg:px-8 lg:py-8"
+          className="workspace-main mx-auto max-w-[1680px] px-5 py-7 sm:px-7 lg:px-9 lg:py-9"
         >
           {children}
         </main>

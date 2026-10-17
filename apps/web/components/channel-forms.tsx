@@ -1,6 +1,6 @@
 "use client";
-import { useActionState, useState } from "react";
-import { Copy, Check } from "lucide-react";
+import { useActionState, useState, type ReactNode } from "react";
+import { Copy, Check, ChevronDown } from "lucide-react";
 import type { FormState } from "@/app/auth/actions";
 import {
   saveWebsiteChannel,
@@ -8,6 +8,30 @@ import {
 } from "@/app/app/channels/actions";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
+export function ConnectionManagement({
+  label,
+  initialOpen = false,
+  children,
+}: {
+  label: string;
+  initialOpen?: boolean;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(initialOpen);
+  return (
+    <details
+      className="connection-management mt-5"
+      open={open}
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
+      <summary>
+        {label}
+        <ChevronDown aria-hidden className="size-3.5" />
+      </summary>
+      <div className="connection-management-content">{children}</div>
+    </details>
+  );
+}
 export function WebsiteChannelForm({
   enabled,
   origins,
@@ -22,8 +46,8 @@ export function WebsiteChannelForm({
     status: "idle",
   } as FormState);
   return (
-    <form action={action} className="mt-5 space-y-4">
-      <label className="flex items-center gap-3 rounded-md border border-border bg-muted/40 p-3 text-[13px] font-medium">
+    <form action={action} className="space-y-4">
+      <label className="flex items-center gap-3 text-[13px] font-medium">
         <input
           type="checkbox"
           name="enabled"

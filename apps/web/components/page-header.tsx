@@ -11,10 +11,10 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <header className="mb-7 flex flex-wrap items-start justify-between gap-4">
+    <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
       <div className="min-w-0">
         {eyebrow && <p className="eyebrow mb-2">{eyebrow}</p>}
-        <h1 className="text-[26px] font-medium leading-tight tracking-[-.035em] text-foreground sm:text-[28px]">
+        <h1 className="text-[28px] font-medium leading-tight tracking-[-.035em] text-foreground sm:text-[30px]">
           {title}
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">

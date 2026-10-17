@@ -10,8 +10,6 @@ import { requireWorkspace } from "@/lib/workspace";
 import { dateLabel } from "@/lib/utils";
 import { PageHeader } from "@/components/page-header";
 import { KnowledgeActions } from "@/components/knowledge-actions";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
 export default async function KnowledgePage({
@@ -54,25 +52,24 @@ export default async function KnowledgePage({
       </Button>
     ) : null;
   return (
-    <div className="page-reading">
+    <div className="max-w-[1200px]">
       <PageHeader
-        eyebrow="A curated business library"
         title="Business knowledge"
-        description="Only published knowledge is available to your agent. Keep it clear, current and useful."
+        description="Everything Avenlyo is allowed to use when answering customers. Only published knowledge is available to your agent."
         action={action}
       />
-      <div className="mb-6 grid grid-cols-3 gap-3">
-        {["Published items", "Drafts", "Archived items"].map((label, i) => (
-          <Card key={label} className="px-4 py-4 sm:px-5">
-            <p className="text-xs text-muted-foreground">{label}</p>
-            <p className="mt-2 text-2xl font-medium tabular-nums">
+      <p className="mb-4 flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-muted-foreground">
+        {["published", "draft", "archived"].map((label, i) => (
+          <span key={label}>
+            <strong className="font-medium text-foreground">
               {counts[i].error ? "—" : (counts[i].count ?? 0)}
-            </p>
-          </Card>
+            </strong>{" "}
+            {label}
+          </span>
         ))}
-      </div>
-      <div
-        className="mb-5 flex flex-wrap gap-1 border-b border-border pb-3"
+      </p>
+      <nav
+        className="flex flex-wrap border-b border-border"
         aria-label="Knowledge status filters"
       >
         {[
@@ -81,63 +78,65 @@ export default async function KnowledgePage({
           ["draft", "Drafts"],
           ["archived", "Archived"],
         ].map(([s, label]) => (
-          <Button
+          <Link
             key={s}
-            size="sm"
-            variant={status === s ? "outline" : "ghost"}
-            asChild
+            className="filter-tab"
+            aria-current={status === s ? "page" : undefined}
+            href={`/app/knowledge${s === "all" ? "" : `?status=${s}`}`}
           >
-            <Link
-              aria-current={status === s ? "page" : undefined}
-              href={`/app/knowledge${s === "all" ? "" : `?status=${s}`}`}
-            >
-              {label}
-            </Link>
-          </Button>
+            {label}
+          </Link>
         ))}
-      </div>
+      </nav>
       {params.notice === "draft-saved" && (
         <p
           role="status"
-          className="mb-5 rounded-md border border-success/15 bg-success-soft p-3 text-sm text-success"
+          className="mt-5 bg-success-soft px-4 py-3 text-[13px] text-success"
         >
           Draft saved. Review the content, then publish it for your agent.
         </p>
       )}
       {result.error ? (
-        <p role="alert">Knowledge could not be loaded. Please try again.</p>
+        <p role="alert" className="py-6">
+          Knowledge could not be loaded. Please try again.
+        </p>
       ) : !result.data.length ? (
         <EmptyState
           title={
             status === "all"
-              ? "Give Avenlyo the information it can safely use."
+              ? "Give Avenlyo approved information it can use."
               : `No ${status} items`
           }
-          description="Start with a service description or a frequently asked question. Review it, then publish it when it’s ready."
+          description="Start with a service description or a customer question. Review the information, then publish it when it’s ready."
           action={action}
         />
       ) : (
-        <Card className="divide-y divide-border overflow-hidden">
+        <div>
           {result.data.map((item) => (
-            <article className="p-5 sm:p-6" key={item.id}>
-              <div className="flex items-start gap-4">
-                <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-md border border-border bg-muted text-muted-foreground">
-                  {item.type === "faq" ? (
-                    <HelpCircle aria-hidden className="size-4" />
-                  ) : (
-                    <FileText aria-hidden className="size-4" />
-                  )}
-                </span>
+            <article className="library-row" key={item.id}>
+              <div className="flex min-w-0 gap-3.5">
+                {item.type === "faq" ? (
+                  <HelpCircle
+                    aria-hidden
+                    className="mt-1 size-4 text-muted-foreground"
+                  />
+                ) : (
+                  <FileText
+                    aria-hidden
+                    className="mt-1 size-4 text-muted-foreground"
+                  />
+                )}
                 <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h2 className="text-sm font-medium">{item.title}</h2>
-                    <Badge
-                      tone={
+                  <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-2">
+                    <h2 className="text-sm font-semibold">{item.title}</h2>
+                    <span
+                      className="status-text"
+                      data-tone={
                         item.status === "published"
                           ? "success"
                           : item.status === "draft"
                             ? "attention"
-                            : "neutral"
+                            : undefined
                       }
                     >
                       {item.status === "published"
@@ -145,32 +144,32 @@ export default async function KnowledgePage({
                         : item.status === "draft"
                           ? "Draft"
                           : "Archived"}
-                    </Badge>
+                    </span>
                   </div>
-                  <p className="mt-2 line-clamp-2 whitespace-pre-wrap break-words text-[13px] leading-6 text-muted-foreground">
+                  <p className="mt-2 line-clamp-2 whitespace-pre-wrap text-[13px] leading-6 text-muted-foreground">
                     {item.content}
                   </p>
-                  <p className="mt-3 text-[11px] text-muted-foreground">
+                  <p className="mt-3 text-xs text-muted-foreground">
                     {item.type === "faq" ? "FAQ" : "Text"} · Updated{" "}
                     {dateLabel(item.updated_at)}
                   </p>
-                  {ctx.role === "owner" && (
-                    <div className="mt-4 border-t border-border pt-3">
-                      <Link
-                        href={`/app/knowledge/${item.id}`}
-                        className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                      >
-                        Edit item
-                        <ArrowUpRight aria-hidden className="size-3" />
-                      </Link>
-                      <KnowledgeActions id={item.id} status={item.status} />
-                    </div>
-                  )}
                 </div>
               </div>
+              {ctx.role === "owner" && (
+                <div className="mt-4 flex flex-wrap items-center gap-3 pl-[30px] lg:mt-0 lg:max-w-[290px] lg:justify-end lg:pl-0">
+                  <Link
+                    href={`/app/knowledge/${item.id}`}
+                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                  >
+                    Edit item
+                    <ArrowUpRight aria-hidden className="size-3" />
+                  </Link>
+                  <KnowledgeActions id={item.id} status={item.status} />
+                </div>
+              )}
             </article>
           ))}
-        </Card>
+        </div>
       )}
       <p className="mt-5 flex items-center gap-2 text-xs leading-6 text-muted-foreground">
         <BookOpen aria-hidden className="size-3.5" />

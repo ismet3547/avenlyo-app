@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import type { InboxThread, InboxItem } from "@avenlyo-app/shared";
@@ -36,12 +35,6 @@ export default async function InboxDetail({
     : ((list.data as unknown as InboxItem[] | null) ?? []);
   return (
     <>
-      <Link
-        href="/app/inbox"
-        className="mb-5 inline-block text-xs text-muted-foreground hover:text-primary"
-      >
-        ← All customer conversations
-      </Link>
       <InboxConversation
         key={id}
         initial={result.data as InboxThread}

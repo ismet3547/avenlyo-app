@@ -52,11 +52,28 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await expect(
     page.getByRole("heading", { name: "Your AI front office", exact: true }),
   ).toBeVisible();
+  await expect(page.getByTestId("customer-conversation-count")).toHaveText("0");
+  await expect(
+    page.getByText("0 of 4 complete", { exact: true }),
+  ).toBeVisible();
   await page.screenshot({
     path: `${shots}/overview-desktop.png`,
     fullPage: true,
   });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({
+    path: `${shots}/home-onboarding-mobile.png`,
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/app/agent");
+  await page.getByRole("radio", { name: "Warm", exact: true }).check();
+  await expect(
+    page
+      .getByLabel("Configuration preview")
+      .getByRole("heading", { name: "Warm", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("radio", { name: "Professional", exact: true }).check();
   await page
     .getByLabel("What should Avenlyo help your customers with?", {
       exact: true,
@@ -134,9 +151,18 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await expect(page.getByText("Qualified", { exact: true })).toBeVisible();
   await expect(page.getByText("Test Agent", { exact: true })).toBeVisible();
   await page.screenshot({ path: `${shots}/lead-desktop.png`, fullPage: true });
+  const testLeadUrl = page.url();
+  await page.goto("/app");
+  await expect(page.getByTestId("customer-conversation-count")).toHaveText("0");
+  await expect(page.getByTestId("customer-qualified-count")).toHaveText("0");
+  await page.goto(testLeadUrl);
   await page
-    .getByRole("link", { name: "View conversation", exact: true })
+    .getByRole("link", { name: "Open conversation", exact: true })
     .click();
+  await page.screenshot({
+    path: `${shots}/test-conversation-desktop.png`,
+    fullPage: true,
+  });
   await page.getByRole("link", { name: "Continue test", exact: true }).click();
   await page.getByLabel("Customer message").fill("I want a human.");
   await page.getByRole("button", { name: "Send", exact: true }).click();
@@ -149,6 +175,17 @@ test("new user completes the independent foundation flow on desktop and mobile",
       { exact: true },
     ),
   ).toBeVisible();
+  await page.goto("/app/conversations");
+  await expect(
+    page.getByRole("heading", { name: "Test conversations", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link").filter({ hasText: "Test conversation" }).first(),
+  ).toBeVisible();
+  await page.screenshot({
+    path: `${shots}/test-history-desktop.png`,
+    fullPage: true,
+  });
   await page.goto("/app/channels");
   await expect(page.getByText("Disabled", { exact: true })).toBeVisible();
   await expect(page.getByText("Not configured", { exact: true })).toBeVisible();
@@ -159,7 +196,7 @@ test("new user completes the independent foundation flow on desktop and mobile",
     ["/app/knowledge", "Business knowledge"],
     ["/app/test-agent", "Try a customer conversation"],
     ["/app/leads", "Leads"],
-    ["/app/channels", "Meet customers where they are"],
+    ["/app/channels", "Channels"],
     ["/app/settings", "Workspace settings"],
   ]) {
     await page.goto(route);
@@ -176,6 +213,15 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await page.goto("/app");
   await expect(
     page.getByRole("heading", { name: "Your AI front office", exact: true }),
+  ).toBeVisible();
+  // Existing Test Agent conversations/leads must not inflate customer metrics.
+  await expect(page.getByTestId("customer-conversation-count")).toHaveText("0");
+  await expect(page.getByTestId("customer-needs-you-count")).toHaveText("0");
+  await expect(
+    page.getByText(
+      "Customer channels only · Test Agent activity is excluded.",
+      { exact: true },
+    ),
   ).toBeVisible();
   await page.screenshot({
     path: `${shots}/overview-mobile.png`,

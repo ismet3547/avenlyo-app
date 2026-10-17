@@ -1,26 +1,30 @@
 import Link from "next/link";
 import { requireWorkspace } from "@/lib/workspace";
 import { PageHeader } from "@/components/page-header";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/empty-state";
 import { dateLabel } from "@/lib/utils";
-import { channelLabels } from "@avenlyo-app/shared";
 export default async function ConversationsPage() {
   const ctx = await requireWorkspace();
   const result = await ctx.supabase
     .from("conversations")
     .select("*")
     .eq("workspace_id", ctx.workspace.id)
+    .eq("channel", "test_agent")
     .order("updated_at", { ascending: false })
     .limit(100);
   return (
-    <>
+    <div className="page-reading">
+      <Link
+        href="/app/agent"
+        className="mb-6 inline-block text-xs text-muted-foreground hover:text-primary"
+      >
+        ← Agent
+      </Link>
       <PageHeader
-        eyebrow="Conversation history"
-        title="Conversations"
-        description="Review Test Agent sessions separately from real customer conversations in Inbox."
+        eyebrow="Test mode"
+        title="Test conversations"
+        description="Saved Test Agent sessions. No external customer messages are sent from these conversations."
         action={
           <Button asChild variant="outline">
             <Link href="/app/test-agent">New test</Link>
@@ -32,7 +36,7 @@ export default async function ConversationsPage() {
       ) : !result.data.length ? (
         <EmptyState
           title="Start your first test conversation"
-          description="Try a customer question and review the answer, lead and handoff outcome. Test sessions stay clearly labeled here."
+          description="Try a customer question, then review the answer, lead and handoff outcome. Real customer conversations stay in Inbox."
           action={
             <Button asChild>
               <Link href="/app/test-agent">Test agent</Link>
@@ -40,71 +44,43 @@ export default async function ConversationsPage() {
           }
         />
       ) : (
-        <div className="page-reading space-y-6">
-          {["test_agent", "customer"].map((group) => {
-            const items = result.data.filter((c) =>
-              group === "test_agent"
-                ? c.channel === "test_agent"
-                : c.channel !== "test_agent",
-            );
-            if (!items.length) return null;
-            return (
-              <section key={group}>
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <h2 className="panel-title">
-                    {group === "test_agent"
-                      ? "Test Agent sessions"
-                      : "Customer conversations"}
-                  </h2>
-                  {group === "customer" ? (
-                    <Link href="/app/inbox" className="text-xs text-primary">
-                      Open Inbox →
-                    </Link>
-                  ) : (
-                    <Badge tone="test">Internal tests</Badge>
-                  )}
-                </div>
-                <Card className="divide-y divide-border overflow-hidden">
-                  {items.map((c) => (
-                    <Link
-                      href={
-                        c.channel === "test_agent"
-                          ? `/app/conversations/${c.id}`
-                          : `/app/inbox/${c.id}`
-                      }
-                      className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 hover:bg-muted/50"
-                      key={c.id}
-                    >
-                      <div>
-                        <p className="text-[13px] font-medium">
-                          {c.channel === "test_agent"
-                            ? "Test conversation"
-                            : "Customer conversation"}
-                          <span className="ml-2 font-mono text-[11px] font-normal text-muted-foreground">
-                            {c.id.slice(0, 8)}
-                          </span>
-                        </p>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {channelLabels[c.channel]} · {dateLabel(c.updated_at)}
-                        </p>
-                      </div>
-                      <Badge
-                        tone={
-                          c.status === "needs_human" ? "attention" : "neutral"
-                        }
-                      >
-                        {c.status === "needs_human"
-                          ? "Needs human · AI paused"
-                          : "Open"}
-                      </Badge>
-                    </Link>
-                  ))}
-                </Card>
-              </section>
-            );
-          })}
+        <div className="divide-y divide-border border-y border-border">
+          {result.data.map((c) => (
+            <Link
+              key={c.id}
+              href={`/app/conversations/${c.id}`}
+              className="flex flex-wrap items-center justify-between gap-4 py-5 hover:bg-muted/50"
+            >
+              <div>
+                <p className="text-sm font-medium">
+                  Test conversation{" "}
+                  <span className="ml-2 font-mono text-xs font-normal text-muted-foreground">
+                    {c.id.slice(0, 8)}
+                  </span>
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Test Agent · {dateLabel(c.updated_at)}
+                </p>
+              </div>
+              <span
+                className="status-text"
+                data-tone={c.ai_mode === "paused" ? "attention" : undefined}
+              >
+                {c.ai_mode === "paused" ? "Needs human · AI paused" : "Open"}
+              </span>
+            </Link>
+          ))}
         </div>
       )}
-    </>
+      <p className="mt-6 text-[13px] text-muted-foreground">
+        Looking for a real customer?{" "}
+        <Link
+          href="/app/inbox"
+          className="font-medium text-primary hover:underline"
+        >
+          Open Inbox →
+        </Link>
+      </p>
+    </div>
   );
 }
