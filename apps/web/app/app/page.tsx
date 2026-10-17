@@ -14,7 +14,6 @@ import type { InboxItem } from "@avenlyo-app/shared";
 import { requireWorkspace } from "@/lib/workspace";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/empty-state";
 import { ConversationItem } from "@/components/conversation-item";
@@ -288,7 +287,9 @@ export default async function Overview() {
             </Link>
           </Button>
           <div className="mt-6 border-t border-success/15 pt-4">
-            <Badge tone="test">Your knowledge. Your team.</Badge>
+            <p className="text-xs text-muted-foreground">
+              Your knowledge. Your team.
+            </p>
           </div>
         </Card>
       </div>

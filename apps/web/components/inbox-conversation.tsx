@@ -290,7 +290,7 @@ export function InboxConversation({
                   </p>
                   {delivery && (
                     <p
-                      className={`mt-2.5 text-[11px] leading-5 ${["unknown", "failed", "blocked"].includes(delivery.status) ? "text-attention" : "text-muted-foreground"}`}
+                      className={`mt-2.5 text-[11px] leading-5 ${delivery.status === "failed" ? "text-danger" : ["unknown", "blocked"].includes(delivery.status) ? "text-attention" : "text-muted-foreground"}`}
                     >
                       {deliveryLabel}
                       {reason ? ` · ${reason}` : ""}
@@ -464,7 +464,7 @@ export function InboxConversation({
                 {snapshot.notifications.map((n) => (
                   <p
                     key={n.id}
-                    className="text-[11px] leading-5 text-muted-foreground"
+                    className={`text-[11px] leading-5 ${n.status === "failed" && n.error_code !== "NOTIFICATION_NOT_CONFIGURED" ? "text-danger" : "text-muted-foreground"}`}
                   >
                     {n.kind === "qualified_lead"
                       ? "Qualified inquiry"

@@ -158,6 +158,16 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   await expect(
     page.getByText("Hi, this is Susan from Northstar Studio.", { exact: true }),
   ).toBeInViewport();
+  await visitor.screenshot({
+    path: "test-results/screenshots/website-widget-handoff-desktop.png",
+    fullPage: true,
+  });
+  await visitor.setViewportSize({ width: 390, height: 844 });
+  await visitor.screenshot({
+    path: "test-results/screenshots/website-widget-handoff-mobile.png",
+    fullPage: true,
+  });
+  await visitor.setViewportSize({ width: 1200, height: 850 });
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
     path: "test-results/screenshots/inbox-desktop.png",
@@ -248,6 +258,10 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     exact: true,
   });
   await expect(drawer).toBeVisible();
+  await page.screenshot({
+    path: "test-results/screenshots/mobile-navigation-390.png",
+    fullPage: true,
+  });
   await page.keyboard.press("Tab");
   expect(
     await drawer.evaluate((node) => node.contains(document.activeElement)),

@@ -47,7 +47,10 @@ export function Qualification({ value }: { value: string }) {
   );
 }
 export function customerLabel(item: InboxItem) {
-  return item.channel === "website_chat" && item.customerRef.includes("-")
+  return item.channel === "website_chat" &&
+    /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(
+      item.customerRef,
+    )
     ? `Website visitor · ${item.customerRef.slice(0, 8)}`
     : item.customerRef;
 }
