@@ -166,7 +166,9 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
       .filter({ hasText: "Hi, this is Susan from Northstar Studio." }),
   ).toBeVisible();
   await expect(
-    page.getByText("Hi, this is Susan from Northstar Studio.", { exact: true }),
+    page
+      .getByLabel("Conversation thread", { exact: true })
+      .getByText("Hi, this is Susan from Northstar Studio.", { exact: true }),
   ).toBeInViewport();
   await visitor.screenshot({
     path: "test-results/screenshots/website-widget-handoff-desktop.png",
