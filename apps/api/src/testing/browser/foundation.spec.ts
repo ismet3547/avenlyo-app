@@ -145,7 +145,8 @@ test("new user completes the independent foundation flow on desktop and mobile",
     ),
   ).toBeVisible();
   await page.goto("/app/channels");
-  await expect(page.getByText("Coming next", { exact: true })).toHaveCount(2);
+  await expect(page.getByText("Disabled", { exact: true })).toBeVisible();
+  await expect(page.getByText("Not configured", { exact: true })).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   for (const route of [
     "/app",

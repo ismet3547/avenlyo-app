@@ -21,6 +21,7 @@ export default async function TestAgentPage({
         .select("id,ai_mode")
         .eq("workspace_id", ctx.workspace.id)
         .eq("id", conversationId)
+        .eq("channel", "test_agent")
         .single()
     : null;
   const authorizedId = conversation?.data?.id ?? null;
@@ -73,7 +74,7 @@ export default async function TestAgentPage({
         key={authorizedId ?? "new"}
         workspaceId={ctx.workspace.id}
         conversationId={authorizedId}
-        initialMessages={messages?.data ?? []}
+        initialMessages={messages?.data?.map(m => ({role: m.role === "customer" ? "customer" : "assistant", content: m.content})) ?? []}
         initialLeadId={lead?.data?.id ?? null}
       />
     </>

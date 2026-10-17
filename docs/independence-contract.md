@@ -12,4 +12,4 @@
 
 `pnpm check:independence` scans application/configuration/migration files for legacy package imports, repository dependencies and API hostnames. CI runs it with lint. Operational configuration must also use new project credentials; source scanning cannot validate a human-supplied database URL.
 
-Milestone 1 supports manual Text/FAQ knowledge and a labeled Test Agent. Website Chat, Instagram, a customer inbox, notifications, billing, appointments, Voice/SMS and industry-specific packs are absent. Test lead records are explicitly attributed to `test_agent`.
+Foundation supports manual Text/FAQ knowledge and a labeled Test Agent. Channels & Handoff V1 adds Website Chat, real Inbox, a managed Instagram Login adapter and internal staff notifications through the same independent runtime. No billing, appointments, Voice/SMS, CRM/workflow or industry-specific subsystem is introduced. Test lead records remain explicitly attributed to `test_agent` and never send staff email. Website/Instagram lead sources remain distinct. All migrations are owned by this repository; the Foundation migration is unchanged.

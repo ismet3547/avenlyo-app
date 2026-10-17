@@ -22,7 +22,9 @@ const provider: AgentProvider = {
     return {
       reply: name
         ? "Thanks. Your custom project inquiry includes the requested contact details."
-        : "We provide custom design and manufacturing services. What kind of project are you considering?",
+        : input.knowledge.some((k) => k.content.includes("logo design"))
+          ? "We provide logo design for small businesses. What would you like to create?"
+          : "We provide custom design and manufacturing services. What kind of project are you considering?",
       request_human: false,
       interest: "service",
       name,
@@ -32,7 +34,24 @@ const provider: AgentProvider = {
     };
   },
 };
-const app = await buildApp({ config, provider, logger: false });
+const app = await buildApp({
+  config,
+  provider,
+  logger: false,
+  backgroundChannels: false,
+  emailProvider: {
+    send: async () => ({
+      state: "sent",
+      providerMessageId: "fictional-browser-email",
+    }),
+  },
+  instagramTransport: {
+    send: async () => ({
+      state: "sent",
+      providerMessageId: "fictional-browser-instagram",
+    }),
+  },
+});
 await app.listen({ host: config.API_HOST, port: config.API_PORT });
 for (const signal of ["SIGINT", "SIGTERM"] as const)
   process.once(signal, () => {

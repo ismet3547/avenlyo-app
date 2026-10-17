@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { dateLabel } from "@/lib/utils";
+import { channelLabels } from "@avenlyo-app/shared";
 export default async function LeadsPage({
   searchParams,
 }: {
@@ -35,8 +36,8 @@ export default async function LeadsPage({
       <PageHeader
         eyebrow="Useful inquiries"
         title="Leads"
-        description="Genuine service interest with customer-provided contact details. Milestone 1 records come from Test Agent."
-        action={<Badge>Test data</Badge>}
+        description="Service interest with customer-stated contact details. Every inquiry keeps its original channel source."
+        action={<Badge>Customer-stated details</Badge>}
       />
       <div className="mb-6 flex flex-wrap gap-2">
         {[
@@ -100,7 +101,7 @@ export default async function LeadsPage({
                     </p>
                   </td>
                   <td className="px-5 py-4 text-xs text-muted-foreground">
-                    Test Agent
+                    {channelLabels[lead.source]}
                   </td>
                   <td className="px-5 py-4">
                     <Badge

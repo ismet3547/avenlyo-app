@@ -4,9 +4,23 @@ import rateLimit from "@fastify/rate-limit";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { turnSchema, type Database } from "@avenlyo-app/shared";
 import { z } from "zod";
+import type { Writable } from "node:stream";
+declare module "fastify" {
+  interface FastifyInstance {
+    processChannelWork(): Promise<void>;
+  }
+}
 import type { Config } from "./config.js";
 import { FrontOfficeRuntime, RuntimeError } from "./runtime/agent.js";
 import { OpenAIProvider, type AgentProvider } from "./runtime/provider.js";
+import { ChannelWork } from "./channels/work.js";
+import { registerChannelRoutes } from "./channels/routes.js";
+import {
+  MetaInstagramTransport,
+  ResendBusinessEmailProvider,
+  type InstagramTransport,
+  type BusinessEmailProvider,
+} from "./channels/transports.js";
 
 export interface AppInput {
   config: Config;
@@ -14,6 +28,10 @@ export interface AppInput {
   userClient?: (token: string) => SupabaseClient<Database>;
   serviceClient?: SupabaseClient<Database>;
   logger?: boolean;
+  logStream?: Writable;
+  instagramTransport?: InstagramTransport;
+  emailProvider?: BusinessEmailProvider;
+  backgroundChannels?: boolean;
 }
 export async function buildApp(input: AppInput) {
   const { config } = input;
@@ -23,6 +41,7 @@ export async function buildApp(input: AppInput) {
       input.logger === false
         ? false
         : {
+            stream: input.logStream,
             redact: [
               "req.headers.authorization",
               "req.headers.cookie",
@@ -36,9 +55,38 @@ export async function buildApp(input: AppInput) {
             },
           },
   });
+  app.setErrorHandler((error, request, reply) => {
+    const known = error instanceof RuntimeError;
+    const frameworkStatus =
+      error instanceof Error && "statusCode" in error ? error.statusCode : null;
+    const status = known
+      ? error.status
+      : frameworkStatus === 429
+        ? 429
+        : frameworkStatus === 413
+          ? 413
+          : frameworkStatus === 400
+            ? 400
+            : 503;
+    const code = known
+      ? error.code
+      : status === 429
+        ? "RATE_LIMITED"
+        : status === 413
+          ? "PAYLOAD_TOO_LARGE"
+          : status === 400
+            ? "INVALID_REQUEST"
+            : "SERVICE_UNAVAILABLE";
+    request.log.warn(
+      { event: "request.failed", code },
+      "Request could not be completed",
+    );
+    reply.code(status).send({ code });
+  });
   await app.register(cors, {
     origin: config.API_CORS_ORIGIN,
     credentials: false,
+    preflight: false,
   });
   await app.register(rateLimit, { max: 90, timeWindow: "1 minute" });
   const configured = Boolean(
@@ -66,6 +114,29 @@ export async function buildApp(input: AppInput) {
       : null);
   const runtime =
     service && provider ? new FrontOfficeRuntime(service, provider) : null;
+  const work = service
+    ? new ChannelWork(
+        service,
+        runtime,
+        input.instagramTransport ?? new MetaInstagramTransport(),
+        input.emailProvider ??
+          (config.BUSINESS_NOTIFICATION_PROVIDER === "resend" &&
+          config.RESEND_API_KEY &&
+          config.BUSINESS_NOTIFICATION_FROM
+            ? new ResendBusinessEmailProvider(config.RESEND_API_KEY)
+            : null),
+        config,
+        (event, code) => app.log.info({ event, code }),
+      )
+    : null;
+  if (work && (input.backgroundChannels ?? input.logger !== false)) {
+    app.addHook("onReady", async () => {
+      work.start();
+    });
+    app.addHook("onClose", async () => {
+      await work.stop();
+    });
+  }
   async function authenticate(request: FastifyRequest) {
     const header = request.headers.authorization;
     if (!header || !/^Bearer [A-Za-z0-9._~-]{20,4096}$/.test(header))
@@ -148,33 +219,14 @@ export async function buildApp(input: AppInput) {
       return { status: "published" };
     },
   );
-  app.setErrorHandler((error, request, reply) => {
-    const known = error instanceof RuntimeError;
-    const frameworkStatus =
-      error instanceof Error && "statusCode" in error ? error.statusCode : null;
-    const status = known
-      ? error.status
-      : frameworkStatus === 429
-        ? 429
-        : frameworkStatus === 413
-          ? 413
-          : frameworkStatus === 400
-            ? 400
-            : 503;
-    const code = known
-      ? error.code
-      : status === 429
-        ? "RATE_LIMITED"
-        : status === 413
-          ? "PAYLOAD_TOO_LARGE"
-          : status === 400
-            ? "INVALID_REQUEST"
-            : "SERVICE_UNAVAILABLE";
-    request.log.warn(
-      { event: "request.failed", code },
-      "Request could not be completed",
-    );
-    reply.code(status).send({ code });
+  await registerChannelRoutes(app, {
+    config,
+    service,
+    runtime,
+    work,
+    authenticate,
   });
-  return app;
+  return Object.assign(app, {
+    processChannelWork: () => work?.pump() ?? Promise.resolve(),
+  });
 }

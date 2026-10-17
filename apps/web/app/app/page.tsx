@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 export default async function Overview() {
   const { supabase, workspace } = await requireWorkspace();
-  const [knowledge, conversations, qualified, human, agent] = await Promise.all(
+  const [knowledge, conversations, qualified, human, agent, channels] = await Promise.all(
     [
       supabase
         .from("knowledge_items")
@@ -40,6 +40,7 @@ export default async function Overview() {
         .select("setup_brief,updated_at")
         .eq("workspace_id", workspace.id)
         .single(),
+      supabase.from("channel_connections").select("id", {count: "exact", head: true}).eq("workspace_id", workspace.id).eq("enabled", true),
     ],
   );
   const published = knowledge.error ? null : (knowledge.count ?? 0);
@@ -117,11 +118,11 @@ export default async function Overview() {
             <span className="grid size-9 place-items-center rounded-lg bg-muted text-muted-foreground">
               <MessageSquare className="size-4" aria-hidden />
             </span>
-            <Badge>Coming next</Badge>
+            <Badge>{channels.error ? "Unavailable" : `${channels.count ?? 0} enabled`}</Badge>
           </div>
           <h2 className="mt-5 font-semibold">Customer channels</h2>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Website Chat and Instagram are planned. Start by testing your agent.
+            Website Chat and managed Instagram conversations, with your team in Inbox.
           </p>
           <Link
             className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-primary"
@@ -135,7 +136,7 @@ export default async function Overview() {
       <section className="mt-8">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold">Workspace activity</h2>
-          <Badge>Test Agent data</Badge>
+          <Badge>All channels · includes tests</Badge>
         </div>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           {[

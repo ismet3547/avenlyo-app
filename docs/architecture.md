@@ -1,4 +1,4 @@
-# Foundation V1 architecture
+# Avenlyo App architecture
 
 The pnpm monorepo contains a Next.js web app, a Fastify API and a small shared contract package. No second AI runtime exists.
 
@@ -8,7 +8,7 @@ The web app owns cookie sessions using Supabase SSR and verifies them before ren
 
 The browser submits a bounded test message to the same-origin web route. That route checks Origin, validates the body and forwards only a verified access token to the configured new API. Fastify verifies the token against Auth and uses a protected atomic RPC to recheck active membership before claiming a turn. No workspace identity comes from model output or mutable user metadata.
 
-`FrontOfficeRuntime` loads structured goals/tone/contact fields, bounded customer history and published semantic matches. The administrative setup brief is excluded from runtime reads and prompts. OpenAI receives source-controlled instructions and clearly identified reference data, no custom tools or database credentials. Explicit human requests, paused threads and missing knowledge fail conservatively to human assistance. A model-level `request_human` value is advisory only and cannot pause an otherwise grounded, answerable turn; hard handoff authority stays in server-controlled policy. Replies are also scrubbed of unsupported claims that an inquiry was sent, forwarded or notified to a team. This is the runtime future channels will call; no channel integration is implemented now.
+`FrontOfficeRuntime` loads structured goals/tone/contact fields, bounded customer history and published semantic matches. The administrative setup brief is excluded from runtime reads and prompts. OpenAI receives source-controlled instructions and clearly identified reference data, no custom tools or database credentials. Explicit human requests, paused threads and missing knowledge fail conservatively to human assistance. A model-level `request_human` value is advisory only and cannot pause an otherwise grounded, answerable turn; hard handoff authority stays in server-controlled policy. Replies are also scrubbed of unsupported claims that an inquiry was sent, forwarded or notified to a team. This remains the one runtime for Test Agent, Website Chat and Instagram.
 
 ## Knowledge
 
@@ -22,7 +22,7 @@ Lead proposals pass a strict model schema and server validation. Genuine service
 
 ## Database boundary
 
-Nine small tables: profiles, workspaces, workspace_members, agent_settings, knowledge_items, conversations, messages, leads, agent_runs. RLS covers every table. Authenticated members have scoped reads; raw DML is revoked. Owner RPCs manage business configuration and knowledge. Four backend RPCs handle publication and turn truth with explicit current-actor checks. Private membership helpers use fixed search paths and explicit grants. Composite workspace/conversation foreign keys prevent cross-workspace links. No Auth-schema trigger is installed.
+Foundation provides nine small tables: profiles, workspaces, workspace_members, agent_settings, knowledge_items, conversations, messages, leads and agent_runs. Channels adds the five tables described below. RLS covers every table. Authenticated members have scoped reads; raw DML is revoked. Owner RPCs manage business configuration and knowledge. Protected backend RPCs handle publication and turn truth with explicit authority checks. Private membership helpers use fixed search paths and explicit grants. Composite workspace/conversation foreign keys prevent cross-workspace links. No Auth-schema trigger is installed.
 
 The service-role key exists only in the Fastify environment. The web app never has or needs it. Request logs discard customer bodies, credentials and query strings; provider errors are reduced to bounded codes. No external provider is called by automated tests.
 
@@ -36,3 +36,17 @@ The service-role key exists only in the Fastify environment. The web app never h
 - [Next.js 16](https://nextjs.org/docs/app/guides/upgrading/version-16)
 
 Supabase changelog reviewed on 2026-10-14 (Istanbul). The new project uses publishable keys for web/API auth, does not request the anon OpenAPI schema, does not modify Auth schemas, and uses supported TLS clients. No hosted project or deployment was created.
+
+## Channels & Handoff V1
+
+Milestone 2 starts from merged `main` commit `72d891675a9e2f569df0213986a7809f614bd3a1`. The Foundation migration is byte-for-byte unchanged. One additive migration extends channel/source/role/nullable external actor support and adds five small tables: channel_connections, website_sessions, channel_events, message_deliveries and business_notifications. A private credential-reference table points to encrypted Supabase Vault secrets. Existing test records and their original fields survive the upgrade acceptance.
+
+Channel authority is separate from behavior. Test Agent uses fresh Auth/current membership and cannot target real channel threads. Website requests resolve an opaque channel ID plus hashed, origin-bound visitor credential. Instagram verifies the exact signed raw body before parsing, then resolves a provisioned professional account. Neither visitor nor sender is an auth.users row. Public bodies never grant workspace identity.
+
+Every channel uses FrontOfficeRuntime: the same bounded history/settings, published semantic knowledge and validatedLead logic. External run-scoped context/retrieval RPCs avoid granting a public caller team access. Test and external finalization wrappers authorize independently, then call one private atomic commit for evidence, current goals, publication revisions, one lead and durable replay. Administrative brief stays excluded.
+
+Inbox reads active-member scoped real conversations. Claim, reply, release and explicit resume use guarded current-membership RPCs. Human messages have role human and unique actor/conversation/nonce identity. AI remains paused until explicit resume; state versions suppress model results after intervening team changes. Website thread polling reads human replies through only the visitor session.
+
+Instagram text events enter a dedicated durable channel ledger and are drained by the running Fastify process. Message deliveries are claimed before one transport attempt. Pending assistant sends recheck state/window/connection; unconfirmed attempts stop as unknown and need attention. Staff email has its own unique conversation/kind ledger and a verified active owner recipient selected in the database. Failures never undo a customer message/lead/handoff; Test Agent never notifies.
+
+See [channel operation](channels-handoff-v1.md), [current official Meta contract and managed provisioning](instagram-managed-setup.md), and [security review and operational limits](channels-handoff-security-review.md). No production deploy, merge, hosted DB mutation or live provider test is part of this milestone.

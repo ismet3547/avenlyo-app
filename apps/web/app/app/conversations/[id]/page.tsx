@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { requireWorkspace } from "@/lib/workspace";
 import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
@@ -20,6 +20,7 @@ export default async function ConversationDetail({
     .eq("id", id)
     .single();
   if (conversation.error) notFound();
+  if (conversation.data.channel !== "test_agent") redirect(`/app/inbox/${id}`);
   const [messages, lead] = await Promise.all([
     ctx.supabase
       .from("messages")
