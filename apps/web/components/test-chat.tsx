@@ -2,16 +2,9 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  ArrowUp,
-  Check,
-  MessageSquare,
-  RotateCcw,
-  Sparkles,
-} from "lucide-react";
+import { ArrowUp, MessageSquare, RotateCcw } from "lucide-react";
 import type { TurnResult } from "@avenlyo-app/shared";
 import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
 import { Textarea } from "./ui/textarea";
 type ChatMessage = { role: "customer" | "assistant"; content: string };
 type RequestInput = {
@@ -93,9 +86,12 @@ export function TestChat({
         // Keep the composer locked until the server page remounts with that ID;
         // otherwise a fast second input can be lost during router.replace().
         setRouteSyncing(true);
-        router.replace(`/app/test-agent?conversation=${result.conversationId}`, {
-          scroll: false,
-        });
+        router.replace(
+          `/app/test-agent?conversation=${result.conversationId}`,
+          {
+            scroll: false,
+          },
+        );
       } else if (result.needsHuman) {
         // Refresh server-owned handoff state so the paused banner/action appear.
         router.refresh();
@@ -110,41 +106,36 @@ export function TestChat({
     }
   }
   return (
-    <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
-      <section className="overflow-hidden rounded-xl border border-border bg-white shadow-xs">
-        <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          <div className="flex items-center gap-3">
-            <span className="grid size-8 place-items-center rounded-lg bg-[#efeffd] text-primary">
-              <Sparkles aria-hidden className="size-4" />
-            </span>
-            <div>
-              <h2 className="text-sm font-semibold">Your Avenlyo agent</h2>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Published knowledge · effective settings
-              </p>
-            </div>
+    <div className="test-workspace">
+      <section className="min-w-0 overflow-hidden rounded-lg border border-border bg-card">
+        <div className="flex items-center justify-between gap-3 border-b border-border px-6 py-4">
+          <div>
+            <h2 className="text-sm font-semibold">Your Avenlyo agent</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Published knowledge · saved settings
+            </p>
           </div>
-          <Badge>Test mode</Badge>
+          <span className="text-xs text-muted-foreground">Internal test</span>
         </div>
         <div
           aria-live="polite"
           aria-busy={pending}
-          className="max-h-[560px] min-h-[340px] space-y-5 overflow-y-auto p-5 sm:p-7"
+          className="test-timeline space-y-7"
         >
           {!messages.length && (
-            <div className="mx-auto max-w-sm py-10 text-center">
+            <div className="mx-auto max-w-sm py-8 text-center">
               <MessageSquare
                 aria-hidden
-                className="mx-auto size-7 text-primary"
+                className="mx-auto size-6 text-primary"
               />
-              <h3 className="mt-4 font-semibold">Ask like a customer</h3>
+              <h3 className="mt-4 font-medium">Ask like a customer</h3>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 Try a question about your services or a genuine project inquiry.
-                You’ll see how your agent uses your published knowledge.
+                See how your agent uses your published knowledge.
               </p>
               <button
                 type="button"
-                className="mt-6 rounded-lg border border-border bg-muted px-3 py-2 text-xs leading-5 text-muted-foreground hover:border-primary"
+                className="mt-5 border-b border-border py-2 text-xs font-medium text-primary hover:border-primary"
                 onClick={() =>
                   setContent(
                     "I'm interested in a custom project but I'm not sure what I need.",
@@ -156,23 +147,18 @@ export function TestChat({
             </div>
           )}
           {messages.map((message, index) => (
-            <div
-              className={`flex ${message.role === "customer" ? "justify-end" : "justify-start"}`}
+            <article
+              className="conversation-entry"
+              data-role={message.role}
               key={index}
             >
-              <div
-                className={`max-w-[90%] rounded-xl px-4 py-3 ${message.role === "customer" ? "bg-primary text-white" : "border border-border bg-[#fafafe]"}`}
-              >
-                <p
-                  className={`mb-1.5 text-[10px] font-semibold uppercase tracking-wider ${message.role === "customer" ? "text-white/70" : "text-muted-foreground"}`}
-                >
-                  {message.role === "customer" ? "Test customer" : "Avenlyo"}
-                </p>
-                <p className="whitespace-pre-wrap text-sm leading-6">
-                  {message.content}
-                </p>
-              </div>
-            </div>
+              <p className="mb-2 text-xs font-semibold">
+                {message.role === "customer" ? "Test customer" : "Avenlyo"}
+              </p>
+              <p className="whitespace-pre-wrap text-[13px] leading-6">
+                {message.content}
+              </p>
+            </article>
           ))}
           {(pending || routeSyncing) && (
             <p role="status" className="text-xs text-muted-foreground">
@@ -187,14 +173,14 @@ export function TestChat({
             event.preventDefault();
             void send();
           }}
-          className="border-t border-border p-4"
+          className="border-t border-border p-4 sm:px-6"
         >
           <label htmlFor="test-message" className="sr-only">
             Customer message
           </label>
           <Textarea
             id="test-message"
-            className="min-h-20 resize-none border-0 bg-muted shadow-none"
+            className="min-h-20 resize-none"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             maxLength={2000}
@@ -202,8 +188,8 @@ export function TestChat({
             placeholder="Type a customer question…"
           />
           <div className="mt-3 flex items-center justify-between gap-3">
-            <p className="text-[10px] text-muted-foreground">
-              Test conversation · saved in this workspace
+            <p className="text-xs text-muted-foreground">
+              Saved in this workspace
             </p>
             <Button
               size="sm"
@@ -223,62 +209,50 @@ export function TestChat({
           {error && (
             <p
               role="alert"
-              className="mt-3 rounded-lg bg-red-50 p-3 text-xs leading-5 text-red-700"
+              className="mt-3 rounded-md bg-danger-soft p-3 text-xs leading-5 text-danger"
             >
               {error}
             </p>
           )}
         </form>
       </section>
-      <aside className="space-y-4">
-        <div className="rounded-xl border border-border bg-white p-5">
-          <h2 className="text-sm font-semibold">What to look for</h2>
-          <div className="mt-4 space-y-3 text-xs leading-5 text-muted-foreground">
-            {[
-              "Answers grounded in published information",
-              "A useful follow-up for genuine interest",
-              "Only customer-stated contact details",
-              "Human assistance when needed",
-            ].map((text) => (
-              <p key={text} className="flex gap-2">
-                <Check
-                  aria-hidden
-                  className="mt-0.5 size-3.5 shrink-0 text-primary"
-                />
-                {text}
-              </p>
-            ))}
-          </div>
-        </div>
-        <div className="rounded-xl border border-border bg-[#f2f2fd] p-5">
-          <h2 className="text-sm font-semibold">Conversation outcome</h2>
-          {leadId ? (
-            <>
-              <p className="mt-3 text-xs leading-5 text-muted-foreground">
-                One lead is linked to this test conversation. Further contact
-                details update the same lead.
-              </p>
-              <Link
-                href={`/app/leads/${leadId}`}
-                className="mt-4 block text-xs font-medium text-primary"
-              >
-                View test lead →
-              </Link>
-            </>
-          ) : (
-            <p className="mt-3 text-xs leading-5 text-muted-foreground">
-              No lead yet. Genuine service interest and relevant contact details
-              are required.
+      <aside className="border-t border-border pt-5 lg:border-t-0 lg:pt-0">
+        <h2 className="text-sm font-semibold">Conversation outcome</h2>
+        {leadId ? (
+          <>
+            <p className="mt-3 text-[13px] leading-6 text-muted-foreground">
+              One lead is linked to this test conversation. Further contact
+              details update the same lead.
             </p>
-          )}
-          {id && (
             <Link
-              className="mt-4 block text-xs text-primary"
-              href={`/app/conversations/${id}`}
+              href={`/app/leads/${leadId}`}
+              className="mt-4 block text-xs font-medium text-primary"
             >
-              View saved conversation →
+              View test lead →
             </Link>
-          )}
+          </>
+        ) : (
+          <p className="mt-3 text-[13px] leading-6 text-muted-foreground">
+            No lead yet. Genuine service interest and relevant contact details
+            are required.
+          </p>
+        )}
+        {id && (
+          <Link
+            className="mt-4 block text-xs font-medium text-primary"
+            href={`/app/conversations/${id}`}
+          >
+            View saved conversation →
+          </Link>
+        )}
+        <div className="mt-6 border-t border-border pt-5">
+          <p className="text-xs text-muted-foreground">
+            Refine what your agent can use.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-4 text-xs font-medium text-primary">
+            <Link href="/app/agent">Agent settings</Link>
+            <Link href="/app/knowledge">Business knowledge</Link>
+          </div>
         </div>
       </aside>
     </div>

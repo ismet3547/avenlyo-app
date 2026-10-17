@@ -25,8 +25,19 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
       })
     ).error,
   ).toBeNull();
+  async function capturePage(options: Parameters<typeof page.screenshot>[0]) {
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.screenshot(options);
+  }
   await mkdir("test-results/screenshots", { recursive: true });
   await page.goto("/auth/sign-in");
+  await expect(
+    page.getByRole("heading", { name: "Welcome back", exact: true }),
+  ).toBeVisible();
+  await capturePage({
+    path: "test-results/screenshots/auth-desktop.png",
+    fullPage: true,
+  });
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
@@ -40,6 +51,18 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   await expect(
     page.getByRole("heading", { name: "Your AI front office", exact: true }),
   ).toBeVisible();
+  await page.goto("/app/agent");
+  await page
+    .getByLabel("What should Avenlyo help your customers with?", {
+      exact: true,
+    })
+    .fill(
+      "Help small businesses understand our design services, identify useful inquiries and connect them with our team.",
+    );
+  await page
+    .getByRole("button", { name: "Save settings", exact: true })
+    .click();
+  await expect(page.getByRole("status")).toContainText("Agent settings saved");
   await page.goto("/app/knowledge/new");
   await page.getByLabel("Title", { exact: true }).fill("Logo design");
   await page
@@ -64,11 +87,12 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     .click();
   await expect(page.getByRole("status")).toContainText("ready");
   await expect(page.getByText("Ready", { exact: true })).toBeVisible();
+  await page.getByText("Website embed", { exact: true }).click();
   const snippet = await page.locator("pre code").innerText();
   expect(snippet).toContain("widget.js");
   expect(snippet).not.toContain(process.env.SUPABASE_SERVICE_ROLE_KEY!);
   const publicId = snippet.match(/data-avenlyo-channel="([a-f0-9-]{36})"/)![1];
-  await page.screenshot({
+  await capturePage({
     path: "test-results/screenshots/channels-desktop.png",
     fullPage: true,
   });
@@ -81,6 +105,45 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   await expect(
     visitor.getByRole("dialog", { name: "Business chat" }),
   ).toBeVisible();
+  await visitor
+    .getByRole("button", { name: "Close chat", exact: true })
+    .click();
+  await expect(
+    visitor.getByRole("dialog", { name: "Business chat" }),
+  ).not.toBeVisible();
+  await expect(
+    visitor.getByRole("button", { name: "Open business chat" }),
+  ).toBeFocused();
+  await visitor.screenshot({
+    path: "test-results/screenshots/website-widget-launcher-desktop.png",
+    fullPage: true,
+  });
+  await visitor.setViewportSize({ width: 390, height: 844 });
+  await visitor.screenshot({
+    path: "test-results/screenshots/website-widget-launcher-mobile.png",
+    fullPage: true,
+  });
+  await visitor.setViewportSize({ width: 1200, height: 850 });
+  await visitor.getByRole("button", { name: "Open business chat" }).click();
+  await expect(
+    visitor.getByRole("dialog", { name: "Business chat" }),
+  ).toBeVisible();
+  await expect(
+    visitor.getByRole("heading", { name: "Northstar Studio", exact: true }),
+  ).toBeVisible();
+  await expect(
+    visitor.getByLabel("Your message", { exact: true }),
+  ).toBeEnabled();
+  await visitor.screenshot({
+    path: "test-results/screenshots/website-widget-welcome-desktop.png",
+    fullPage: true,
+  });
+  await visitor.setViewportSize({ width: 390, height: 844 });
+  await visitor.screenshot({
+    path: "test-results/screenshots/website-widget-welcome-mobile.png",
+    fullPage: true,
+  });
+  await visitor.setViewportSize({ width: 1200, height: 850 });
   await visitor
     .getByLabel("Your message", { exact: true })
     .fill("I'm interested in your logo design.");
@@ -111,10 +174,19 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   await expect(
     page.getByRole("heading", { name: "Inbox", exact: true }),
   ).toBeVisible();
+  await capturePage({
+    path: "test-results/screenshots/inbox-list-desktop.png",
+    fullPage: true,
+  });
   await page.getByRole("link").filter({ hasText: "Alex" }).first().click();
   await expect(
     page.getByRole("link", { name: "View linked lead →" }),
   ).toBeVisible();
+  await expect(page.getByText("AI active", { exact: true })).toBeVisible();
+  await capturePage({
+    path: "test-results/screenshots/inbox-active-desktop.png",
+    fullPage: true,
+  });
   await visitor
     .getByLabel("Your message", { exact: true })
     .fill("I want to speak with a person.");
@@ -129,6 +201,16 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     .getByRole("button", { name: "Claim conversation", exact: true })
     .click();
   await expect(page.getByText("Claimed by you", { exact: true })).toBeVisible();
+  const conversationList = page.getByRole("navigation", {
+    name: "Customer conversations",
+    exact: true,
+  });
+  await expect(
+    conversationList.getByText("Assigned to you", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    conversationList.getByText("AI paused", { exact: true }),
+  ).toBeVisible();
   await page
     .getByLabel("Your human reply")
     .fill("Hi, this is Susan from Northstar Studio.");
@@ -144,13 +226,53 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
       .filter({ hasText: "Hi, this is Susan from Northstar Studio." }),
   ).toBeVisible();
   await expect(
-    page.getByText("Hi, this is Susan from Northstar Studio.", { exact: true }),
+    page
+      .getByLabel("Conversation thread", { exact: true })
+      .getByText("Hi, this is Susan from Northstar Studio.", { exact: true }),
   ).toBeInViewport();
+  await visitor.screenshot({
+    path: "test-results/screenshots/website-widget-handoff-desktop.png",
+    fullPage: true,
+  });
+  await visitor.setViewportSize({ width: 390, height: 844 });
+  await visitor.screenshot({
+    path: "test-results/screenshots/website-widget-handoff-mobile.png",
+    fullPage: true,
+  });
+  await visitor.setViewportSize({ width: 1200, height: 850 });
   await page.evaluate(() => window.scrollTo(0, 0));
-  await page.screenshot({
+  await capturePage({
     path: "test-results/screenshots/inbox-desktop.png",
     fullPage: true,
   });
+  const pausedInboxUrl = page.url();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await capturePage({
+    path: "test-results/screenshots/inbox-paused-mobile.png",
+    fullPage: true,
+  });
+  expect(
+    await page
+      .getByLabel("Conversation thread", { exact: true })
+      .evaluate((node) => getComputedStyle(node).overflowY),
+  ).toBe("visible");
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/app");
+  await expect(page.getByTestId("customer-conversation-count")).toHaveText("1");
+  await expect(
+    page
+      .getByRole("region", { name: "Needs your attention", exact: true })
+      .getByRole("link")
+      .filter({ hasText: "Alex" }),
+  ).toBeVisible();
+  await capturePage({
+    path: "test-results/screenshots/home-needs-attention-desktop.png",
+    fullPage: true,
+  });
+  await page.goto(pausedInboxUrl);
+  await expect(
+    page.getByRole("button", { name: "Release conversation", exact: true }),
+  ).toBeVisible();
   const assistantCount = await visitor
     .locator('[data-role="assistant"]')
     .count();
@@ -190,6 +312,9 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   expect(bounds!.x).toBeGreaterThanOrEqual(0);
   expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(391);
   const inboxUrl = page.url();
+  const leadUrl = await page
+    .getByRole("link", { name: "View linked lead →", exact: true })
+    .getAttribute("href");
   await page.setViewportSize({ width: 390, height: 844 });
   for (const url of [
     inboxUrl,
@@ -202,9 +327,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     else
       await expect(
         page.getByRole("heading", {
-          name: url.endsWith("/app/inbox")
-            ? "Inbox"
-            : "Meet customers where they are",
+          name: url.endsWith("/app/inbox") ? "Inbox" : "Channels",
           exact: true,
         }),
       ).toBeVisible();
@@ -214,17 +337,130 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
       ),
     ).toBe(true);
   }
-  await page.screenshot({
+  await capturePage({
     path: "test-results/screenshots/channels-mobile.png",
     fullPage: true,
   });
   await page.goto(inboxUrl);
   await expect(page.getByLabel("Your human reply")).toBeVisible();
   await expect(page.getByText("AI active", { exact: true })).toBeVisible();
-  await page.screenshot({
+  await capturePage({
     path: "test-results/screenshots/inbox-mobile.png",
     fullPage: true,
   });
+  // Mobile ownership is reachable from the composer, with unchanged pause/resume semantics.
+  await page
+    .getByRole("button", { name: "Claim conversation", exact: true })
+    .click();
+  await expect(page.getByText("Claimed by you", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Your human reply")).toBeEnabled();
+  await page
+    .getByRole("button", { name: "Release conversation", exact: true })
+    .click();
+  await expect(page.getByRole("status")).toContainText("AI remains paused");
+  await page.getByRole("button", { name: "Resume AI", exact: true }).click();
+  await expect(page.getByText("AI active", { exact: true })).toBeVisible();
+  await page
+    .getByRole("button", { name: "Open navigation", exact: true })
+    .click();
+  const drawer = page.getByRole("dialog", {
+    name: "Workspace navigation",
+    exact: true,
+  });
+  await expect(drawer).toBeVisible();
+  await capturePage({
+    path: "test-results/screenshots/mobile-navigation-390.png",
+    fullPage: false,
+  });
+  await page.keyboard.press("Tab");
+  expect(
+    await drawer.evaluate((node) => node.contains(document.activeElement)),
+  ).toBe(true);
+  await page.keyboard.press("Escape");
+  await expect(drawer).not.toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Open navigation", exact: true }),
+  ).toBeFocused();
+  await page
+    .getByRole("button", { name: "Open navigation", exact: true })
+    .click();
+  await drawer.getByRole("link", { name: "Agent", exact: true }).click();
+  await expect(drawer).not.toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Agent", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole("navigation", { name: "Main navigation", exact: true })
+      .getByRole("link", { name: "Conversations", exact: true }),
+  ).toHaveCount(0);
+  await page
+    .getByRole("link", { name: "Test conversation history", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Test conversations", exact: true }),
+  ).toBeVisible();
+  const routes = [
+    ["/app", "Your AI front office", "home-active"],
+    ["/app/inbox", "Inbox", "inbox-list"],
+    [inboxUrl, "Alex", "inbox-conversation"],
+    ["/app/agent", "Agent", "agent"],
+    ["/app/knowledge", "Business knowledge", "knowledge"],
+    ["/app/channels", "Channels", "channels"],
+    ["/app/leads", "Leads", "leads"],
+    [leadUrl!, "Alex", "lead"],
+    ["/app/conversations", "Test conversations", "conversations"],
+    ["/app/test-agent", "Try a customer conversation", "test-agent"],
+    ["/app/settings", "Workspace settings", "settings"],
+  ];
+  for (const width of [1440, 1280, 1024, 768, 390]) {
+    await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 });
+    for (const [route, heading, name] of routes) {
+      await page.goto(route);
+      await expect(
+        page.getByRole("heading", { name: heading, exact: true }),
+      ).toBeVisible();
+      if (route === inboxUrl) {
+        await expect(page.getByLabel("Your human reply")).toBeVisible();
+        if (width === 1440) {
+          const list = await page
+            .getByRole("navigation", {
+              name: "Customer conversations",
+              exact: true,
+            })
+            .boundingBox();
+          const center = await page
+            .getByLabel("Customer conversation", { exact: true })
+            .boundingBox();
+          const context = await page
+            .getByLabel("Customer and conversation context", { exact: true })
+            .boundingBox();
+          expect(list).not.toBeNull();
+          expect(center).not.toBeNull();
+          expect(context).not.toBeNull();
+          expect(list!.x + list!.width).toBeLessThanOrEqual(center!.x + 1);
+          expect(center!.x + center!.width).toBeLessThanOrEqual(context!.x + 1);
+        }
+        if (width === 390)
+          expect(
+            await page
+              .getByLabel("Conversation thread", { exact: true })
+              .evaluate((node) => getComputedStyle(node).overflowY),
+          ).toBe("visible");
+      }
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= window.innerWidth + 1,
+        ),
+        `No overflow at ${width}px: ${name}`,
+      ).toBe(true);
+      if (width === 1440 || width === 390)
+        await capturePage({
+          path: `test-results/screenshots/product-${name}-${width}.png`,
+          fullPage: true,
+        });
+    }
+  }
   await visitor.goto(inboxUrl);
   await expect(visitor).toHaveURL(/\/auth\/sign-in$/);
   await visitorContext.close();

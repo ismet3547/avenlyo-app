@@ -45,21 +45,29 @@ export default async function TestAgentPage({
   return (
     <>
       <PageHeader
-        eyebrow="Test Agent"
+        eyebrow="Test mode"
         title="Try a customer conversation"
-        description="Test your effective settings and published knowledge. Conversations and leads are test data; no external customer message or team notification is sent."
+        description="Try your saved settings and published knowledge. No external customer messages or team notifications are sent."
         action={
-          <Button asChild variant="outline">
-            <Link href="/app/test-agent">
-              <Plus aria-hidden />
-              New test
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/app/conversations"
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              Test history
             </Link>
-          </Button>
+            <Button asChild variant="outline">
+              <Link href="/app/test-agent">
+                <Plus aria-hidden />
+                New test
+              </Link>
+            </Button>
+          </div>
         }
       />
       {conversation?.data?.ai_mode === "paused" && (
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm text-amber-900">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-attention/20 bg-attention-soft p-4">
+          <p className="text-sm text-attention">
             This test needs human assistance. Automated answers are paused.
           </p>
           <form action={resumeTest}>
@@ -74,7 +82,12 @@ export default async function TestAgentPage({
         key={authorizedId ?? "new"}
         workspaceId={ctx.workspace.id}
         conversationId={authorizedId}
-        initialMessages={messages?.data?.map(m => ({role: m.role === "customer" ? "customer" : "assistant", content: m.content})) ?? []}
+        initialMessages={
+          messages?.data?.map((m) => ({
+            role: m.role === "customer" ? "customer" : "assistant",
+            content: m.content,
+          })) ?? []
+        }
         initialLeadId={lead?.data?.id ?? null}
       />
     </>

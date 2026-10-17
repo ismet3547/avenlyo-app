@@ -27,7 +27,7 @@ export default async function ChatDemo({
         the chat to ask your business’s agent a question. The customer does not
         sign in.
       </p>
-      <div className="mt-10 rounded-xl border border-border bg-white p-6 text-sm leading-7 text-muted-foreground">
+      <div className="mt-10 rounded-xl border border-border bg-card p-6 text-sm leading-7 text-muted-foreground">
         This origin must be explicitly approved in Channels → Website Chat. The
         widget uses your published knowledge and saves a real channel
         conversation in your disposable local database.

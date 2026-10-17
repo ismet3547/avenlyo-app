@@ -1,13 +1,11 @@
 import { Globe, MessageCircle, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   WebsiteChannelForm,
   EmbedSnippet,
   DisconnectInstagram,
+  ConnectionManagement,
 } from "@/components/channel-forms";
 import { requireWorkspace } from "@/lib/workspace";
 import { websiteOriginSchema } from "@avenlyo-app/shared";
@@ -37,122 +35,173 @@ export default async function ChannelsPage() {
     ? "Connected"
     : instagram?.status === "needs_attention"
       ? "Needs attention"
-      : instagram
-        ? "Managed setup required"
-        : "Not configured";
+      : instagram?.status === "disconnected"
+        ? "Disconnected"
+        : instagram
+          ? "Managed setup required"
+          : "Not configured";
   return (
-    <>
+    <div className="max-w-[1120px]">
       <PageHeader
-        title="Meet customers where they are"
-        description="Your agent settings and published knowledge power every channel. Real customer conversations come together in Inbox."
+        title="Channels"
+        description="Connect the places where customers contact your business. One agent, with your team in control."
       />
-      <div className="grid items-start gap-5 xl:grid-cols-2">
-        <Card className="min-w-0 p-6">
-          <div className="flex items-center justify-between">
-            <span className="grid size-11 place-items-center rounded-xl border border-border bg-muted">
-              <Globe className="size-5" aria-hidden />
-            </span>
-            <Badge
-              className={
-                website?.enabled
-                  ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-                  : ""
-              }
-            >
-              {websiteState}
-            </Badge>
-          </div>
-          <h2 className="mt-5 text-lg font-semibold tracking-tight">
-            Website Chat
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            A small chat widget for customer questions, useful inquiries and a
-            clear handoff to your team.
-          </p>
-          <WebsiteChannelForm
-            enabled={website?.enabled ?? false}
-            origins={
-              website?.approved_origins ??
-              (local ? ["http://localhost:3001"] : [])
-            }
-            editable={ctx.role === "owner"}
-          />
-          {website && (
-            <EmbedSnippet
-              snippet={`<script async src="${publicUrl}/widget.js" data-avenlyo-channel="${website.public_id}"></script>`}
-            />
-          )}
-          {website && local && (
-            <Link
-              href={`/chat-demo?channel=${website.public_id}`}
-              target="_blank"
-              className="mt-4 inline-flex items-center gap-2 text-xs font-medium text-primary"
-            >
-              Open local widget demo
-              <ArrowUpRight className="size-3" aria-hidden />
-            </Link>
-          )}
-        </Card>
-        <Card className="min-w-0 p-6">
-          <div className="flex items-center justify-between">
-            <span className="grid size-11 place-items-center rounded-xl border border-border bg-muted">
-              <MessageCircle className="size-5" aria-hidden />
-            </span>
-            <Badge
-              className={
-                connected
-                  ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-                  : ""
-              }
-            >
-              {instagramState}
-            </Badge>
-          </div>
-          <h2 className="mt-5 text-lg font-semibold tracking-tight">
-            Instagram
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Reply to supported customer-initiated direct messages through the
-            same agent, with human replies from Inbox.
-          </p>
-          {connected ? (
-            <div className="mt-6 rounded-lg border border-emerald-100 bg-emerald-50/60 p-4">
-              <p className="text-sm font-semibold">
-                @{instagram?.provider_username}
+      <div className="border-t border-border">
+        <section
+          className="connection-row"
+          aria-labelledby="website-channel-heading"
+        >
+          <div className="flex items-start gap-4">
+            <Globe aria-hidden className="mt-1 size-5 text-primary" />
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2
+                  id="website-channel-heading"
+                  className="text-base font-semibold"
+                >
+                  Website Chat
+                </h2>
+                <span
+                  className="status-text"
+                  data-tone={website?.enabled ? "success" : undefined}
+                >
+                  {websiteState}
+                </span>
+              </div>
+              <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
+                Handle inquiries directly on your website, with a clear handoff
+                to your team.
               </p>
-              <p className="mt-2 break-all text-xs text-muted-foreground">
-                Professional account · {instagram?.provider_account_id}
-              </p>
+              <div className="mt-5">
+                <h3 className="text-xs font-semibold">Approved sites</h3>
+                {website?.approved_origins.length ? (
+                  <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-[13px]">
+                    {website.approved_origins.map((origin) => (
+                      <li key={origin} className="break-all">
+                        {origin}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-2 text-[13px] text-muted-foreground">
+                    Approve your website’s origin to get started.
+                  </p>
+                )}
+              </div>
+              <ConnectionManagement
+                label="Manage Website Chat"
+                initialOpen={!website?.enabled}
+              >
+                <WebsiteChannelForm
+                  enabled={website?.enabled ?? false}
+                  origins={
+                    website?.approved_origins ??
+                    (local ? ["http://localhost:3001"] : [])
+                  }
+                  editable={ctx.role === "owner"}
+                />
+                {website && (
+                  <EmbedSnippet
+                    snippet={
+                      '<script async src="' +
+                      publicUrl +
+                      '/widget.js" data-avenlyo-channel="' +
+                      website.public_id +
+                      '"></script>'
+                    }
+                  />
+                )}
+                {website && local && (
+                  <Link
+                    href={"/chat-demo?channel=" + website.public_id}
+                    target="_blank"
+                    className="mt-4 inline-flex items-center gap-2 text-xs font-medium text-primary"
+                  >
+                    Open local widget demo
+                    <ArrowUpRight className="size-3" aria-hidden />
+                  </Link>
+                )}
+              </ConnectionManagement>
             </div>
-          ) : (
-            <div className="mt-6 rounded-lg border border-border bg-muted/50 p-4">
-              <p className="text-sm font-medium">Founder-assisted setup</p>
-              <p className="mt-2 text-xs leading-6 text-muted-foreground">
-                A verified professional account, messaging access and webhook
-                setup are required. Ask your Avenlyo operator to connect the
-                correct account for this workspace.
+          </div>
+        </section>
+        <section
+          className="connection-row"
+          aria-labelledby="instagram-channel-heading"
+        >
+          <div className="flex items-start gap-4">
+            <MessageCircle aria-hidden className="mt-1 size-5 text-primary" />
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2
+                  id="instagram-channel-heading"
+                  className="text-base font-semibold"
+                >
+                  Instagram
+                </h2>
+                <span
+                  className="status-text"
+                  data-tone={
+                    connected
+                      ? "success"
+                      : instagram?.status === "needs_attention"
+                        ? "attention"
+                        : undefined
+                  }
+                >
+                  {instagramState}
+                </span>
+              </div>
+              <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
+                Use the same Avenlyo agent for customer-initiated Instagram
+                messages.
               </p>
+              <div className="mt-5">
+                <h3 className="text-xs font-semibold">
+                  {connected ? "Professional account" : "Managed setup"}
+                </h3>
+                {connected ? (
+                  <p className="mt-2 text-[13px]">
+                    {instagram?.provider_username
+                      ? "@" + instagram.provider_username
+                      : "Connected professional account"}
+                  </p>
+                ) : (
+                  <p className="mt-2 max-w-xl text-[13px] leading-6 text-muted-foreground">
+                    A verified professional account, messaging access and
+                    webhook setup are required. Your Avenlyo operator connects
+                    the correct account for this workspace.
+                  </p>
+                )}
+              </div>
+              {instagram && (
+                <ConnectionManagement label="Connection details">
+                  {connected && (
+                    <p className="break-all text-[13px]">
+                      Professional account · {instagram.provider_account_id}
+                    </p>
+                  )}
+                  <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
+                    Replies follow Instagram’s supported messaging window.
+                    Delivery failures and unconfirmed sends are visible in
+                    Inbox.
+                  </p>
+                  {instagram.status !== "disconnected" && (
+                    <DisconnectInstagram editable={ctx.role === "owner"} />
+                  )}
+                </ConnectionManagement>
+              )}
             </div>
-          )}
-          <p className="mt-5 text-xs leading-6 text-muted-foreground">
-            Replies follow Instagram’s supported messaging window. Delivery
-            failures and unconfirmed sends are visible in Inbox.
-          </p>
-          {instagram && instagram.status !== "disconnected" && (
-            <DisconnectInstagram editable={ctx.role === "owner"} />
-          )}
-        </Card>
+          </div>
+        </section>
       </div>
-      <div className="mt-7 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-white p-5">
-        <p className="max-w-xl text-sm leading-6 text-muted-foreground">
-          When a real inquiry qualifies or needs a person, a staff email is
-          recorded for a verified workspace owner. Delivery status appears with
-          the conversation.
-        </p>
-        <Button asChild variant="outline">
-          <Link href="/app/inbox">Open Inbox</Link>
-        </Button>
-      </div>
-    </>
+      <Link
+        href="/app/inbox"
+        className="mt-6 inline-flex items-center gap-2 text-[13px] font-medium text-primary"
+      >
+        Open Inbox
+        <ArrowUpRight aria-hidden className="size-3.5" />
+      </Link>
+    </div>
   );
 }

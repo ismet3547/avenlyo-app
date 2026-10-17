@@ -16,11 +16,19 @@ test("new user completes the independent foundation flow on desktop and mobile",
   const email = `browser-${randomUUID()}@example.test`;
   const password = `Local-browser-${randomUUID()}!`;
   const shots = "test-results/screenshots";
+  async function capturePage(options: Parameters<typeof page.screenshot>[0]) {
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.screenshot(options);
+  }
   await mkdir(shots, { recursive: true });
   await page.goto("/auth/sign-up");
   await expect(
     page.getByRole("heading", { name: "Start with your business" }),
   ).toBeVisible();
+  await capturePage({
+    path: `${shots}/auth-sign-up-desktop.png`,
+    fullPage: true,
+  });
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page
@@ -48,11 +56,37 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await expect(
     page.getByRole("heading", { name: "Your AI front office", exact: true }),
   ).toBeVisible();
-  await page.screenshot({
+  await expect(page.getByTestId("customer-conversation-count")).toHaveText("0");
+  await expect(
+    page.getByText("0 of 4 complete", { exact: true }),
+  ).toBeVisible();
+  await capturePage({
     path: `${shots}/overview-desktop.png`,
     fullPage: true,
   });
+  await page.setViewportSize({ width: 390, height: 844 });
+  const setupBounds = await page
+    .getByRole("heading", { name: "Set up your AI front office", exact: true })
+    .boundingBox();
+  const attentionBounds = await page
+    .getByRole("heading", { name: "Needs your attention", exact: true })
+    .boundingBox();
+  expect(setupBounds).not.toBeNull();
+  expect(attentionBounds).not.toBeNull();
+  expect(setupBounds!.y).toBeLessThan(attentionBounds!.y);
+  await capturePage({
+    path: `${shots}/home-onboarding-mobile.png`,
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/app/agent");
+  await page.getByRole("radio", { name: "Warm", exact: true }).check();
+  await expect(
+    page
+      .getByLabel("Configuration preview")
+      .getByRole("heading", { name: "Warm", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("radio", { name: "Professional", exact: true }).check();
   await page
     .getByLabel("What should Avenlyo help your customers with?", {
       exact: true,
@@ -67,6 +101,7 @@ test("new user completes the independent foundation flow on desktop and mobile",
     .getByRole("button", { name: "Save settings", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Agent settings saved");
+  await capturePage({ path: `${shots}/agent-desktop.png`, fullPage: true });
   await page.goto("/app/knowledge/new");
   await page.getByLabel("Title", { exact: true }).fill("Custom projects");
   await page
@@ -80,6 +115,12 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await expect(
     page.getByRole("status").filter({ hasText: "Published." }),
   ).toBeVisible();
+  await expect(
+    page.getByText(
+      "Draft saved. Review the content, then publish it for your agent.",
+      { exact: true },
+    ),
+  ).not.toBeVisible();
   await page.goto("/app/knowledge/new");
   await page.getByRole("radio", { name: "FAQ · question and answer" }).check();
   await page
@@ -93,7 +134,7 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await expect(
     page.getByRole("status").filter({ hasText: "Published." }),
   ).toBeVisible();
-  await page.screenshot({
+  await capturePage({
     path: `${shots}/knowledge-desktop.png`,
     fullPage: true,
   });
@@ -115,7 +156,7 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await expect(
     page.getByRole("link", { name: "View test lead →" }),
   ).toBeVisible();
-  await page.screenshot({
+  await capturePage({
     path: `${shots}/test-agent-desktop.png`,
     fullPage: true,
   });
@@ -128,10 +169,25 @@ test("new user completes the independent foundation flow on desktop and mobile",
   ).toBeVisible();
   await expect(page.getByText("Qualified", { exact: true })).toBeVisible();
   await expect(page.getByText("Test Agent", { exact: true })).toBeVisible();
-  await page.screenshot({ path: `${shots}/lead-desktop.png`, fullPage: true });
+  await capturePage({ path: `${shots}/lead-desktop.png`, fullPage: true });
+  const testLeadUrl = page.url();
+  await page.goto("/app");
+  await expect(page.getByTestId("customer-conversation-count")).toHaveText("0");
+  await expect(page.getByTestId("customer-qualified-count")).toHaveText("0");
+  await page.goto(testLeadUrl);
   await page
-    .getByRole("link", { name: "View conversation", exact: true })
+    .getByRole("link", { name: "Open conversation", exact: true })
     .click();
+  await expect(
+    page.getByRole("heading", { name: "Test conversation", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("I'm Alex. My email is alex@example.test.", { exact: true }),
+  ).toBeVisible();
+  await capturePage({
+    path: `${shots}/test-conversation-desktop.png`,
+    fullPage: true,
+  });
   await page.getByRole("link", { name: "Continue test", exact: true }).click();
   await page.getByLabel("Customer message").fill("I want a human.");
   await page.getByRole("button", { name: "Send", exact: true }).click();
@@ -144,21 +200,34 @@ test("new user completes the independent foundation flow on desktop and mobile",
       { exact: true },
     ),
   ).toBeVisible();
+  await page.goto("/app/conversations");
+  await expect(
+    page.getByRole("heading", { name: "Test conversations", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link").filter({ hasText: "Test conversation" }).first(),
+  ).toBeVisible();
+  await capturePage({
+    path: `${shots}/test-history-desktop.png`,
+    fullPage: true,
+  });
   await page.goto("/app/channels");
   await expect(page.getByText("Disabled", { exact: true })).toBeVisible();
   await expect(page.getByText("Not configured", { exact: true })).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
-  for (const route of [
-    "/app",
-    "/app/agent",
-    "/app/knowledge",
-    "/app/test-agent",
-    "/app/leads",
-    "/app/channels",
-    "/app/settings",
+  for (const [route, heading] of [
+    ["/app", "Your AI front office"],
+    ["/app/agent", "Agent"],
+    ["/app/knowledge", "Business knowledge"],
+    ["/app/test-agent", "Try a customer conversation"],
+    ["/app/leads", "Leads"],
+    ["/app/channels", "Channels"],
+    ["/app/settings", "Workspace settings"],
   ]) {
     await page.goto(route);
-    await expect(page.getByRole("main")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: heading, exact: true }),
+    ).toBeVisible();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth + 1,
@@ -167,7 +236,19 @@ test("new user completes the independent foundation flow on desktop and mobile",
     ).toBe(true);
   }
   await page.goto("/app");
-  await page.screenshot({
+  await expect(
+    page.getByRole("heading", { name: "Your AI front office", exact: true }),
+  ).toBeVisible();
+  // Existing Test Agent conversations/leads must not inflate customer metrics.
+  await expect(page.getByTestId("customer-conversation-count")).toHaveText("0");
+  await expect(page.getByTestId("customer-needs-you-count")).toHaveText("0");
+  await expect(
+    page.getByText(
+      "Customer channels only · Test Agent activity is excluded.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await capturePage({
     path: `${shots}/overview-mobile.png`,
     fullPage: true,
   });

@@ -1,10 +1,15 @@
 import Link from "next/link";
-import { Plus, ArrowUpRight, Globe, FileText, HelpCircle } from "lucide-react";
+import {
+  Plus,
+  ArrowUpRight,
+  FileText,
+  HelpCircle,
+  BookOpen,
+} from "lucide-react";
 import { requireWorkspace } from "@/lib/workspace";
+import { dateLabel } from "@/lib/utils";
 import { PageHeader } from "@/components/page-header";
 import { KnowledgeActions } from "@/components/knowledge-actions";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
 export default async function KnowledgePage({
@@ -27,7 +32,16 @@ export default async function KnowledgePage({
     .limit(100);
   if (status !== "all")
     query = query.eq("status", status as "draft" | "published" | "archived");
-  const result = await query;
+  const [result, ...counts] = await Promise.all([
+    query,
+    ...(["published", "draft", "archived"] as const).map((s) =>
+      ctx.supabase
+        .from("knowledge_items")
+        .select("id", { count: "exact", head: true })
+        .eq("workspace_id", ctx.workspace.id)
+        .eq("status", s),
+    ),
+  ]);
   const action =
     ctx.role === "owner" ? (
       <Button asChild>
@@ -38,116 +52,130 @@ export default async function KnowledgePage({
       </Button>
     ) : null;
   return (
-    <>
+    <div className="max-w-[1200px]">
       <PageHeader
-        eyebrow="Business knowledge"
-        title="Good answers start here"
-        description="Add information directly. No website needed. Only published items are available to your agent."
+        title="Business knowledge"
+        description="Everything Avenlyo is allowed to use when answering customers. Only published knowledge is available to your agent."
         action={action}
       />
-      <div
-        className="mb-6 flex flex-wrap gap-2"
+      <p className="mb-4 flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-muted-foreground">
+        {["published", "draft", "archived"].map((label, i) => (
+          <span key={label}>
+            <strong className="font-medium text-foreground">
+              {counts[i].error ? "—" : (counts[i].count ?? 0)}
+            </strong>{" "}
+            {label}
+          </span>
+        ))}
+      </p>
+      <nav
+        className="flex flex-wrap border-b border-border"
         aria-label="Knowledge status filters"
       >
-        {["all", "published", "draft", "archived"].map((s) => (
-          <Button
+        {[
+          ["all", "All"],
+          ["published", "Published"],
+          ["draft", "Drafts"],
+          ["archived", "Archived"],
+        ].map(([s, label]) => (
+          <Link
             key={s}
-            size="sm"
-            variant={status === s ? "default" : "ghost"}
-            asChild
+            className="filter-tab"
+            aria-current={status === s ? "page" : undefined}
+            href={`/app/knowledge${s === "all" ? "" : `?status=${s}`}`}
           >
-            <Link
-              className="capitalize"
-              href={`/app/knowledge${s === "all" ? "" : `?status=${s}`}`}
-            >
-              {s}
-            </Link>
-          </Button>
+            {label}
+          </Link>
         ))}
-      </div>
-      {params.notice === "draft-saved" && (
-        <p
-          role="status"
-          className="mb-5 rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-800"
-        >
-          Draft saved. Review the content, then publish it for your agent.
-        </p>
-      )}
+      </nav>
+      {params.notice === "draft-saved" &&
+        result.data?.some((item) => item.status === "draft") && (
+          <p
+            role="status"
+            className="mt-5 bg-success-soft px-4 py-3 text-[13px] text-success"
+          >
+            Draft saved. Review the content, then publish it for your agent.
+          </p>
+        )}
       {result.error ? (
-        <p role="alert">
-          Knowledge could not be loaded. Check your local database setup.
+        <p role="alert" className="py-6">
+          Knowledge could not be loaded. Please try again.
         </p>
       ) : !result.data.length ? (
         <EmptyState
           title={
             status === "all"
-              ? "Teach your agent about your business"
+              ? "Give Avenlyo approved information it can use."
               : `No ${status} items`
           }
-          description="Start with a service description or a frequently asked question. Keep information clear and accurate."
+          description="Start with a service description or a customer question. Review the information, then publish it when it’s ready."
           action={action}
         />
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div>
           {result.data.map((item) => (
-            <Card className="p-5" key={item.id}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  {item.type === "faq" ? (
-                    <HelpCircle className="size-4" aria-hidden />
-                  ) : (
-                    <FileText className="size-4" aria-hidden />
-                  )}
-                  {item.type === "faq" ? "FAQ" : "Text"}
+            <article className="library-row" key={item.id}>
+              <div className="flex min-w-0 gap-3.5">
+                {item.type === "faq" ? (
+                  <HelpCircle
+                    aria-hidden
+                    className="mt-1 size-4 text-muted-foreground"
+                  />
+                ) : (
+                  <FileText
+                    aria-hidden
+                    className="mt-1 size-4 text-muted-foreground"
+                  />
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-2">
+                    <h2 className="text-sm font-semibold">{item.title}</h2>
+                    <span
+                      className="status-text"
+                      data-tone={
+                        item.status === "published"
+                          ? "success"
+                          : item.status === "draft"
+                            ? "attention"
+                            : undefined
+                      }
+                    >
+                      {item.status === "published"
+                        ? "Published"
+                        : item.status === "draft"
+                          ? "Draft"
+                          : "Archived"}
+                    </span>
+                  </div>
+                  <p className="mt-2 line-clamp-2 whitespace-pre-wrap text-[13px] leading-6 text-muted-foreground">
+                    {item.content}
+                  </p>
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    {item.type === "faq" ? "FAQ" : "Text"} · Updated{" "}
+                    {dateLabel(item.updated_at)}
+                  </p>
                 </div>
-                <Badge
-                  className={
-                    item.status === "published"
-                      ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-                      : ""
-                  }
-                >
-                  {item.status === "published"
-                    ? "Published"
-                    : item.status === "draft"
-                      ? "Draft"
-                      : "Archived"}
-                </Badge>
               </div>
-              <h2 className="mt-4 text-sm font-semibold leading-6">
-                {item.title}
-              </h2>
-              <p className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
-                {item.content}
-              </p>
               {ctx.role === "owner" && (
-                <>
+                <div className="mt-4 flex flex-wrap items-center gap-3 pl-[30px] lg:mt-0 lg:max-w-[290px] lg:justify-end lg:pl-0">
                   <Link
                     href={`/app/knowledge/${item.id}`}
-                    className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-primary"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
                   >
                     Edit item
-                    <ArrowUpRight className="size-3" aria-hidden />
+                    <ArrowUpRight aria-hidden className="size-3" />
                   </Link>
                   <KnowledgeActions id={item.id} status={item.status} />
-                </>
+                </div>
               )}
-            </Card>
+            </article>
           ))}
         </div>
       )}
-      <Card className="mt-7 flex items-center gap-4 bg-transparent p-5 shadow-none">
-        <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-muted">
-          <Globe aria-hidden className="size-5 text-muted-foreground" />
-        </span>
-        <div className="flex-1">
-          <h2 className="text-sm font-medium">Website import</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Another way to add knowledge. Manual text and FAQs work today.
-          </p>
-        </div>
-        <Badge>Coming next</Badge>
-      </Card>
-    </>
+      <p className="mt-5 flex items-center gap-2 text-xs leading-6 text-muted-foreground">
+        <BookOpen aria-hidden className="size-3.5" />
+        Draft and archived items stay outside your agent’s published knowledge.
+      </p>
+    </div>
   );
 }

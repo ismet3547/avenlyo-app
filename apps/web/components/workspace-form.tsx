@@ -27,7 +27,7 @@ export function WorkspaceForm() {
         manually.
       </p>
       {state.message && (
-        <p role="status" className="text-sm text-red-700">
+        <p role="status" className="text-sm text-danger">
           {state.message}
         </p>
       )}
