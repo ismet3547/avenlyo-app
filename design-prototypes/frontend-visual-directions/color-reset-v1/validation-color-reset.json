@@ -1,0 +1,376 @@
+{
+  "scope": "static design artwork only",
+  "geometry_source_commit": "4efa686ff043c8d56350cf603f72574320529ae8",
+  "preferred_palette": "B / Graphite + Cyan / Teal",
+  "preferred_font": "Manrope",
+  "geometry_and_fixture_checks": [
+    {
+      "file": "mockups/a-home.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/a-inbox-desktop.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/type-a-geist-home.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/type-a-geist-inbox-desktop.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/type-a-instrument-sans-home.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/type-a-instrument-sans-inbox-desktop.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/b-home.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/b-inbox-desktop.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/type-b-geist-home.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/type-b-geist-inbox-desktop.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/type-b-instrument-sans-home.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/type-b-instrument-sans-inbox-desktop.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/c-home.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/c-inbox-desktop.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/type-c-geist-home.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/type-c-geist-inbox-desktop.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/type-c-instrument-sans-home.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/type-c-instrument-sans-inbox-desktop.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/b-agent.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/b-widget-desktop.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "mockups/b-inbox-mobile.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        390,
+        844
+      ]
+    },
+    {
+      "file": "mockups/b-widget-mobile.svg",
+      "geometry": "identical",
+      "fixture_and_line_breaks": "identical",
+      "dimensions": [
+        390,
+        844
+      ]
+    }
+  ],
+  "preserved_refinement_hashes": {
+    "refinement-v1/mockups/03-ai-product-refined-home-desktop.svg": "f8ccec4678ed19592474eff6fd0556f68e1e893bda76d8bee742f32cdc5a4b82",
+    "refinement-v1/mockups/03-ai-product-refined-home-desktop.png": "8baa0cac8138d26bc9c0737fb943c9e0cdae4abc44b5e8fbadd7a1b56cb4a329",
+    "refinement-v1/mockups/03-ai-product-refined-inbox-desktop.svg": "144beeb4970983fcc4baea9f07c5b0a71aeaef045704cff858716d43c5904b01",
+    "refinement-v1/mockups/03-ai-product-refined-inbox-desktop.png": "5e475a3b8afbbc5a331a62dfa42cfeae4d789f38a242aeb80d1da10fdd5b7905",
+    "refinement-v1/mockups/03-ai-product-refined-agent-desktop.svg": "968cfeb681612e3a52172510ebefa4075c2d2161fe34a9fb52a940c28b13c1f9",
+    "refinement-v1/mockups/03-ai-product-refined-agent-desktop.png": "dd6dc1e739932ce6a108af7eae464418bb1a739fa14bccd345f8478627360c2f",
+    "refinement-v1/mockups/03-ai-product-refined-widget-desktop.svg": "7fbfec9a1de262113b5b0b5e712c34e0446d289430112057021a38343e8057f6",
+    "refinement-v1/mockups/03-ai-product-refined-widget-desktop.png": "be39855c48b7ef8572042ef18bcbbe2dc6b9416b860d9419afc2ef3defc01a16",
+    "refinement-v1/mockups/03-ai-product-refined-inbox-mobile.svg": "9318e02c4ae4db07670c8fecea5e8928f7c5927a32fade1fc62c1e695229f684",
+    "refinement-v1/mockups/03-ai-product-refined-inbox-mobile.png": "ab2482694d121a718ab95e3723bf989ec5ce0ad13089ed4a420d5172eb4c2d3c",
+    "refinement-v1/mockups/03-ai-product-refined-widget-mobile.svg": "62675092cdb1fa15314be52d309793cf3176d66fec513a378e01296c77607e73",
+    "refinement-v1/mockups/03-ai-product-refined-widget-mobile.png": "39fba51ea3f589a56fb0ed82a58b6df6f7527f206f3c10311c8ee131aea3ba26"
+  },
+  "contrast_ratios": {
+    "a": {
+      "text / surface": 16.29,
+      "muted / subtle": 5.3,
+      "text / AI": 14.74,
+      "text / customer": 13.96,
+      "action label / action": 5.37,
+      "link / surface": 5.37,
+      "nav text / nav": 14.62,
+      "nav selected text / selected": 7.74,
+      "success / success fill": 4.96,
+      "attention / neutral fill": 4.75,
+      "danger / surface": 5.59,
+      "paused / paused fill": 5.25,
+      "handling / nav": 13.31,
+      "handling muted / nav": 9.46,
+      "focus / canvas": 4.15
+    },
+    "b": {
+      "text / surface": 16.05,
+      "muted / subtle": 5.41,
+      "text / AI": 14.61,
+      "text / customer": 13.91,
+      "action label / action": 4.75,
+      "link / surface": 5.41,
+      "nav text / nav": 14.18,
+      "nav selected text / selected": 7.57,
+      "success / success fill": 4.96,
+      "attention / neutral fill": 4.75,
+      "danger / surface": 5.59,
+      "paused / paused fill": 5.25,
+      "handling / nav": 12.94,
+      "handling muted / nav": 9.2,
+      "focus / canvas": 4.16
+    },
+    "c": {
+      "text / surface": 15.25,
+      "muted / subtle": 5.18,
+      "text / AI": 13.82,
+      "text / customer": 13.05,
+      "action label / action": 9.85,
+      "link / surface": 7.38,
+      "nav text / nav": 14.82,
+      "nav selected text / selected": 9.23,
+      "success / success fill": 4.96,
+      "attention / neutral fill": 4.75,
+      "danger / surface": 5.59,
+      "paused / paused fill": 5.25,
+      "handling / nav": 13.7,
+      "handling muted / nav": 9.74,
+      "focus / canvas": 4.02
+    }
+  },
+  "type_study_padding_intrusions": [
+    {
+      "font": "geist",
+      "scene": "inbox-desktop",
+      "text": "If you'd like, share your name and email and I can save your inquiry",
+      "available": 432.4089765625,
+      "actual": 438.799
+    },
+    {
+      "font": "geist",
+      "scene": "inbox-desktop",
+      "text": "I'm Alex. My email is alex@example.test.",
+      "available": 263.056,
+      "actual": 265.19050000000004
+    },
+    {
+      "font": "geist",
+      "scene": "inbox-desktop",
+      "text": "Thanks, Alex. Your inquiry has been saved for team follow-up.",
+      "available": 402.3695078125,
+      "actual": 404.5935
+    },
+    {
+      "font": "geist",
+      "scene": "inbox-desktop",
+      "text": "I'd like to speak with a person.",
+      "available": 195.283,
+      "actual": 198.79500000000002
+    },
+    {
+      "font": "geist",
+      "scene": "inbox-desktop",
+      "text": "If you'd like, share your name and email and I can save your inquiry",
+      "available": 432.4089765625,
+      "actual": 438.799
+    },
+    {
+      "font": "geist",
+      "scene": "inbox-desktop",
+      "text": "I'm Alex. My email is alex@example.test.",
+      "available": 263.056,
+      "actual": 265.19050000000004
+    },
+    {
+      "font": "geist",
+      "scene": "inbox-desktop",
+      "text": "Thanks, Alex. Your inquiry has been saved for team follow-up.",
+      "available": 402.3695078125,
+      "actual": 404.5935
+    },
+    {
+      "font": "geist",
+      "scene": "inbox-desktop",
+      "text": "I'd like to speak with a person.",
+      "available": 195.283,
+      "actual": 198.79500000000002
+    },
+    {
+      "font": "geist",
+      "scene": "inbox-desktop",
+      "text": "If you'd like, share your name and email and I can save your inquiry",
+      "available": 432.4089765625,
+      "actual": 438.799
+    },
+    {
+      "font": "geist",
+      "scene": "inbox-desktop",
+      "text": "I'm Alex. My email is alex@example.test.",
+      "available": 263.056,
+      "actual": 265.19050000000004
+    },
+    {
+      "font": "geist",
+      "scene": "inbox-desktop",
+      "text": "Thanks, Alex. Your inquiry has been saved for team follow-up.",
+      "available": 402.3695078125,
+      "actual": 404.5935
+    },
+    {
+      "font": "geist",
+      "scene": "inbox-desktop",
+      "text": "I'd like to speak with a person.",
+      "available": 195.283,
+      "actual": 198.79500000000002
+    }
+  ],
+  "type_study_note": "Locked Manrope line breaks and bubble widths. Geist reaches up to 6.39px into the original 12px text padding; it remains inside the bubble. No font is scaled or given more space. Preferred Manrope has no fit change.",
+  "unchanged_geometry": {
+    "sidebar": 224,
+    "conversation_list": 320,
+    "thread": 624,
+    "context": 272,
+    "conversation_row": 96,
+    "handling_desktop": 72,
+    "handling_mobile": 57,
+    "composer_desktop": 116,
+    "composer_mobile": 98,
+    "message_radius": 10,
+    "work_radius": 10,
+    "widget_radius": 22,
+    "mobile_primary_height": 44
+  },
+  "limits": "Static outlines and raster QA do not validate browser focus, hit testing, virtual keyboard or production behavior."
+}

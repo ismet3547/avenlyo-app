@@ -6,7 +6,7 @@ Visual review date: **17 October 2026**. Branch: `feat/frontend-recreation-v1`. 
 
 **Design only.** No production application, API, database, migration, RLS, authentication, runtime, dependency, CI or route change. No merge, deployment or implementation PR. Do not implement the recommendation without a separate explicit approval.
 
-**Stakeholder update:** Direction 3 is approved as the visual direction. The [Direction 3 refinement](#direction-3-refinement) below is design-only; implementation remains unapproved. Earlier specifications and scores describe the preserved original study.
+**Latest stakeholder update:** The refined Direction 3 structure is approved; its warm color/visual tone is rejected. The [cool color reset](#cool-color-reset) is the current visual study. Earlier palettes, recommendations and scores remain as historical records. Implementation remains unapproved.
 
 ## Review entry points
 
@@ -465,3 +465,42 @@ Concrete spacing tokens: message gap **13→9px desktop / 8→6px mobile**; auth
 Each new PNG has a matching portable outlined SVG. The 2952×4028 before/after board compares Home, Inbox, desktop widget and both mobile views; the gallery also pairs Agent. All use the original fictional Northstar Studio data, transcript and unclaimed/paused state. Claim/release/resume semantics and lead qualification behavior are unchanged. Original images are retained and their hashes recorded; Directions 1 and 2 are untouched.
 
 Validation covers six image sizes, fixture/state labels, unchanged message sizes, 44px mobile primary artwork, contrast, measured spacing/color changes and visual inspection of all six renders and the board. This remains static visual validation, without a production browser, keyboard, runtime or backend acceptance claim. **No implementation, production styles/components, dependencies, merge or deployment is authorized or performed. Stop for stakeholder approval.**
+
+## Cool color reset
+
+The stakeholder approved the refined Direction 3 architecture, composition,
+density and radii, while rejecting its warm color family. This new study resets
+color only. Prior artwork is retained; warm token tables above are superseded
+for the new study and are not an implementation recommendation.
+
+**Preferred: B — Graphite + Cyan / Teal, with Manrope.** Its restrained cyan
+decision accent, true cool graphite navigation and white/cool-neutral work
+planes provide the best balance of distinctive identity, calm and operational
+clarity. A / Graphite + Azure is very clear but more familiar; C / Midnight +
+Ice Blue is composed but gives its pale primary actions less emphasis. This
+recommendation awaits stakeholder color approval.
+
+- [Home / all three palettes](../design-prototypes/frontend-visual-directions/color-reset-v1/color-reset-comparison-home.png).
+- [Inbox / all three palettes](../design-prototypes/frontend-visual-directions/color-reset-v1/color-reset-comparison-inbox.png).
+- [Typography / three palettes × Manrope, Geist and Instrument Sans](../design-prototypes/frontend-visual-directions/color-reset-v1/color-reset-typography.png).
+- [Complete preferred system and offline gallery](../design-prototypes/frontend-visual-directions/color-reset-v1/index.html).
+- [Exact token tables, semantic rules, type assessment and all mockups](../design-prototypes/frontend-visual-directions/color-reset-v1/README.md).
+- [CSS tokens](../design-prototypes/frontend-visual-directions/color-reset-v1/tokens-color-reset.css) and [validation evidence](../design-prototypes/frontend-visual-directions/color-reset-v1/validation-color-reset.json).
+
+Ten required views are provided: Home and Inbox at 1440×900 for each palette;
+Agent and widget at 1440×900, plus Inbox and widget at 390×844 for preferred B.
+Twelve additional Home/Inbox font-study frames support the typography matrix.
+All 22 frames preserve the corresponding approved refined geometry and fixture
+line breaks. Main Manrope frames also preserve all glyph placements. Typeface
+judgments are visual, not user-test findings; Manrope retains the strongest
+overall balance in this composition without changing type for novelty.
+
+Primary/action, success, attention, danger and AI paused have independent
+tokens. AI paused uses explicit text/icon and neutral slate treatment. Functional
+amber is restricted to small attention marks on cool surfaces; no cream/peach
+status fills, warm-gray messages or brown navigation remain. Claim/release/
+resume semantics, product truth, density and tightened radii do not change.
+
+Only documentation and static design artifacts changed. **No production UI,
+apps/packages/backend, dependencies, merge or deployment. Stop for stakeholder
+color approval before implementation.**
