@@ -1,0 +1,57 @@
+{
+  "notice": "Fictional design fixture; no customer or backend data",
+  "workspace": "Northstar Studio",
+  "websiteChat": "Active (past activity; not live installation monitoring)",
+  "instagram": "Setup required",
+  "publishedKnowledgeItems": 4,
+  "customer": {
+    "name": "Alex Morgan",
+    "email": "alex@example.test"
+  },
+  "inquiry": "Logo design",
+  "qualification": "Qualified",
+  "channel": "Website Chat",
+  "handoff": "Needs human",
+  "ai": "AI paused",
+  "ownership": "Unclaimed",
+  "messages": [
+    {
+      "role": "customer",
+      "text": "Hi, I'm interested in your logo design."
+    },
+    {
+      "role": "assistant",
+      "text": "Absolutely. Our published pricing lists logo design at $50.\nIf you'd like, share your name and email and I can save your inquiry for team follow-up."
+    },
+    {
+      "role": "customer",
+      "text": "I'm Alex. My email is alex@example.test."
+    },
+    {
+      "role": "assistant",
+      "text": "Thanks, Alex. Your inquiry has been saved for team follow-up."
+    },
+    {
+      "role": "customer",
+      "text": "I'd like to speak with a person."
+    },
+    {
+      "role": "assistant",
+      "text": "A team member can continue this conversation.\nAutomated answers are paused."
+    }
+  ],
+  "savedAgent": {
+    "goals": [
+      "answer_questions",
+      "identify_interest",
+      "qualify_inquiries",
+      "collect_contact"
+    ],
+    "tone": "professional",
+    "contactFields": [
+      "name",
+      "email"
+    ],
+    "humanHandoff": "always available"
+  }
+}

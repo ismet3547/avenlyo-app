@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-17",
+  "base_commit": "570ef1c2cfde754f975a10d63d5ce0ec47539545",
+  "desktop_compositions": 12,
+  "mobile_compositions": 6,
+  "dimensions": "pass",
+  "turkish_glyphs": {
+    "geist": {
+      "missing": []
+    },
+    "ibm-plex-sans": {
+      "missing": []
+    },
+    "instrument-sans": {
+      "missing": []
+    },
+    "instrument-serif": {
+      "missing": []
+    },
+    "inter": {
+      "missing": []
+    },
+    "manrope": {
+      "missing": []
+    },
+    "newsreader": {
+      "missing": []
+    },
+    "source-serif": {
+      "missing": []
+    },
+    "system-ui-review": {
+      "missing": []
+    }
+  },
+  "critical_color_pairs": {
+    "01-editorial": {
+      "body / surface": 14.66,
+      "muted / canvas": 5.25,
+      "white / primary": 8.37,
+      "white / primary hover": 11.53,
+      "focus / canvas": 7.68,
+      "body / selection": 11.42,
+      "success / success-fill": 6.18,
+      "attention / attention-fill": 5.73,
+      "danger / surface": 6.27
+    },
+    "02-precision": {
+      "body / surface": 15.86,
+      "muted / canvas": 5.58,
+      "white / primary": 6.01,
+      "white / primary hover": 8.11,
+      "focus / canvas": 5.66,
+      "body / selection": 13.74,
+      "success / success-fill": 6.25,
+      "attention / attention-fill": 6.11,
+      "danger / surface": 6.11
+    },
+    "03-ai-product": {
+      "body / surface": 14.68,
+      "muted / canvas": 5.24,
+      "white / primary": 6.03,
+      "white / primary hover": 8.27,
+      "focus / canvas": 5.22,
+      "body / selection": 12.04,
+      "success / success-fill": 5.82,
+      "attention / attention-fill": 5.67,
+      "danger / surface": 6.15
+    }
+  },
+  "fixture_state_checks": "pass",
+  "rendering": "font-outline SVG \u2192 sharp PNG; no browser or backend needed",
+  "limits": [
+    "Static artwork does not validate real focus, keyboard, scrolling, transitions or auth behavior.",
+    "Operating system SF rendering was not available; the actual Linux system font is labeled.",
+    "No production code or runtime tests run for this isolated design change."
+  ]
+}

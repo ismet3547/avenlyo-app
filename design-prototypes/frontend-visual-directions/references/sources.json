@@ -1,0 +1,68 @@
+[
+  {
+    "id": "linear-inbox",
+    "page": "https://linear.app/changelog/2026-09-03-priority-inbox",
+    "image_url": "https://webassets.linear.app/images/ornj730p/production/8005be22da38ee19e6ac56569976958564d9bbb1-3600x2080.png",
+    "original_size": [
+      3600,
+      2080
+    ],
+    "saved": "linear-inbox.jpg",
+    "retrieved": "2026-10-17"
+  },
+  {
+    "id": "attio-record",
+    "page": "https://attio.com/changelog/2026/record-page-redesign",
+    "image_url": "https://a.storyblok.com/f/234930/7680x4320/68fc5a1cc0/new-record-layout.png",
+    "original_size": [
+      7680,
+      4320
+    ],
+    "saved": "attio-record.jpg",
+    "retrieved": "2026-10-17"
+  },
+  {
+    "id": "intercom-inbox",
+    "page": "https://www.intercom.com/helpdesk/inbox",
+    "image_url": "https://cdn.sanity.io/images/4bgok82s/monorepo-static-assets/b1b18a305bbce7f039c68bbdb044841365045a98-2436x1624.webp",
+    "original_size": [
+      2436,
+      1624
+    ],
+    "saved": "intercom-inbox.jpg",
+    "retrieved": "2026-10-17"
+  },
+  {
+    "id": "front-inbox",
+    "page": "https://help.front.com/en/articles/3889728",
+    "image_url": "https://usw1.frontkb-cdn.com/attachments/11/1/5d6d107c-3768-448a-9aee-b90590ec381d.png",
+    "original_size": [
+      1093,
+      692
+    ],
+    "saved": "front-inbox.jpg",
+    "retrieved": "2026-10-17"
+  },
+  {
+    "id": "vercel-shell",
+    "page": "https://vercel.com/changelog/dashboard-navigation-redesign-rollout",
+    "image_url": "https://assets.vercel.com/image/upload/contentful/image/e5382hct74si/2Y43YuHnMCvnuYMC3VCvWX/9a16131f4a4a06532246b10258b43cff/Dash_-_Light__2_.png",
+    "original_size": [
+      1200,
+      628
+    ],
+    "saved": "vercel-shell.jpg",
+    "retrieved": "2026-10-17"
+  },
+  {
+    "id": "resend-list",
+    "page": "https://resend.com/products/transactional-emails",
+    "image_url": "https://resend.com/static/product-pages/screenshot-emails.webp",
+    "original_size": [
+      2560,
+      1367
+    ],
+    "saved": "resend-list.jpg",
+    "retrieved": "2026-10-17"
+  }
+]

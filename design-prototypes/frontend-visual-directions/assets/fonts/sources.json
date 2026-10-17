@@ -1,0 +1,58 @@
+[
+  {
+    "key": "inter",
+    "family": "Inter",
+    "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/inter/Inter%5Bopsz%2Cwght%5D.ttf",
+    "bytes": 876576,
+    "status": "ok"
+  },
+  {
+    "key": "geist",
+    "family": "Geist",
+    "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/geist/Geist%5Bwght%5D.ttf",
+    "bytes": 169056,
+    "status": "ok"
+  },
+  {
+    "key": "ibm-plex-sans",
+    "family": "IBM Plex Sans",
+    "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/ibmplexsans/IBMPlexSans%5Bwdth%2Cwght%5D.ttf",
+    "bytes": 537244,
+    "status": "ok"
+  },
+  {
+    "key": "manrope",
+    "family": "Manrope",
+    "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/Manrope%5Bwght%5D.ttf",
+    "bytes": 164700,
+    "status": "ok"
+  },
+  {
+    "key": "instrument-sans",
+    "family": "Instrument Sans",
+    "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/instrumentsans/InstrumentSans%5Bwdth%2Cwght%5D.ttf",
+    "bytes": 194336,
+    "status": "ok"
+  },
+  {
+    "key": "newsreader",
+    "family": "Newsreader",
+    "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/newsreader/Newsreader%5Bopsz%2Cwght%5D.ttf",
+    "bytes": 451664,
+    "status": "ok"
+  },
+  {
+    "key": "source-serif",
+    "family": "Source Serif 4",
+    "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/sourceserif4/SourceSerif4%5Bopsz%2Cwght%5D.ttf",
+    "bytes": 1209508,
+    "status": "ok"
+  },
+  {
+    "key": "instrument-serif",
+    "family": "Instrument Serif",
+    "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/instrumentserif/InstrumentSerif-Regular.ttf",
+    "bytes": 70012,
+    "status": "ok"
+  }
+]
