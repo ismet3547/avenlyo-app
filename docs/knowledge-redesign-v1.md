@@ -13,7 +13,7 @@ The audit document itself and ElevenLabs screenshots were not supplied in this w
 
 An additive migration adds real `service`, `pricing`, `policy`, `business_info`, `custom_note` types alongside FAQ. Legacy `text` remains accepted/readable and is displayed as Custom note, including the type filter. Existing rows, IDs, statuses, revisions, timestamps, content and embeddings are not rewritten. The old six-argument RPC remains for older Text/FAQ clients; new Text writes normalize to Custom note. Older clients cannot erase the structured fields of newer types.
 
-Pricing has a required free-form `price_statement` (240 characters), optional three-letter currency, and optional conditions in content. This accepts fixed prices, ranges, starting prices and contact-based pricing. Service has description plus optional details/limits (2,000 characters). Other types retain title/content. SQL checks and the shared strict Zod contract reject irrelevant structured fields.
+Pricing has a required free-form `price_statement` (240 characters), optional three-letter currency, and optional conditions in content. This accepts fixed prices, ranges, starting prices and contact-based pricing. Service has a description (4,000 characters) plus optional details/limits (2,000 characters), keeping the complete structured representation inside the existing embedding provider’s 6,500-character input bound. Other types retain title/content. SQL checks and the shared strict Zod contract reject irrelevant structured fields.
 
 A generated `runtime_content` column combines structured fields into readable facts. Publication embeds title + runtime content; both retrieval RPCs return the same generated content using their unchanged published-only predicates and authorization boundaries. Legacy Text/FAQ runtime content is identical to its original content. Publication also supports the pre-upgrade Foundation schema in the existing upgrade acceptance flow.
 
@@ -25,7 +25,9 @@ Knowledge uses the existing app shell with a scoped maximum working width of 1,4
 
 The editor begins with a keyboard-reachable type picker and then shows type-specific fields. Pricing has a dedicated panel and price input. The useful context panel describes the current publication state and organization. Save draft is followed by an explicit existing Publish action in the library; there is no automatic publication. Editing published content explicitly returns it to Draft.
 
-Knowledge-only CSS increases the title to 28–32px, labels/body to 15–16px and support/status text to 13–14px with stronger contrast. Mobile uses one-column choices, full-width search, wrapping filters, horizontally scrollable status links and stacked entries. Native labels, radio controls, semantic buttons, visible focus and readable hit targets are retained.
+Knowledge-only CSS increases the title to 28–32px, labels/body to 15–16px and support/status text to 14px with stronger contrast. Mobile uses one-column choices, full-width search, wrapping filters, horizontally scrollable status links and stacked entries. Native labels, radio controls, semantic buttons, visible focus and readable hit targets are retained.
+
+Operational body text contrast is 7.10:1 on white (6.79:1 on the app background), primary 9.38:1, published status 7.35:1 and Draft 5.63:1, exceeding the 4.5:1 normal-text target.
 
 ## Verification
 
@@ -35,4 +37,4 @@ Knowledge-only CSS increases the title to 28–32px, labels/body to 15–16px an
 - Browser acceptance covers each editor, zero/one/24-item libraries, publishing, published edits, archiving, searching, filtered empty states, collection create/rename and overflow at 1440/1280/1024/768/390.
 - Browser screenshots are written to `test-results/screenshots/knowledge` and attached to the existing CI artifact `foundation-browser-qa`.
 
-Local results: 106 unit/API tests passed; typecheck, lint and production build passed. This container requires a temporary external Node memory-query workaround to run Next build (no application code change). API artifact smoke and browser inventory are also checked. Docker is not available locally, so real database/browser acceptance must be confirmed by CI. The initial Playwright Chromium download returned an invalid archive in this container.
+Local results: 107 unit/API tests passed; typecheck, lint and production build passed. This container requires a temporary external Node memory-query workaround to run Next build (no application code change). API artifact smoke and browser inventory are also checked. Docker is not available locally. The first CI run passed real Foundation acceptance, additive upgrade preservation, the pgTAP database suite and channel runtime acceptance; browser validation is in progress. The initial Playwright Chromium download returned an invalid archive in this container.

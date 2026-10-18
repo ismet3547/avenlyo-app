@@ -1,12 +1,5 @@
 import Link from "next/link";
-import {
-  Plus,
-  Search,
-  FolderClosed,
-  Library,
-  ArrowUpRight,
-  RotateCcw,
-} from "lucide-react";
+import { Plus, Search, FolderClosed, Library, RotateCcw } from "lucide-react";
 import {
   businessKnowledgeType,
   knowledgeLabels,
@@ -370,14 +363,6 @@ export default async function KnowledgePage({
                         </div>
                         {owner ? (
                           <div className="knowledge-row-actions">
-                            <Link
-                              href={`/app/knowledge/${item.id}`}
-                              className="knowledge-edit-link"
-                            >
-                              Edit{" "}
-                              <ArrowUpRight aria-hidden className="size-3.5" />
-                              <span className="sr-only">{item.title}</span>
-                            </Link>
                             <KnowledgeActions
                               id={item.id}
                               status={item.status}

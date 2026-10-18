@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useActionState } from "react";
 import { knowledgeOperation } from "@/app/app/knowledge/actions";
 import type { FormState } from "@/app/auth/actions";
@@ -38,6 +39,9 @@ export function KnowledgeActions({
             More
           </summary>
           <div className="mt-2 flex flex-wrap gap-2">
+            <Button size="sm" variant="ghost" asChild>
+              <Link href={`/app/knowledge/${id}`}>Edit item</Link>
+            </Button>
             {status !== "archived" && (
               <Button
                 size="sm"

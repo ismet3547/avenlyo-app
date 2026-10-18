@@ -219,7 +219,7 @@ test("new user completes the independent foundation flow on desktop and mobile",
   for (const [route, heading] of [
     ["/app", "Your AI front office"],
     ["/app/agent", "Agent"],
-    ["/app/knowledge", "Business knowledge"],
+    ["/app/knowledge", "Knowledge"],
     ["/app/test-agent", "Try a customer conversation"],
     ["/app/leads", "Leads"],
     ["/app/channels", "Channels"],

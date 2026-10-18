@@ -869,7 +869,7 @@ body:has(.navigation-dialog[open]) {
   border-color: var(--primary);
 }
 .knowledge-status-tabs span {
-  font-size: 13px;
+  font-size: 14px;
   padding: 0 6px;
   border-radius: 4px;
   background: var(--muted);
@@ -883,12 +883,12 @@ body:has(.navigation-dialog[open]) {
 }
 .knowledge-row-heading {
   padding: 16px 12px 10px;
-  font-size: 13px;
+  font-size: 14px;
   color: #505b52;
 }
 .knowledge-row {
   align-items: start;
-  padding: 20px 12px;
+  padding: 16px 12px;
   border-bottom: 1px solid var(--border);
 }
 .knowledge-row:hover {
@@ -896,7 +896,7 @@ body:has(.navigation-dialog[open]) {
 }
 .knowledge-row-type {
   color: #505b52;
-  font-size: 13px;
+  font-size: 14px;
   display: flex;
   flex-direction: column;
   gap: 7px;
@@ -918,7 +918,7 @@ body:has(.navigation-dialog[open]) {
   font-size: 14px;
   line-height: 1.6;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
   overflow-wrap: anywhere;
@@ -935,17 +935,8 @@ body:has(.navigation-dialog[open]) {
 .knowledge-row-status time {
   display: block;
   color: #505b52;
-  font-size: 13px;
-  margin-top: 6px;
-}
-.knowledge-edit-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  min-height: 40px;
   font-size: 14px;
-  color: var(--primary);
-  font-weight: 500;
+  margin-top: 6px;
 }
 .knowledge-row-actions {
   display: flex;
@@ -1252,7 +1243,10 @@ body:has(.navigation-dialog[open]) {
     text-align: right;
   }
   .knowledge-row-status time {
-    font-size: 13px;
+    font-size: 14px;
+  }
+  .knowledge-row h2 + p {
+    -webkit-line-clamp: 2;
   }
   .knowledge-row-actions {
     grid-column: 1 / -1;

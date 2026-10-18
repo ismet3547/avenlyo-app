@@ -180,7 +180,7 @@ export function KnowledgeForm({
                 defaultValue={item?.content}
                 required={type !== "pricing"}
                 minLength={type === "pricing" ? undefined : 3}
-                maxLength={6000}
+                maxLength={type === "service" ? 4000 : 6000}
                 placeholder={f.body}
                 className="min-h-52"
               />

@@ -64,6 +64,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     .click();
   await expect(page.getByRole("status")).toContainText("Agent settings saved");
   await page.goto("/app/knowledge/new");
+  await page.getByRole("radio", { name: "Custom note", exact: true }).check();
   await page.getByLabel("Title", { exact: true }).fill("Logo design");
   await page
     .getByLabel("Content", { exact: true })
@@ -405,7 +406,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     ["/app/inbox", "Inbox", "inbox-list"],
     [inboxUrl, "Alex", "inbox-conversation"],
     ["/app/agent", "Agent", "agent"],
-    ["/app/knowledge", "Business knowledge", "knowledge"],
+    ["/app/knowledge", "Knowledge", "knowledge"],
     ["/app/channels", "Channels", "channels"],
     ["/app/leads", "Leads", "leads"],
     [leadUrl!, "Alex", "lead"],

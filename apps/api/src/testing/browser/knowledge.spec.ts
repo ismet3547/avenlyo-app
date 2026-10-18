@@ -57,6 +57,7 @@ test("Knowledge is a structured, responsive, published-only business workspace",
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await expect(page).toHaveURL(/\/app$/);
   await page.goto("/app/knowledge");
   await expect(
     page.getByRole("heading", { name: "Teach Avenlyo about your business." }),
@@ -177,7 +178,7 @@ test("Knowledge is a structured, responsive, published-only business workspace",
       expect(persisted.data?.runtime_content).toContain(
         "Price: Starting at $50\nCurrency: USD",
       );
-      await row.getByRole("link", { name: /Edit/ }).click();
+      await row.getByRole("heading").getByRole("link").click();
       await page
         .getByLabel("Price / pricing statement", { exact: true })
         .fill("$50–$100");

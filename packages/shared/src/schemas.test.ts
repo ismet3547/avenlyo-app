@@ -166,6 +166,23 @@ describe("business knowledge model", () => {
       }).success,
     ).toBe(false);
   });
+  it("keeps complete Service facts inside the existing embedding input bound", () => {
+    expect(
+      knowledgeSchema.safeParse({
+        type: "service",
+        title: "Service",
+        content: "x".repeat(4000),
+        details: "y".repeat(2000),
+      }).success,
+    ).toBe(true);
+    expect(
+      knowledgeSchema.safeParse({
+        type: "service",
+        title: "Service",
+        content: "x".repeat(4001),
+      }).success,
+    ).toBe(false);
+  });
   it("keeps legacy Text discoverable as Custom note", () => {
     expect(businessKnowledgeType("text")).toBe("custom_note");
     expect(

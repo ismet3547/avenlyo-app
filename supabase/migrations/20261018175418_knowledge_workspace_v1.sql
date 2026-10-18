@@ -32,6 +32,7 @@ alter table public.knowledge_items add constraint knowledge_structured_fields_ch
   length(price_statement)<=240 and currency ~ '^([A-Z]{3})?$' and length(details)<=2000
   and (case when type='pricing' then length(btrim(price_statement))>0 else price_statement='' and currency='' end)
   and (type='service' or details='')
+  and (type<>'service' or length(content)<=4000)
 );
 -- A single database-owned representation is used by both embeddings and retrieval.
 -- Collections are deliberately absent: they organize content, never confer authority.

@@ -33,8 +33,9 @@ export async function saveKnowledge(
   if (!parsed.success || !id.success || !revision.success)
     return {
       status: "error",
-      message:
-        "Add a title/question and content/answer within the shown limits.",
+      message: !parsed.success
+        ? parsed.error.issues[0].message
+        : "Reload this item before saving again.",
     };
   const result = await ctx.supabase.rpc("save_business_knowledge", {
     target_workspace_id: ctx.workspace.id,

@@ -92,6 +92,13 @@ export const knowledgeSchema = z
   })
   .strict()
   .superRefine((item, ctx) => {
+    if (item.type === "service" && item.content.length > 4000)
+      ctx.addIssue({
+        code: "custom",
+        path: ["content"],
+        message:
+          "Keep service descriptions within 4,000 characters; use Details / limits for extra information.",
+      });
     if (item.type === "pricing") {
       if (!item.price_statement)
         ctx.addIssue({
