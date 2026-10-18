@@ -167,6 +167,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
       .filter({ hasText: "available to the website visitor" }),
   ).toBeVisible();
   await expect(page.getByLabel("Your human reply")).toHaveValue("");
+  await expect(page.getByLabel("Your human reply")).toBeFocused();
   await expect(
     page.getByRole("button", { name: "Retry same reply", exact: true }),
   ).toHaveCount(0);

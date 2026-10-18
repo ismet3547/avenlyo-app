@@ -55,6 +55,10 @@ export function TestChat({
     if (scroll.current && follow.current)
       scroll.current.scrollTop = scroll.current.scrollHeight;
   }, [messages, pending]);
+  useEffect(() => {
+    if (!pending && !routeSyncing && !retry && messages.length)
+      field.current?.focus({ preventScroll: true });
+  }, [pending, routeSyncing, retry, messages.length]);
   async function send() {
     if (busy.current || routeSyncing) return;
     if (!request.current) {

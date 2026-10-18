@@ -76,8 +76,9 @@ export function InboxConversation({
   }, [snapshot.messages]);
 
   useEffect(() => {
-    if (mine) composer.current?.focus();
-  }, [mine]);
+    if (mine && !pending && !retry)
+      composer.current?.focus({ preventScroll: true });
+  }, [mine, pending, retry]);
 
   async function refresh(before?: string) {
     const response = await fetch(
@@ -216,7 +217,6 @@ export function InboxConversation({
     router.refresh();
     busy.current = false;
     setPending(false);
-    composer.current?.focus();
   }
 
   const name =
