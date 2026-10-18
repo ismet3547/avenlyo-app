@@ -280,7 +280,7 @@ function htmlToKnowledge(html: string) {
 }
 
 function trimImportedContent(value: string) {
-  const cleaned = value.replace(/\u0000/g, "").trim();
+  const cleaned = value.split(String.fromCharCode(0)).join("").trim();
   if (cleaned.length < 3) throw new Error("No useful readable text was found.");
   return cleaned.slice(0, MAX_KNOWLEDGE_CHARS);
 }
