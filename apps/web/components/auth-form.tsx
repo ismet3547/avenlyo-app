@@ -32,11 +32,12 @@ export function AuthForm({
           required
         />
       </label>
-      <label className="block text-sm font-medium">
-        Password
+      <div className="text-sm font-medium">
+        <label htmlFor="auth-password">Password</label>
         <span className="relative mt-2 block">
           <Input
             className="pr-12"
+            id="auth-password"
             name="password"
             type={showPassword ? "text" : "password"}
             minLength={8}
@@ -63,7 +64,7 @@ export function AuthForm({
             )}
           </button>
         </span>
-      </label>
+      </div>
       {!configured && (
         <p
           role="status"

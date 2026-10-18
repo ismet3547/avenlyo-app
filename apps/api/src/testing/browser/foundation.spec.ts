@@ -48,6 +48,10 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await expect(
     page.getByRole("heading", { name: "Your AI front office", exact: true }),
   ).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  expect(
+    await page.evaluate(() => getComputedStyle(document.body).fontFamily),
+  ).toContain("geist");
   await page.screenshot({
     path: `${shots}/overview-desktop.png`,
     fullPage: true,

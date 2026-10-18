@@ -128,7 +128,7 @@ export default async function KnowledgePage({
                       )}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block text-[13px] font-semibold leading-6">
+                      <span className="block break-words text-[13px] font-semibold leading-6">
                         {item.title}
                       </span>
                       <span className="mt-1 block text-[11px] text-muted-foreground">

@@ -1,8 +1,8 @@
 "use client";
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
@@ -10,6 +10,7 @@ import {
   Inbox,
   MessageCircle,
   Search,
+  RefreshCw,
   UserRound,
 } from "lucide-react";
 import { channelLabels, type InboxItem } from "@avenlyo-app/shared";
@@ -34,6 +35,8 @@ export function InboxWorkspace({
   children?: ReactNode;
 }) {
   const params = useSearchParams();
+  const router = useRouter();
+  const [refreshing, startRefresh] = useTransition();
   const initialFilter = params.get("filter") ?? "all";
   const [filter, setFilter] = useState(
     ["all", "paused", "mine"].includes(initialFilter) ? initialFilter : "all",
@@ -56,12 +59,26 @@ export function InboxWorkspace({
             Customer conversations, together.
           </p>
         </div>
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/app/channels">
-            Channels
-            <ArrowRight aria-hidden />
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Refresh Inbox"
+            disabled={refreshing}
+            onClick={() => startRefresh(() => router.refresh())}
+          >
+            <RefreshCw
+              className={refreshing ? "animate-spin" : ""}
+              aria-hidden
+            />
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/app/channels">
+              Channels
+              <ArrowRight aria-hidden />
+            </Link>
+          </Button>
+        </div>
       </header>
       <div className="inbox-body">
         <aside

@@ -18,8 +18,8 @@ export const metadata: Metadata = {
 };
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body className={geist.variable}>{children}</body>
+    <html lang="en" className={geist.variable}>
+      <body>{children}</body>
     </html>
   );
 }
