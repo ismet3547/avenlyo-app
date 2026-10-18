@@ -200,13 +200,13 @@ export async function buildApp(input: AppInput) {
         throw new RuntimeError("FORBIDDEN", 403);
       const item = await user
         .from("knowledge_items")
-        .select("title,content,revision")
+        .select("*")
         .eq("id", params.data.id)
         .eq("workspace_id", body.data.workspaceId)
         .single();
       if (item.error) throw new RuntimeError("NOT_FOUND", 404);
       const embedding = await provider.embed(
-        `${item.data.title}\n${item.data.content}`,
+        `${item.data.title}\n${item.data.runtime_content ?? item.data.content}`,
       );
       const published = await service.rpc("publish_knowledge_item", {
         actor_id: actorId,

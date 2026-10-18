@@ -51,13 +51,73 @@ export function runtimeSettings(settings: AgentSettings): RuntimeSettings {
 export const workspaceSchema = z
   .object({ name: z.string().trim().min(2).max(100) })
   .strict();
+export const knowledgeTypes = [
+  "service",
+  "pricing",
+  "faq",
+  "policy",
+  "business_info",
+  "custom_note",
+] as const;
+export type KnowledgeType = (typeof knowledgeTypes)[number];
+export const knowledgeLabels: Record<KnowledgeType, string> = {
+  service: "Service",
+  pricing: "Pricing",
+  faq: "FAQ",
+  policy: "Policy",
+  business_info: "Business info",
+  custom_note: "Custom note",
+};
+export function businessKnowledgeType(
+  type: KnowledgeType | "text",
+): KnowledgeType {
+  return type === "text" ? "custom_note" : type;
+}
+export const collectionSchema = z
+  .object({ name: z.string().trim().min(2).max(80) })
+  .strict();
 export const knowledgeSchema = z
   .object({
-    type: z.enum(["text", "faq"]),
+    type: z.enum([...knowledgeTypes, "text"]),
     title: z.string().trim().min(3).max(180),
-    content: z.string().trim().min(3).max(6000),
+    content: z.string().trim().max(6000),
+    price_statement: z.string().trim().max(240).default(""),
+    currency: z
+      .string()
+      .trim()
+      .regex(/^([A-Z]{3})?$/, "Use a three-letter currency code.")
+      .default(""),
+    details: z.string().trim().max(2000).default(""),
+    collection_id: z.uuid().nullable().default(null),
   })
-  .strict();
+  .strict()
+  .superRefine((item, ctx) => {
+    if (item.type === "pricing") {
+      if (!item.price_statement)
+        ctx.addIssue({
+          code: "custom",
+          path: ["price_statement"],
+          message: "Add a price or pricing statement.",
+        });
+    } else {
+      if (item.content.length < 3)
+        ctx.addIssue({
+          code: "custom",
+          path: ["content"],
+          message: "Add at least three characters.",
+        });
+      if (item.price_statement || item.currency)
+        ctx.addIssue({
+          code: "custom",
+          message: "Pricing fields require Pricing knowledge.",
+        });
+    }
+    if (item.type !== "service" && item.details)
+      ctx.addIssue({
+        code: "custom",
+        message: "Service details require Service knowledge.",
+      });
+  });
 export const turnSchema = z
   .object({
     workspaceId: z.uuid(),

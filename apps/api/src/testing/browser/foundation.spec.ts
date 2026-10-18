@@ -103,6 +103,7 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await expect(page.getByRole("status")).toContainText("Agent settings saved");
   await capturePage({ path: `${shots}/agent-desktop.png`, fullPage: true });
   await page.goto("/app/knowledge/new");
+  await page.getByRole("radio", { name: "Custom note", exact: true }).check();
   await page.getByLabel("Title", { exact: true }).fill("Custom projects");
   await page
     .getByLabel("Content", { exact: true })
@@ -122,7 +123,7 @@ test("new user completes the independent foundation flow on desktop and mobile",
     ),
   ).not.toBeVisible();
   await page.goto("/app/knowledge/new");
-  await page.getByRole("radio", { name: "FAQ · question and answer" }).check();
+  await page.getByRole("radio", { name: "FAQ", exact: true }).check();
   await page
     .getByLabel("Question", { exact: true })
     .fill("Do you work with small businesses?");

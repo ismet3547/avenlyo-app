@@ -34,7 +34,7 @@ export function KnowledgeActions({
           </Button>
         )}
         <details className="self-center">
-          <summary className="cursor-pointer px-2 py-2 text-xs text-muted-foreground">
+          <summary className="cursor-pointer px-2 py-2 text-sm text-foreground">
             More
           </summary>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -50,10 +50,10 @@ export function KnowledgeActions({
               </Button>
             )}
             <details className="self-center">
-              <summary className="cursor-pointer px-2 text-xs text-muted-foreground">
+              <summary className="cursor-pointer px-2 text-sm text-foreground">
                 Delete
               </summary>
-              <span className="mt-2 inline-flex items-center gap-2 rounded-lg border border-danger/15 bg-danger-soft p-2 text-xs text-danger">
+              <span className="mt-2 inline-flex items-center gap-2 rounded-lg border border-danger/15 bg-danger-soft p-2 text-sm text-danger">
                 Permanently delete?
                 <Button
                   size="sm"
@@ -72,7 +72,7 @@ export function KnowledgeActions({
       {state.message && (
         <p
           role="status"
-          className={`mt-3 text-xs ${state.status === "error" ? "text-danger" : "text-success"}`}
+          className={`mt-3 text-sm ${state.status === "error" ? "text-danger" : "text-success"}`}
         >
           {state.message}
         </p>

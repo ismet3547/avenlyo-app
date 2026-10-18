@@ -16,13 +16,22 @@ export default async function EditKnowledge({
     .eq("id", id)
     .single();
   if (item.error || ctx.role !== "owner") notFound();
+  const collections = await ctx.supabase
+    .from("knowledge_collections")
+    .select("*")
+    .eq("workspace_id", ctx.workspace.id)
+    .order("name");
   return (
-    <>
+    <div className="knowledge-screen knowledge-editor-screen">
       <PageHeader
         title="Edit knowledge"
         description="Changes are saved as a draft. Publish again after reviewing the updated information."
       />
-      <KnowledgeForm item={item.data} />
-    </>
+      {collections.error ? (
+        <p role="alert">Collections could not be loaded. Reload to continue.</p>
+      ) : (
+        <KnowledgeForm item={item.data} collections={collections.data} />
+      )}
+    </div>
   );
 }
