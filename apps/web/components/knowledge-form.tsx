@@ -1,7 +1,7 @@
 "use client";
 import { useActionState, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, FileText, HelpCircle, Save, Send } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 import type { KnowledgeItem } from "@avenlyo-app/shared";
 import { saveKnowledge } from "@/app/app/knowledge/actions";
 import type { FormState } from "@/app/auth/actions";
@@ -132,43 +132,15 @@ export function KnowledgeForm({ item }: { item?: KnowledgeItem }) {
           </p>
         )}
       </div>
-      <aside className="rounded-xl border border-border bg-white p-5 xl:mt-9">
-        <h2 className="text-sm font-semibold">From a draft to an answer</h2>
-        <div className="mt-5 space-y-5">
-          {[
-            [
-              FileText,
-              "1. Write",
-              "Use clear facts your team is comfortable sharing.",
-            ],
-            [
-              HelpCircle,
-              "2. Review",
-              "Check the details. A saved draft stays private to your team.",
-            ],
-            [
-              Send,
-              "3. Publish",
-              "Publish from Knowledge when it is ready for customer answers.",
-            ],
-          ].map(([Icon, title, text]) => {
-            const StepIcon = Icon as typeof FileText;
-            return (
-              <div key={String(title)} className="flex gap-3">
-                <StepIcon
-                  className="mt-1 size-3.5 shrink-0 text-primary"
-                  aria-hidden
-                />
-                <div>
-                  <p className="text-xs font-medium">{String(title)}</p>
-                  <p className="mt-1 text-xs leading-6 text-muted-foreground">
-                    {String(text)}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      <aside className="border-t border-border pt-5 xl:mt-9 xl:border-l xl:border-t-0 xl:pl-6 xl:pt-0">
+        <h2 className="text-[13px] font-medium">Publishing</h2>
+        <p className="mt-4 text-xs leading-6 text-muted-foreground">
+          Save this item as a draft, then publish it from Knowledge when the
+          content is ready.
+        </p>
+        <p className="mt-3 text-xs leading-6 text-muted-foreground">
+          Only published items are available in customer answers.
+        </p>
       </aside>
     </form>
   );

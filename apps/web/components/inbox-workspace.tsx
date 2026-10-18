@@ -53,11 +53,9 @@ export function InboxWorkspace({
   return (
     <section className="inbox-workspace" aria-label="Customer inbox">
       <header className="inbox-topbar">
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight">Inbox</h1>
-          <p className="mt-1 text-[11px] text-muted-foreground">
-            Customer conversations, together.
-          </p>
+        <div className="inbox-heading">
+          <h1 className="text-base font-semibold tracking-tight">Inbox</h1>
+          <p className="inbox-caption">Customer conversations</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -149,9 +147,7 @@ export function InboxWorkspace({
                         <Icon className="size-3" aria-hidden />
                         {channelLabels[c.channel]}
                       </span>
-                      <span
-                        className={`inline-flex items-center gap-1.5 ${c.aiMode === "paused" ? "text-amber-800" : "text-primary"}`}
-                      >
+                      <span className="queue-mode" data-state={c.aiMode}>
                         <span className="status-dot" />
                         {c.aiMode === "paused" ? "AI paused" : "AI active"}
                       </span>
@@ -232,7 +228,7 @@ export function InboxWorkspace({
               />
             </span>
             <h2 className="mt-6 text-xl font-medium tracking-tight">
-              Every conversation has a next step.
+              Select a conversation
             </h2>
             <p className="mt-3 max-w-xs text-sm leading-7 text-muted-foreground">
               Select a conversation to read the story so far, review its status,

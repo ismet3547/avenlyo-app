@@ -22,9 +22,7 @@ export function Brand({ className }: { className?: string }) {
       aria-label="Avenlyo home"
     >
       <BrandMark />
-      <span>
-        avenlyo<span className="text-primary">.</span>
-      </span>
+      <span>avenlyo.</span>
     </Link>
   );
 }

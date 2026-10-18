@@ -45,9 +45,9 @@ export default async function LeadsPage({
   return (
     <>
       <PageHeader
-        eyebrow="Customer interest"
-        title="Turn interest into a next step"
-        description="Useful inquiries from your conversations, with the details your customers shared."
+        eyebrow="Workspace"
+        title="Leads"
+        description="Customer inquiries and the contact details shared in conversation."
         action={
           <div className="inline-flex rounded-lg border border-border bg-white p-1">
             <Link
@@ -100,7 +100,7 @@ export default async function LeadsPage({
           title={
             tests
               ? "See what a useful test inquiry looks like"
-              : "The right details. A clearer follow-up."
+              : "No customer inquiries yet"
           }
           description={
             tests

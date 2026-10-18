@@ -21,7 +21,7 @@ export default async function ConversationsPage() {
     <>
       <PageHeader
         eyebrow="Your agent"
-        title="A little practice, saved"
+        title="Test history"
         description="Revisit test conversations, review their outcomes, and continue where you left off."
         action={
           <Button asChild variant="outline">
@@ -68,11 +68,7 @@ export default async function ConversationsPage() {
                 </p>
               </div>
               <Badge
-                className={
-                  c.status === "needs_human"
-                    ? "border-amber-100 bg-amber-50 text-amber-800"
-                    : ""
-                }
+                className={c.status === "needs_human" ? "status-warning" : ""}
               >
                 {c.status === "needs_human"
                   ? "Needs human · AI paused"

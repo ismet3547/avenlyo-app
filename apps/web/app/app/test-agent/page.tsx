@@ -59,8 +59,8 @@ export default async function TestAgentPage({
     <>
       <PageHeader
         eyebrow="Test Agent"
-        title="Try a customer conversation"
-        description="Ask a question as a customer. See how your saved settings and published knowledge work together."
+        title="Test Agent"
+        description="Test the saved agent settings and published knowledge."
         action={
           <Button asChild variant="outline">
             <Link href="/app/test-agent">
@@ -72,8 +72,8 @@ export default async function TestAgentPage({
       />
       <AgentNavigation active="test" />
       {conversation?.data?.ai_mode === "paused" && (
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm text-amber-900">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/50 p-4">
+          <p className="text-sm text-foreground">
             This test needs human assistance. Automated answers are paused.
           </p>
           <form action={resumeTest}>

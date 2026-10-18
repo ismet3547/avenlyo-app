@@ -10,11 +10,11 @@ const geist = localFont({
 });
 export const metadata: Metadata = {
   title: {
-    default: "Avenlyo · Your AI front office",
+    default: "Avenlyo",
     template: "%s · Avenlyo",
   },
   description:
-    "Turn your business knowledge into helpful answers and useful inquiries.",
+    "Manage customer conversations, business knowledge and human handoffs.",
 };
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

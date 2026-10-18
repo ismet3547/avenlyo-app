@@ -8,7 +8,7 @@ Research: `docs/frontend-rebuild-research-v2.md` and `docs/uiux-deep-research-20
 
 The interface now centers daily work around Home, Inbox and Leads. Agent settings, Knowledge and Channels form a separate preparation group. Test history lives with Test Agent instead of duplicating the customer Inbox in primary navigation.
 
-- A new warm neutral / forest green design system, checked-in Geist variable font and its OFL license, responsive shell, accessible mobile dialog, account menu and skip link.
+- A new monochrome design system with white and graphite surfaces, checked-in Geist variable font and its OFL license, responsive shell, accessible mobile dialog, account menu and skip link.
 - Home adapts to customer activity. Customer metrics exclude Test Agent records. Setup guidance uses real published knowledge and channel state; it does not infer agent readiness from an internal note or timestamp.
 - Inbox keeps the customer queue beside an open conversation on wider screens. Mobile opens one focused surface with a return path. Search and ownership / AI-paused filters apply to the loaded page of up to 50 conversations, and travel with conversation links. Customer identity, AI mode, ownership, linked lead and delivery evidence stay explicit.
 - Claiming reveals the human composer. Releasing keeps AI paused; resuming applies to the next customer message. Conversation details and staff notification diagnostics are disclosed on demand.
@@ -40,3 +40,9 @@ A successful human reply acknowledgement is separated from its following thread 
 GitHub CI run `39130735460` passed production builds, typecheck, lint, unit tests, database isolation, upgrade, runtime and channel acceptance. The foundation browser flow passed, including 360px mobile navigation. The first Inbox browser run exposed an ambiguous test selector because a confirmed reply now appears both in the queue preview and the thread; the assertion was scoped to the thread log. Its acknowledged-send/read-failure regression passed before that assertion. Final acceptance and visual review remain tracked in the draft PR. No deployment or merge is part of this change.
 
 Visual inspection of the first CI screenshots found two rendering issues: the font variable belonged on the document root so theme tokens could resolve it, and mobile metric links needed an explicit block display. Both were corrected before the final validation run. The final patch also adds an explicit Inbox refresh action, preserves the exhausted widget history cursor across polls, improves long-text wrapping, and separates the password reveal control from its input label.
+
+## Visual direction refinement
+
+The working interface uses white, charcoal and neutral gray. Semantic color is confined to small state indicators and actionable errors. AI mode is plain text with a dot; assistant and human messages no longer have green or blue panels. Selection uses neutral contrast and a narrow rule.
+
+Primary navigation is compact. Test Agent is a utility link rather than a promotional card. Overview uses setup rows, channel state and actual customer activity; the large marketing panel and decorative circles were removed. Page headings use functional names. Auth uses a restrained dark brand surface, and the public widget shares the neutral palette. Acceptance screenshots cover the revised Inbox, mobile states, onboarding, active Overview, auth, agent settings and widget.

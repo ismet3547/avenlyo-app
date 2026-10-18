@@ -19,8 +19,9 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await mkdir(shots, { recursive: true });
   await page.goto("/auth/sign-up");
   await expect(
-    page.getByRole("heading", { name: "Start with your business" }),
+    page.getByRole("heading", { name: "Create an account" }),
   ).toBeVisible();
+  await page.screenshot({ path: `${shots}/auth-desktop.png`, fullPage: true });
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page
@@ -46,7 +47,7 @@ test("new user completes the independent foundation flow on desktop and mobile",
     .getByRole("button", { name: "Create workspace", exact: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Your AI front office", exact: true }),
+    page.getByRole("heading", { name: "Overview", exact: true }),
   ).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
   expect(
@@ -71,6 +72,7 @@ test("new user completes the independent foundation flow on desktop and mobile",
     .getByRole("button", { name: "Save settings", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Agent settings saved");
+  await page.screenshot({ path: `${shots}/agent-desktop.png`, fullPage: true });
   await page.goto("/app/knowledge/new");
   await page.getByLabel("Title", { exact: true }).fill("Custom projects");
   await page

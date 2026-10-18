@@ -1,6 +1,6 @@
 import { AgentNavigation } from "@/components/agent-navigation";
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
+import { FlaskConical } from "lucide-react";
 import { agentSettingsSchema } from "@avenlyo-app/shared";
 import { requireWorkspace } from "@/lib/workspace";
 import { AgentForm } from "@/components/agent-form";
@@ -31,12 +31,12 @@ export default async function AgentPage() {
     <>
       <PageHeader
         eyebrow="Your agent"
-        title="Make your agent feel like your business"
-        description="Choose its goals, voice and the details that make an inquiry useful."
+        title="Agent settings"
+        description="Configure goals, tone and contact requirements."
         action={
           <Button asChild variant="outline">
             <Link href="/app/test-agent">
-              <Sparkles aria-hidden />
+              <FlaskConical aria-hidden />
               Test saved settings
             </Link>
           </Button>

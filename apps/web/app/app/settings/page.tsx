@@ -10,7 +10,7 @@ export default async function SettingsPage() {
     <>
       <PageHeader
         eyebrow="Workspace"
-        title="The home for your business"
+        title="Workspace settings"
         description="Manage the essentials for this workspace."
       />
       <div className="grid max-w-5xl items-start gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
@@ -50,7 +50,7 @@ export default async function SettingsPage() {
         </Card>
         <div className="rounded-xl border border-border p-5">
           <LockKeyhole className="size-5 text-primary" aria-hidden />
-          <h2 className="mt-4 text-sm font-medium">A workspace of its own.</h2>
+          <h2 className="mt-4 text-sm font-medium">Workspace access</h2>
           <p className="mt-2 text-xs leading-7 text-muted-foreground">
             This business has its own settings, knowledge and conversations.
             Switching workspaces changes which business you are working in.

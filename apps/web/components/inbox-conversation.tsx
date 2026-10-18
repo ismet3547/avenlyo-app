@@ -10,12 +10,10 @@ import {
   LogOut,
   Play,
   RotateCcw,
-  Sparkles,
   UserRound,
 } from "lucide-react";
 import { channelLabels, type InboxThread } from "@avenlyo-app/shared";
 import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
 import { Textarea } from "./ui/textarea";
 import { dateLabel } from "@/lib/utils";
 import { customerLabel, mergeThread } from "@/lib/inbox";
@@ -235,7 +233,7 @@ export function InboxConversation({
               <ArrowLeft aria-hidden />
             </Link>
           </Button>
-          <span className="hidden size-10 shrink-0 place-items-center rounded-full border border-border bg-muted text-xs font-medium sm:grid">
+          <span className="hidden size-8 shrink-0 place-items-center rounded-full bg-muted text-[11px] font-medium sm:grid">
             {snapshot.lead?.name ? (
               snapshot.lead.name.slice(0, 2).toUpperCase()
             ) : (
@@ -255,17 +253,10 @@ export function InboxConversation({
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <Badge
-            className={
-              c.ai_mode === "paused" ? "status-warning" : "status-success"
-            }
-          >
-            <span className="status-dot" />
-            <span className="hidden sm:inline">
-              {c.ai_mode === "paused" ? "Needs human · " : ""}
-            </span>
+          <span className="conversation-mode" data-state={c.ai_mode}>
+            <span className="status-dot" aria-hidden="true" />
             {c.ai_mode === "paused" ? "AI paused" : "AI active"}
-          </Badge>
+          </span>
           <details className="thread-context">
             <summary aria-label="Conversation details">
               <Info className="size-4" aria-hidden />
@@ -307,7 +298,9 @@ export function InboxConversation({
               </dl>
               {snapshot.notifications.length > 0 && (
                 <div className="mt-5 border-t border-border pt-4">
-                  <h4 className="text-xs font-semibold">Staff notifications</h4>
+                  <h4 className="text-[13px] font-medium">
+                    Staff notifications
+                  </h4>
                   {snapshot.notifications.map((n) => (
                     <p
                       key={n.id}
@@ -342,7 +335,7 @@ export function InboxConversation({
         </div>
       </header>
       {snapshot.lead && (
-        <div className="flex items-center justify-between gap-3 border-b border-border bg-muted/30 px-5 py-2 text-[11px]">
+        <div className="flex items-center justify-between gap-3 border-b border-border px-6 py-2 text-[11px]">
           <span className="text-muted-foreground">
             Linked lead ·{" "}
             {snapshot.lead.qualification === "qualified"
@@ -362,7 +355,7 @@ export function InboxConversation({
       {liveError && (
         <p
           role="status"
-          className="thread-feedback border-b border-amber-200 bg-amber-50 text-amber-800"
+          className="thread-feedback border-b border-border bg-muted/50 text-foreground"
         >
           Live updates are interrupted. Reconnecting automatically; the
           conversation below may be out of date.
@@ -416,9 +409,6 @@ export function InboxConversation({
               <article key={m.id} className="thread-message" data-role={m.role}>
                 <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
                   <span className="inline-flex items-center gap-1.5 font-medium">
-                    {m.role === "assistant" && (
-                      <Sparkles className="size-3 text-primary" aria-hidden />
-                    )}
                     {m.role === "customer"
                       ? "Customer"
                       : m.role === "human"
@@ -484,7 +474,7 @@ export function InboxConversation({
       {notice && (
         <p
           role="status"
-          className="thread-feedback border-t border-border text-primary"
+          className="thread-feedback border-t border-border text-muted-foreground"
         >
           {notice}
         </p>
@@ -532,7 +522,7 @@ export function InboxConversation({
               id="human-reply"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Continue the conversation personally…"
+              placeholder="Write a reply…"
               disabled={pending || retry}
               maxLength={2000}
               rows={3}
@@ -565,12 +555,12 @@ export function InboxConversation({
       ) : (
         <div className="claim-panel">
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold">
+            <p className="text-[13px] font-medium">
               {other
                 ? "A team member is helping this customer."
                 : c.ai_mode === "paused"
-                  ? "This conversation needs a person."
-                  : "Your agent is taking care of this conversation."}
+                  ? "AI replies are paused."
+                  : "AI replies are active."}
             </p>
             <p className="mt-1.5 text-[11px] leading-5 text-muted-foreground">
               {other

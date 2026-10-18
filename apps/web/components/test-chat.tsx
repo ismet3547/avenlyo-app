@@ -2,13 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  ArrowUp,
-  Check,
-  MessageSquare,
-  RotateCcw,
-  Sparkles,
-} from "lucide-react";
+import { ArrowUp, MessageSquare, RotateCcw, FlaskConical } from "lucide-react";
 import type { TurnResult } from "@avenlyo-app/shared";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -139,10 +133,10 @@ export function TestChat({
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div className="flex items-center gap-3">
             <span className="grid size-8 place-items-center rounded-lg bg-muted text-primary">
-              <Sparkles aria-hidden className="size-4" />
+              <FlaskConical aria-hidden className="size-4" />
             </span>
             <div>
-              <h2 className="text-sm font-semibold">Your Avenlyo agent</h2>
+              <h2 className="text-sm font-semibold">Agent preview</h2>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 Published knowledge · saved settings
               </p>
@@ -194,7 +188,7 @@ export function TestChat({
               key={index}
             >
               <div
-                className={`max-w-[90%] rounded-xl px-4 py-3 ${message.role === "customer" ? "bg-primary text-white" : "border border-border bg-[#f7faf5]"}`}
+                className={`max-w-[90%] rounded-lg px-4 py-3 ${message.role === "customer" ? "bg-primary text-white" : "border border-border bg-[#fafafa]"}`}
               >
                 <p
                   className={`mb-1.5 text-[11px] font-semibold uppercase tracking-wider ${message.role === "customer" ? "text-white/70" : "text-muted-foreground"}`}
@@ -264,10 +258,10 @@ export function TestChat({
           )}
         </form>
       </section>
-      <aside className="space-y-4">
-        <div className="rounded-xl border border-border bg-white p-5">
-          <h2 className="text-sm font-semibold">What you are testing</h2>
-          <dl className="mt-4 space-y-3 border-b border-border pb-4 text-xs">
+      <aside className="space-y-6 xl:border-l xl:border-border xl:pl-6">
+        <div className="border-b border-border pb-6">
+          <h2 className="text-[13px] font-medium">Saved configuration</h2>
+          <dl className="mt-5 space-y-4 text-xs">
             <div className="flex justify-between gap-3">
               <dt className="text-muted-foreground">Tone</dt>
               <dd className="capitalize">{tone ?? "Unavailable"}</dd>
@@ -285,55 +279,38 @@ export function TestChat({
               </dd>
             </div>
           </dl>
-          <div className="mt-4 space-y-3 text-xs leading-5 text-muted-foreground">
-            {[
-              "Answers grounded in published information",
-              "A useful follow-up for genuine interest",
-              "Only customer-stated contact details",
-              "Human assistance when needed",
-            ].map((text) => (
-              <p key={text} className="flex gap-2">
-                <Check
-                  aria-hidden
-                  className="mt-0.5 size-3.5 shrink-0 text-primary"
-                />
-                {text}
-              </p>
-            ))}
-          </div>
         </div>
-        <div className="rounded-xl border border-border bg-muted/50 p-5">
-          <h2 className="text-sm font-semibold">Conversation outcome</h2>
+        <div>
+          <h2 className="text-[13px] font-medium">Test result</h2>
           {leadId ? (
             <>
-              <p className="mt-3 text-xs leading-5 text-muted-foreground">
-                One lead is linked to this test conversation. Further contact
-                details update the same lead.
+              <p className="mt-3 text-xs leading-6 text-muted-foreground">
+                A test inquiry was created. Further contact details update the
+                same inquiry.
               </p>
               <Link
                 href={`/app/leads/${leadId}`}
-                className="mt-4 block text-xs font-medium text-primary"
+                className="mt-4 block text-xs font-medium"
               >
                 View test lead →
               </Link>
             </>
           ) : (
-            <p className="mt-3 text-xs leading-5 text-muted-foreground">
-              No lead yet. Genuine service interest and relevant contact details
-              are required.
+            <p className="mt-3 text-xs leading-6 text-muted-foreground">
+              No inquiry created yet.
             </p>
           )}
           {id && (
             <Link
-              className="mt-4 block text-xs text-primary"
+              className="mt-4 block text-xs text-muted-foreground hover:text-foreground"
               href={`/app/conversations/${id}`}
             >
               View saved conversation →
             </Link>
           )}
         </div>
-        <p className="px-1 text-[11px] leading-6 text-muted-foreground">
-          Practice only. No external customer message or team notification is
+        <p className="border-t border-border pt-4 text-[11px] leading-6 text-muted-foreground">
+          Test data only. No external customer message or team notification is
           sent.
         </p>
       </aside>

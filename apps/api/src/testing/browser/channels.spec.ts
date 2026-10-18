@@ -38,7 +38,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     .getByRole("button", { name: "Create workspace", exact: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Your AI front office", exact: true }),
+    page.getByRole("heading", { name: "Overview", exact: true }),
   ).toBeVisible();
   await page.goto("/app/knowledge/new");
   await page.getByLabel("Title", { exact: true }).fill("Logo design");
@@ -233,6 +233,11 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   expect(bounds!.x).toBeGreaterThanOrEqual(0);
   expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(391);
   const inboxUrl = page.url();
+  await page.goto("/app");
+  await page.screenshot({
+    path: "test-results/screenshots/overview-active-desktop.png",
+    fullPage: true,
+  });
   await page.setViewportSize({ width: 390, height: 844 });
   for (const url of [
     inboxUrl,
@@ -247,9 +252,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     else
       await expect(
         page.getByRole("heading", {
-          name: url.endsWith("/app/inbox")
-            ? "Inbox"
-            : "Meet customers where they are",
+          name: url.endsWith("/app/inbox") ? "Inbox" : "Channels",
           exact: true,
         }),
       ).toBeVisible();

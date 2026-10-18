@@ -59,7 +59,7 @@ export function WebsiteChannelForm({
       {state.message && (
         <p
           role="status"
-          className={`text-sm ${state.status === "error" ? "text-red-700" : "text-emerald-700"}`}
+          className={`text-sm ${state.status === "error" ? "text-red-700" : "text-foreground"}`}
         >
           {state.message}
         </p>
@@ -98,7 +98,7 @@ export function EmbedSnippet({ snippet }: { snippet: string }) {
         </Button>
       </div>
       {copyError && (
-        <p role="status" className="mt-2 text-xs text-amber-800">
+        <p role="status" className="mt-2 text-xs text-foreground">
           Copy is unavailable. Select and copy the snippet below.
         </p>
       )}

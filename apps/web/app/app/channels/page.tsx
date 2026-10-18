@@ -4,7 +4,7 @@ import {
   ArrowUpRight,
   ArrowRight,
   BookOpen,
-  Sparkles,
+  SlidersHorizontal,
 } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
@@ -51,9 +51,9 @@ export default async function ChannelsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Customer touchpoints"
-        title="Meet customers where they are"
-        description="The same agent and business knowledge, wherever a conversation begins."
+        eyebrow="Workspace"
+        title="Channels"
+        description="Connect Website Chat and Instagram to your Inbox."
         action={
           <Button variant="outline" asChild>
             <Link href="/app/inbox">
@@ -68,7 +68,7 @@ export default async function ChannelsPage() {
           href="/app/agent"
           className="inline-flex items-center gap-2 hover:text-primary"
         >
-          <Sparkles className="size-3.5" aria-hidden />
+          <SlidersHorizontal className="size-3.5" aria-hidden />
           Shared agent settings
           <ArrowUpRight className="size-3" aria-hidden />
         </Link>
@@ -97,7 +97,7 @@ export default async function ChannelsPage() {
                   Website Chat
                 </h2>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  A helpful welcome, right on your website.
+                  Website conversations and installation.
                 </p>
               </div>
             </div>
@@ -199,7 +199,7 @@ export default async function ChannelsPage() {
               <h3 className="text-sm font-medium">
                 {connected
                   ? `Connected to @${instagram?.provider_username ?? "your business"}`
-                  : "We’ll help you get connected."}
+                  : "Managed connection"}
               </h3>
               <p className="mt-3 max-w-lg text-xs leading-7 text-muted-foreground">
                 {connected
@@ -216,9 +216,7 @@ export default async function ChannelsPage() {
               )}
             </div>
             <div className="rounded-xl bg-muted/50 p-5">
-              <h3 className="text-xs font-semibold">
-                A clear handoff, wherever it starts.
-              </h3>
+              <h3 className="text-xs font-semibold">Messaging and delivery</h3>
               <p className="mt-2 text-xs leading-7 text-muted-foreground">
                 Replies follow Instagram’s supported messaging window. Delivery
                 failures and unconfirmed sends are visible in the conversation,

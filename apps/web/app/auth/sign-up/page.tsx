@@ -4,7 +4,7 @@ export default function SignUpPage() {
   return (
     <>
       <h1 className="text-3xl font-semibold tracking-tight">
-        Start with your business
+        Create an account
       </h1>
       <p className="mt-3 text-sm leading-6 text-muted-foreground">
         Create an account, add knowledge, and test your agent. A website is

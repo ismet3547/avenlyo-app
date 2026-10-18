@@ -68,7 +68,7 @@ export function AuthForm({
       {!configured && (
         <p
           role="status"
-          className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
+          className="rounded-lg border border-border bg-muted/50 p-3 text-sm text-foreground"
         >
           Sign-in is temporarily unavailable. Please try again later.
         </p>
@@ -76,7 +76,7 @@ export function AuthForm({
       {state.message && (
         <p
           role={state.status === "error" ? "alert" : "status"}
-          className={`rounded-lg p-3 text-sm ${state.status === "error" ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-800"}`}
+          className={`rounded-lg p-3 text-sm ${state.status === "error" ? "bg-red-50 text-red-700" : "status-success border border-border"}`}
         >
           {state.message}
         </p>

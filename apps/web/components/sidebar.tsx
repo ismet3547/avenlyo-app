@@ -2,14 +2,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  ArrowUpRight,
   BookOpen,
   Cable,
   FlaskConical,
   House,
   Inbox,
   Settings2,
-  Sparkles,
+  SlidersHorizontal,
   UsersRound,
 } from "lucide-react";
 import { Brand } from "./brand";
@@ -24,9 +23,9 @@ const groups = [
     ],
   },
   {
-    label: "Build your agent",
+    label: "Agent",
     links: [
-      { href: "/app/agent", label: "Agent", icon: Sparkles },
+      { href: "/app/agent", label: "Agent", icon: SlidersHorizontal },
       { href: "/app/knowledge", label: "Knowledge", icon: BookOpen },
       { href: "/app/channels", label: "Channels", icon: Cable },
     ],
@@ -36,22 +35,17 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const path = usePathname();
   return (
     <div className="sidebar-content">
-      <div className="px-3 pb-9 pt-1" onClick={onNavigate}>
+      <div className="px-2 pb-8 pt-1" onClick={onNavigate}>
         <Brand />
       </div>
-      <nav aria-label="Main navigation" className="space-y-8">
+      <nav aria-label="Main navigation" className="space-y-7">
         {groups.map((group) => (
           <div key={group.label}>
             <p className="nav-label">{group.label}</p>
             <div className="space-y-1">
               {group.links.map(({ href, label, icon: Icon }) => {
                 const active =
-                  href === "/app"
-                    ? path === href
-                    : path.startsWith(href) ||
-                      (href === "/app/agent" &&
-                        (path.startsWith("/app/test-agent") ||
-                          path.startsWith("/app/conversations")));
+                  href === "/app" ? path === href : path.startsWith(href);
                 return (
                   <Link
                     key={href}
@@ -66,12 +60,6 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                       strokeWidth={1.7}
                     />
                     {label}
-                    {active && (
-                      <span
-                        className="ml-auto size-1.5 rounded-full bg-primary"
-                        aria-hidden="true"
-                      />
-                    )}
                   </Link>
                 );
               })}
@@ -79,28 +67,24 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           </div>
         ))}
       </nav>
-      <div className="mt-auto space-y-5 pt-10">
+      <div className="mt-auto border-t border-border pt-4">
         <Link
           href="/app/test-agent"
           onClick={onNavigate}
-          className="agent-shortcut group"
+          className={cn(
+            "nav-link",
+            (path.startsWith("/app/test-agent") ||
+              path.startsWith("/app/conversations")) &&
+              "nav-link-active",
+          )}
+          aria-current={path === "/app/test-agent" ? "page" : undefined}
         >
-          <span className="flex items-center justify-between">
-            <FlaskConical className="size-4 text-primary" aria-hidden="true" />
-            <ArrowUpRight
-              className="size-3.5 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-              aria-hidden="true"
-            />
-          </span>
-          <span className="mt-3 block text-[13px] font-semibold">
-            A little practice goes a long way.
-          </span>
-          <span className="mt-1.5 block text-xs leading-5 text-muted-foreground">
-            Try your agent before your customers do.
-          </span>
-          <span className="mt-3 block text-xs font-semibold text-primary">
-            Open Test Agent
-          </span>
+          <FlaskConical
+            className="size-[17px]"
+            strokeWidth={1.6}
+            aria-hidden="true"
+          />
+          Test Agent
         </Link>
         <Link
           href="/app/settings"
@@ -112,15 +96,12 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           )}
         >
           <Settings2
-            className="size-[18px]"
+            className="size-[17px]"
             aria-hidden="true"
-            strokeWidth={1.7}
+            strokeWidth={1.6}
           />
-          Settings
+          Workspace settings
         </Link>
-        <p className="px-3 text-[11px] text-muted-foreground">
-          Your knowledge. A more helpful front office.
-        </p>
       </div>
     </div>
   );

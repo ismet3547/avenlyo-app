@@ -1,12 +1,5 @@
 import Link from "next/link";
-import {
-  Plus,
-  ChevronRight,
-  FileText,
-  HelpCircle,
-  Pencil,
-  BookOpen,
-} from "lucide-react";
+import { Plus, ChevronRight, FileText, HelpCircle, Pencil } from "lucide-react";
 import { requireWorkspace } from "@/lib/workspace";
 import { PageHeader } from "@/components/page-header";
 import { KnowledgeActions } from "@/components/knowledge-actions";
@@ -48,27 +41,17 @@ export default async function KnowledgePage({
   return (
     <>
       <PageHeader
-        eyebrow="Build your agent"
-        title="A home for your business knowledge"
-        description="The services, details and answers your agent can draw on. You decide what gets published."
+        eyebrow="Agent"
+        title="Knowledge"
+        description="Manage the information your agent uses in answers."
         action={action}
       />
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-white px-5 py-4">
-        <p className="flex max-w-xl items-start gap-3 text-xs leading-6 text-muted-foreground">
-          <BookOpen className="mt-1 size-4 shrink-0 text-primary" aria-hidden />
-          <span>
-            <strong className="font-medium text-foreground">
-              Write. Review. Publish.
-            </strong>{" "}
-            Saving keeps an item in Draft. Only published knowledge is available
-            in answers.
-          </span>
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+        <p>
+          Drafts stay internal. Publish an item to make it available in answers.
         </p>
-        <Link
-          href="/app/test-agent"
-          className="text-xs font-medium text-primary"
-        >
-          Try a published answer →
+        <Link href="/app/test-agent" className="quiet-link">
+          Test an answer →
         </Link>
       </div>
       <nav className="filter-bar" aria-label="Knowledge status filters">
