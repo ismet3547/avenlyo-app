@@ -332,8 +332,17 @@ export async function importKnowledgeFromUrl(
         redirect: "manual",
         signal: AbortSignal.timeout(10_000),
         headers: {
-          accept: "text/html,text/plain;q=0.9",
-          "user-agent": "AvenlyoKnowledgeImporter/1.0",
+          accept: "text/html,application/xhtml+xml,application/xml;q=0.9,text/plain;q=0.8,*/*;q=0.5",
+          "accept-language": "en-US,en;q=0.9",
+          "cache-control": "no-cache",
+          pragma: "no-cache",
+          "upgrade-insecure-requests": "1",
+          "sec-fetch-dest": "document",
+          "sec-fetch-mode": "navigate",
+          "sec-fetch-site": "none",
+          "sec-fetch-user": "?1",
+          "user-agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
         },
       });
       if ([301, 302, 303, 307, 308].includes(response.status)) {
@@ -346,7 +355,13 @@ export async function importKnowledgeFromUrl(
     }
     if (!response || [301, 302, 303, 307, 308].includes(response.status))
       throw new Error("The website redirected too many times.");
-    if (!response.ok) throw new Error(`The website returned HTTP ${response.status}.`);
+    if (!response.ok) {
+      if (response.status === 403)
+        throw new Error(
+          "This website blocks automated page access (HTTP 403). Try a more specific public page, or upload an exported file instead.",
+        );
+      throw new Error(`The website returned HTTP ${response.status}.`);
+    }
     const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
     if (!contentType.includes("text/html") && !contentType.includes("text/plain"))
       throw new Error("This URL is not a readable HTML or text page.");

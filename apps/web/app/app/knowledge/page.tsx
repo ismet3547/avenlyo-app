@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Search, FolderClosed, Library, RotateCcw } from "lucide-react";
+import { Plus, Search, FolderClosed, Library, RotateCcw, ChevronDown } from "lucide-react";
 import {
   businessKnowledgeType,
   knowledgeLabels,
@@ -103,7 +103,7 @@ export default async function KnowledgePage({
         description="Information Avenlyo can use with customers."
         action={
           total > 0 && owner ? (
-            <Button asChild>
+            <Button asChild className="knowledge-main-cta">
               <Link
                 href={`/app/knowledge/new${selectedCollection ? `?collection=${selectedCollection.id}` : ""}`}
               >
@@ -189,47 +189,69 @@ export default async function KnowledgePage({
           </aside>
           <section className="min-w-0" aria-label="Knowledge library">
             {owner && <KnowledgeImportPanel mode="toolbar" />}
-            <form
-              className="knowledge-filter-bar"
-              action="/app/knowledge"
-              role="search"
-            >
-              <label className="knowledge-search">
-                <Search aria-hidden className="size-4" />
-                <span className="sr-only">Search knowledge</span>
-                <input
-                  name="q"
-                  defaultValue={search}
-                  placeholder="Search knowledge…"
-                  maxLength={180}
-                />
-              </label>
-              <input type="hidden" name="status" value={status} />
-              <label>
-                <span className="sr-only">Knowledge type filter</span>
-                <select name="type" defaultValue={type ?? ""}>
-                  <option value="">All types</option>
-                  {knowledgeTypes.map((t) => (
-                    <option key={t} value={t}>
-                      {knowledgeLabels[t]}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="knowledge-mobile-collection">
-                <span className="sr-only">Collection filter</span>
-                <select name="collection" defaultValue={collection}>
-                  <option value="">All collections</option>
-                  <option value="unfiled">Unfiled</option>
-                  {collections.data?.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <Button variant="outline">Apply</Button>
-            </form>
+            <div className="knowledge-library-tools">
+              <form
+                className="knowledge-search-form"
+                action="/app/knowledge"
+                role="search"
+              >
+                <label className="knowledge-search">
+                  <Search aria-hidden className="size-4" />
+                  <span className="sr-only">Search knowledge</span>
+                  <input
+                    name="q"
+                    defaultValue={search}
+                    placeholder="Search knowledge…"
+                    maxLength={180}
+                  />
+                </label>
+                <input type="hidden" name="status" value={status} />
+                <input type="hidden" name="type" value={type ?? ""} />
+                <input type="hidden" name="collection" value={collection} />
+                <button type="submit" className="sr-only">Search</button>
+              </form>
+              <div className="knowledge-filter-menus" aria-label="Knowledge filters">
+                <details className="knowledge-filter-menu">
+                  <summary>
+                    <span>type ? knowledgeLabels[type] : "All types"</span>
+                    <ChevronDown aria-hidden />
+                  </summary>
+                  <div className="knowledge-filter-popover">
+                    <Link aria-current={!type ? "page" : undefined} href={href({ type: undefined })}>
+                      All types
+                    </Link>
+                    {knowledgeTypes.map((t) => (
+                      <Link key={t} aria-current={type === t ? "page" : undefined} href={href({ type: t })}>
+                        {knowledgeLabels[t]}
+                      </Link>
+                    ))}
+                  </div>
+                </details>
+                <details className="knowledge-filter-menu">
+                  <summary>
+                    <span>
+                      {collection === "unfiled"
+                        ? "Unfiled"
+                        : selectedCollection?.name ?? "All collections"}
+                    </span>
+                    <ChevronDown aria-hidden />
+                  </summary>
+                  <div className="knowledge-filter-popover knowledge-filter-popover-right">
+                    <Link aria-current={!collection ? "page" : undefined} href={href({ collection: undefined })}>
+                      All collections
+                    </Link>
+                    <Link aria-current={collection === "unfiled" ? "page" : undefined} href={href({ collection: "unfiled" })}>
+                      Unfiled
+                    </Link>
+                    {collections.data?.map((c) => (
+                      <Link key={c.id} aria-current={collection === c.id ? "page" : undefined} href={href({ collection: c.id })}>
+                        {c.name}
+                      </Link>
+                    ))}
+                  </div>
+                </details>
+              </div>
+            </div>
             <nav
               className="knowledge-status-tabs"
               aria-label="Knowledge status filters"
