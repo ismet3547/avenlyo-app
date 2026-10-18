@@ -8,6 +8,8 @@ import {
   type Database,
 } from "@avenlyo-app/shared";
 
+test.use({actionTimeout: 15000});
+
 test("Knowledge is a structured, responsive, published-only business workspace", async ({
   page,
 }, testInfo) => {
@@ -138,7 +140,7 @@ test("Knowledge is a structured, responsive, published-only business workspace",
       await page.getByLabel("Currency (optional)", { exact: true }).fill("USD");
     }
     await page
-      .getByLabel("Collection", { exact: true })
+      .getByRole("combobox", { name: "Collection", exact: true })
       .selectOption(collection.data!.id);
     await capture(`desktop-1440-add-${type}`);
     if (type === "pricing" || type === "faq") {
@@ -241,6 +243,8 @@ test("Knowledge is a structured, responsive, published-only business workspace",
   ).toHaveCount(0);
   await capture("desktop-1440-filter-empty");
   await page.getByRole("link", { name: "Clear filters", exact: true }).click();
+  await expect(page).toHaveURL(/\/app\/knowledge$/);
+  await expect(page.getByRole("article")).toHaveCount(24);
   await page.getByLabel("Knowledge type filter").selectOption("pricing");
   await page.getByRole("button", { name: "Apply", exact: true }).click();
   await expect(page.getByRole("article")).toHaveCount(1);
