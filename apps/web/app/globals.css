@@ -949,6 +949,13 @@ body:has(.navigation-dialog[open]) {
 .knowledge-row-actions form > details {
   position: relative;
 }
+.knowledge-row-actions form > details > summary {
+  list-style: none;
+  white-space: nowrap;
+  min-height: 40px;
+}
+.knowledge-row-actions form > details > summary::-webkit-details-marker { display: none; }
+
 .knowledge-row-actions form > details > div {
   position: absolute;
   right: 0;
