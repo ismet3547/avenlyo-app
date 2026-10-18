@@ -129,6 +129,10 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await expect(page.getByText("Qualified", { exact: true })).toBeVisible();
   await expect(page.getByText("Test Agent", { exact: true })).toBeVisible();
   await page.screenshot({ path: `${shots}/lead-desktop.png`, fullPage: true });
+  await page.goto("/app/leads");
+  await expect(page.getByRole("link", { name: /Alex/ })).toHaveCount(0);
+  await page.getByRole("link", { name: "Test data", exact: true }).click();
+  await page.getByRole("link", { name: /Alex/ }).click();
   await page
     .getByRole("link", { name: "View conversation", exact: true })
     .click();
@@ -171,6 +175,26 @@ test("new user completes the independent foundation flow on desktop and mobile",
     path: `${shots}/overview-mobile.png`,
     fullPage: true,
   });
+  await page.setViewportSize({ width: 360, height: 780 });
+  await page
+    .getByRole("button", { name: "Open navigation", exact: true })
+    .click();
+  await expect(
+    page.getByRole("dialog", { name: "Workspace navigation" }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(
+    page.getByRole("dialog", { name: "Workspace navigation" }),
+  ).not.toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Open navigation", exact: true }),
+  ).toBeFocused();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth + 1,
+    ),
+  ).toBe(true);
+  await page.getByLabel("Account options").click();
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page).toHaveURL(/\/auth\/sign-in$/);
   await page.goto("/app/leads");

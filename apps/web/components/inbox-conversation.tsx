@@ -1,50 +1,84 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { ArrowUp, UserRound, Play, LogOut } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
-  channelLabels,
-  type InboxThread,
-  type Message,
-} from "@avenlyo-app/shared";
-import { PageHeader } from "./page-header";
+  ArrowDown,
+  ArrowLeft,
+  ArrowUp,
+  Info,
+  LogOut,
+  Play,
+  RotateCcw,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
+import { channelLabels, type InboxThread } from "@avenlyo-app/shared";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { Card } from "./ui/card";
 import { Textarea } from "./ui/textarea";
 import { dateLabel } from "@/lib/utils";
-function mergeMessages(current: Message[], incoming: Message[]) {
-  return [
-    ...new Map([...current, ...incoming].map((m) => [m.id, m])).values(),
-  ].sort(
-    (a, b) =>
-      a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id),
-  );
-}
+import { customerLabel, mergeThread } from "@/lib/inbox";
+
 export function InboxConversation({
   initial,
   actorId,
+  page = 0,
 }: {
   initial: InboxThread;
   actorId: string;
+  page?: number;
 }) {
+  const router = useRouter();
+  const params = useSearchParams();
+  const backQuery = new URLSearchParams();
+  if (page) backQuery.set("page", String(page));
+  if (["paused", "mine"].includes(params.get("filter") ?? ""))
+    backQuery.set("filter", params.get("filter")!);
+  if (params.get("q")) backQuery.set("q", params.get("q")!.slice(0, 200));
+  const backHref = `/app/inbox${backQuery.size ? `?${backQuery}` : ""}`;
   const [snapshot, setSnapshot] = useState(initial);
   const [content, setContent] = useState("");
   const [pending, setPending] = useState(false);
+  const [historyPending, setHistoryPending] = useState(false);
   const [error, setError] = useState("");
+  const [liveError, setLiveError] = useState(false);
   const [notice, setNotice] = useState("");
   const [hasEarlier, setHasEarlier] = useState(initial.hasEarlier);
   const [retry, setRetry] = useState(false);
+  const [hasNew, setHasNew] = useState(false);
   const request = useRef<{ clientMessageId: string; content: string } | null>(
     null,
   );
+  const busy = useRef(false);
   const thread = useRef<HTMLDivElement>(null);
+  const composer = useRef<HTMLTextAreaElement>(null);
   const followLatest = useRef(true);
+  const earlierHeight = useRef<number | null>(null);
+  const lastMessage = useRef(initial.messages.at(-1)?.id);
   const id = initial.conversation.id;
-  useEffect(() => {
-    if (thread.current && followLatest.current)
-      thread.current.scrollTop = thread.current.scrollHeight;
+  const c = snapshot.conversation;
+  const mine = c.assignee_id === actorId;
+  const other = Boolean(c.assignee_id && !mine);
+  const instagram = c.channel === "instagram";
+  const bytes = new TextEncoder().encode(content.trim()).length;
+
+  useLayoutEffect(() => {
+    const node = thread.current;
+    if (!node) return;
+    if (earlierHeight.current !== null) {
+      node.scrollTop += node.scrollHeight - earlierHeight.current;
+      earlierHeight.current = null;
+    } else if (followLatest.current) node.scrollTop = node.scrollHeight;
+    else if (lastMessage.current !== snapshot.messages.at(-1)?.id)
+      setHasNew(true);
+    lastMessage.current = snapshot.messages.at(-1)?.id;
   }, [snapshot.messages]);
+
+  useEffect(() => {
+    if (mine) composer.current?.focus();
+  }, [mine]);
+
   async function refresh(before?: string) {
     const response = await fetch(
       `/api/inbox/${id}${before ? `?before=${before}` : ""}`,
@@ -52,47 +86,49 @@ export function InboxConversation({
     );
     if (!response.ok) throw new Error("Thread unavailable");
     const next = (await response.json()) as InboxThread;
-    setSnapshot((prev) => ({
-      ...next,
-      messages: mergeMessages(prev.messages, next.messages),
-    }));
+    if (before && thread.current)
+      earlierHeight.current = thread.current.scrollHeight;
+    setSnapshot((prev) => mergeThread(prev, next));
     if (before) setHasEarlier(next.hasEarlier);
+    setLiveError(false);
   }
+
   useEffect(() => {
     let stopped = false;
-    let busy = false;
-    const timer = setInterval(async () => {
-      if (busy || document.visibilityState === "hidden") return;
-      busy = true;
+    let polling = false;
+    async function poll() {
+      if (polling || busy.current || document.visibilityState === "hidden")
+        return;
+      polling = true;
       try {
         const response = await fetch(`/api/inbox/${id}`, { cache: "no-store" });
         if (!response.ok) throw new Error("Thread unavailable");
         const next = (await response.json()) as InboxThread;
-        if (!stopped)
-          setSnapshot((prev) => ({
-            ...next,
-            messages: mergeMessages(prev.messages, next.messages),
-          }));
+        if (!stopped) {
+          setSnapshot((prev) => mergeThread(prev, next));
+          setLiveError(false);
+        }
       } catch {
-        if (!stopped)
-          setError(
-            "Live updates are unavailable. Reload to check the latest conversation state.",
-          );
+        if (!stopped) setLiveError(true);
       } finally {
-        busy = false;
+        polling = false;
       }
-    }, 4000);
+    }
+    const timer = setInterval(() => void poll(), 4000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void poll();
+    };
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
       stopped = true;
       clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, [id]);
-  const c = snapshot.conversation;
-  const mine = c.assignee_id === actorId;
-  const other = Boolean(c.assignee_id && !mine);
-  const instagram = c.channel === "instagram";
-  const bytes = new TextEncoder().encode(content.trim()).length;
+
   async function action(operation: "claim" | "release" | "resume") {
+    if (busy.current || other || (retry && operation !== "claim")) return;
+    busy.current = true;
     setPending(true);
     setError("");
     setNotice("");
@@ -103,30 +139,39 @@ export function InboxConversation({
         body: JSON.stringify({ operation }),
       });
       if (!response.ok) throw new Error("Team action unavailable");
-      await refresh();
       setNotice(
         operation === "resume"
-          ? "AI explicitly resumed for the next customer message."
+          ? "AI resumed for the next customer message. Earlier unanswered messages are unchanged."
           : operation === "release"
             ? "Conversation released. AI remains paused."
             : "Conversation claimed. AI remains paused.",
       );
     } catch {
       setError(
-        "Could not update this conversation. It may have been claimed by another team member. Reload to check its state.",
+        "Could not confirm this change. Another team member may have claimed the conversation. Check the latest state before trying again.",
       );
-    } finally {
-      setPending(false);
     }
+    try {
+      await refresh();
+    } catch {
+      setLiveError(true);
+    }
+    router.refresh();
+    busy.current = false;
+    setPending(false);
   }
+
   async function reply(event: React.FormEvent) {
     event.preventDefault();
+    if (busy.current || !mine || !content.trim() || (instagram && bytes > 1000))
+      return;
     if (!request.current)
       request.current = {
         clientMessageId: crypto.randomUUID(),
         content: content.trim(),
       };
     const submitted = request.current;
+    busy.current = true;
     setPending(true);
     setError("");
     setNotice("");
@@ -153,164 +198,361 @@ export function InboxConversation({
               : "Reply saved. Check its delivery state in the thread. AI remains paused.",
       );
       followLatest.current = true;
-      await refresh();
     } catch {
       setRetry(true);
       setError(
         "The reply result is unconfirmed. Retry uses the same message to avoid a duplicate. Check the thread before creating another reply.",
       );
-    } finally {
+      busy.current = false;
       setPending(false);
+      return;
     }
+    // A confirmed reply must never become a new retry because the following read failed.
+    try {
+      await refresh();
+    } catch {
+      setLiveError(true);
+    }
+    router.refresh();
+    busy.current = false;
+    setPending(false);
+    composer.current?.focus();
   }
+
+  const name =
+    snapshot.lead?.name ?? customerLabel(c.channel, c.external_customer_ref);
   return (
     <>
-      <PageHeader
-        eyebrow={channelLabels[c.channel]}
-        title={
-          snapshot.lead?.name ??
-          (instagram ? "Instagram conversation" : "Website conversation")
-        }
-        description={`Customer channel reference · ${c.external_customer_ref?.slice(0, 32) ?? ""}`}
-      />
-      <div className="mb-5 flex flex-wrap gap-2">
-        <Badge
-          className={
-            c.ai_mode === "paused"
-              ? "border-amber-100 bg-amber-50 text-amber-800"
-              : "border-emerald-100 bg-emerald-50 text-emerald-700"
-          }
-        >
-          {c.ai_mode === "paused" ? "Needs human · AI paused" : "AI active"}
-        </Badge>
-        {c.assignee_id && (
-          <Badge>{mine ? "Claimed by you" : "Claimed by a team member"}</Badge>
-        )}
-        {snapshot.lead && (
+      <header className="thread-header">
+        <div className="flex min-w-0 items-center gap-3">
+          <Button
+            asChild
+            size="icon"
+            variant="ghost"
+            className="size-8 shrink-0 md:hidden"
+          >
+            <Link href={backHref} aria-label="Back to conversations">
+              <ArrowLeft aria-hidden />
+            </Link>
+          </Button>
+          <span className="hidden size-10 shrink-0 place-items-center rounded-full border border-border bg-muted text-xs font-medium sm:grid">
+            {snapshot.lead?.name ? (
+              snapshot.lead.name.slice(0, 2).toUpperCase()
+            ) : (
+              <UserRound className="size-4 text-muted-foreground" aria-hidden />
+            )}
+          </span>
+          <div className="min-w-0">
+            <h2 className="truncate text-sm font-semibold">{name}</h2>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              {channelLabels[c.channel]}
+              {mine
+                ? " · Claimed by you"
+                : other
+                  ? " · Claimed by a team member"
+                  : " · Unassigned"}
+            </p>
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <Badge
+            className={
+              c.ai_mode === "paused" ? "status-warning" : "status-success"
+            }
+          >
+            <span className="status-dot" />
+            <span className="hidden sm:inline">
+              {c.ai_mode === "paused" ? "Needs human · " : ""}
+            </span>
+            {c.ai_mode === "paused" ? "AI paused" : "AI active"}
+          </Badge>
+          <details className="thread-context">
+            <summary aria-label="Conversation details">
+              <Info className="size-4" aria-hidden />
+            </summary>
+            <div className="thread-context-panel">
+              <h3 className="text-sm font-semibold">Conversation details</h3>
+              <dl className="mt-5 space-y-4 text-xs">
+                <div>
+                  <dt className="text-muted-foreground">
+                    Customer channel reference
+                  </dt>
+                  <dd className="mt-1.5 break-all">
+                    {c.external_customer_ref ?? "Unavailable"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">Ownership</dt>
+                  <dd className="mt-1.5">
+                    {mine
+                      ? "Claimed by you"
+                      : other
+                        ? "Claimed by a team member"
+                        : "Unassigned"}
+                  </dd>
+                </div>
+                {snapshot.lead && (
+                  <div>
+                    <dt className="text-muted-foreground">Linked inquiry</dt>
+                    <dd className="mt-1.5">
+                      <Link
+                        href={`/app/leads/${snapshot.lead.id}`}
+                        className="font-medium text-primary hover:underline"
+                      >
+                        View linked lead →
+                      </Link>
+                    </dd>
+                  </div>
+                )}
+              </dl>
+              {snapshot.notifications.length > 0 && (
+                <div className="mt-5 border-t border-border pt-4">
+                  <h4 className="text-xs font-semibold">Staff notifications</h4>
+                  {snapshot.notifications.map((n) => (
+                    <p
+                      key={n.id}
+                      className="mt-3 text-[11px] leading-5 text-muted-foreground"
+                    >
+                      {n.kind === "qualified_lead"
+                        ? "Qualified inquiry"
+                        : "Human assistance"}{" "}
+                      ·{" "}
+                      {n.status === "sent"
+                        ? "email accepted"
+                        : n.status === "unknown"
+                          ? "delivery unconfirmed"
+                          : n.status === "failed"
+                            ? "email failed"
+                            : n.status === "suppressed"
+                              ? "no verified owner recipient"
+                              : n.status}
+                    </p>
+                  ))}
+                </div>
+              )}
+              {instagram && (
+                <p className="mt-5 border-t border-border pt-4 text-[11px] leading-6 text-muted-foreground">
+                  Human replies must be within 24 hours of the customer’s last
+                  Instagram message. An expired window is blocked and shown in
+                  the thread.
+                </p>
+              )}
+            </div>
+          </details>
+        </div>
+      </header>
+      {snapshot.lead && (
+        <div className="flex items-center justify-between gap-3 border-b border-border bg-muted/30 px-5 py-2 text-[11px]">
+          <span className="text-muted-foreground">
+            Linked lead ·{" "}
+            {snapshot.lead.qualification === "qualified"
+              ? "Qualified"
+              : snapshot.lead.qualification === "needs_human"
+                ? "Needs human"
+                : "Needs info"}
+          </span>
           <Link
+            className="font-medium text-primary"
             href={`/app/leads/${snapshot.lead.id}`}
-            className="ml-2 pt-1 text-xs font-medium text-primary"
           >
             View linked lead →
           </Link>
-        )}
-      </div>
-      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_260px]">
-        <Card className="min-w-0 overflow-hidden">
-          <div
-            ref={thread}
-            onScroll={(event) => {
-              const node = event.currentTarget;
-              followLatest.current =
-                node.scrollHeight - node.scrollTop - node.clientHeight < 80;
-            }}
-            className="max-h-[580px] space-y-5 overflow-y-auto p-5 sm:p-6"
-            aria-label="Conversation thread"
-          >
-            {hasEarlier && (
+        </div>
+      )}
+      {liveError && (
+        <p
+          role="status"
+          className="thread-feedback border-b border-amber-200 bg-amber-50 text-amber-800"
+        >
+          Live updates are interrupted. Reconnecting automatically; the
+          conversation below may be out of date.
+        </p>
+      )}
+      <div className="relative flex min-h-0 flex-1 flex-col">
+        <div
+          ref={thread}
+          role="log"
+          aria-live="polite"
+          aria-label="Conversation thread"
+          className="thread-scroll"
+          onScroll={(event) => {
+            const node = event.currentTarget;
+            followLatest.current =
+              node.scrollHeight - node.scrollTop - node.clientHeight < 80;
+            if (followLatest.current) setHasNew(false);
+          }}
+        >
+          {hasEarlier && (
+            <div className="mb-6 text-center">
               <Button
                 size="sm"
-                variant="ghost"
-                disabled={pending}
+                variant="outline"
+                disabled={historyPending}
                 onClick={async () => {
+                  setHistoryPending(true);
                   try {
                     await refresh(snapshot.messages[0]?.id);
                   } catch {
                     setError("Earlier messages could not be loaded.");
+                  } finally {
+                    setHistoryPending(false);
                   }
                 }}
               >
-                Load earlier messages
+                {historyPending ? "Loading…" : "Load earlier messages"}
               </Button>
-            )}
-            {!snapshot.messages.length && (
-              <p className="text-sm text-muted-foreground">
-                Waiting for the first customer message.
-              </p>
-            )}
-            {snapshot.messages.map((m) => {
-              const delivery = snapshot.deliveries.find(
-                (d) => d.message_id === m.id,
-              );
-              return (
-                <article
-                  key={m.id}
-                  className={`max-w-[94%] rounded-xl p-4 ${m.role === "customer" ? "bg-muted/70" : m.role === "human" ? "ml-auto border border-blue-100 bg-blue-50/60" : "ml-auto border border-[#e8e2fc] bg-[#f7f5ff]"}`}
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-3 text-[10px] text-muted-foreground">
-                    <span className="font-semibold">
-                      {m.role === "customer"
-                        ? "Customer"
-                        : m.role === "human"
-                          ? "Team · human reply"
-                          : "Avenlyo"}
-                    </span>
-                    <time dateTime={m.created_at}>
-                      {dateLabel(m.created_at)}
-                    </time>
-                  </div>
-                  <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-7">
+            </div>
+          )}
+          {!snapshot.messages.length && (
+            <p className="py-12 text-center text-sm text-muted-foreground">
+              Waiting for the first customer message.
+            </p>
+          )}
+          {snapshot.messages.map((m) => {
+            const delivery = snapshot.deliveries.find(
+              (d) => d.message_id === m.id,
+            );
+            return (
+              <article key={m.id} className="thread-message" data-role={m.role}>
+                <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                  <span className="inline-flex items-center gap-1.5 font-medium">
+                    {m.role === "assistant" && (
+                      <Sparkles className="size-3 text-primary" aria-hidden />
+                    )}
+                    {m.role === "customer"
+                      ? "Customer"
+                      : m.role === "human"
+                        ? "Team · human reply"
+                        : "Avenlyo · AI"}
+                  </span>
+                  <time dateTime={m.created_at}>{dateLabel(m.created_at)}</time>
+                </div>
+                <div className="message-body">
+                  <p className="whitespace-pre-wrap break-words text-sm leading-7">
                     {m.content}
                   </p>
-                  {delivery && (
-                    <p
-                      className={`mt-3 text-[10px] ${["unknown", "failed", "blocked"].includes(delivery.status) ? "text-red-700" : "text-muted-foreground"}`}
-                    >
-                      {delivery.status === "available"
-                        ? "Available to visitor"
-                        : delivery.status === "sent"
-                          ? "Accepted by Instagram"
-                          : delivery.status === "unknown"
-                            ? "Delivery unconfirmed · automatic resend stopped"
-                            : delivery.status === "failed"
-                              ? "Delivery failed · automatic resend stopped"
-                              : delivery.status === "blocked"
-                                ? "Delivery blocked"
-                                : "Delivery pending"}
-                      {delivery.error_code
-                        ? ` · ${delivery.error_code.replaceAll("_", " ").toLowerCase()}`
-                        : ""}
-                    </p>
-                  )}
-                </article>
-              );
-            })}
+                </div>
+                {delivery && (
+                  <p
+                    className={`mt-2 text-[11px] leading-5 ${["unknown", "failed", "blocked"].includes(delivery.status) ? "text-red-700" : "text-muted-foreground"}`}
+                  >
+                    {delivery.status === "available"
+                      ? "Available to visitor"
+                      : delivery.status === "sent"
+                        ? "Accepted by Instagram"
+                        : delivery.status === "unknown"
+                          ? "Delivery unconfirmed · automatic resend stopped"
+                          : delivery.status === "failed"
+                            ? "Delivery failed · automatic resend stopped"
+                            : delivery.status === "blocked"
+                              ? "Delivery blocked"
+                              : "Delivery pending"}
+                    {delivery.error_code
+                      ? ` · ${delivery.error_code.replaceAll("_", " ").toLowerCase()}`
+                      : ""}
+                  </p>
+                )}
+              </article>
+            );
+          })}
+        </div>
+        {hasNew && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 shadow-md"
+            onClick={() => {
+              followLatest.current = true;
+              if (thread.current)
+                thread.current.scrollTop = thread.current.scrollHeight;
+              setHasNew(false);
+            }}
+          >
+            <ArrowDown aria-hidden />
+            New messages
+          </Button>
+        )}
+      </div>
+      {error && (
+        <p
+          role="alert"
+          className="thread-feedback border-t border-red-100 bg-red-50 text-red-700"
+        >
+          {error}
+        </p>
+      )}
+      {notice && (
+        <p
+          role="status"
+          className="thread-feedback border-t border-border text-primary"
+        >
+          {notice}
+        </p>
+      )}
+      {mine ? (
+        <div className="border-t border-border pt-3">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2 px-5">
+            <p className="flex items-center gap-1.5 text-[11px] font-medium">
+              <UserRound className="size-3.5" aria-hidden />
+              Your human reply
+              <span className="ml-1 font-normal text-muted-foreground">
+                · AI stays paused
+              </span>
+            </p>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                className="text-[11px] text-muted-foreground hover:text-foreground disabled:opacity-40"
+                aria-label="Release conversation"
+                disabled={pending || retry}
+                onClick={() => void action("release")}
+              >
+                <LogOut className="mr-1 inline size-3" aria-hidden />
+                Release
+              </button>
+              {c.ai_mode === "paused" && (
+                <button
+                  type="button"
+                  className="text-[11px] text-primary disabled:opacity-40"
+                  disabled={pending || retry}
+                  onClick={() => void action("resume")}
+                >
+                  <Play className="mr-1 inline size-3" aria-hidden />
+                  Resume AI
+                </button>
+              )}
+            </div>
           </div>
-          <form onSubmit={reply} className="border-t border-border p-5 sm:p-6">
-            <label htmlFor="human-reply" className="text-sm font-semibold">
+          <form onSubmit={reply} className="thread-composer">
+            <label htmlFor="human-reply" className="sr-only">
               Your human reply
             </label>
             <Textarea
+              ref={composer}
               id="human-reply"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder={
-                mine
-                  ? "Continue the conversation personally…"
-                  : "Claim this conversation to reply."
-              }
-              disabled={!mine || pending || retry}
+              placeholder="Continue the conversation personally…"
+              disabled={pending || retry}
               maxLength={2000}
               rows={3}
-              className="mt-3"
             />
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-              <p className="text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-between gap-2 px-3 pb-3">
+              <p
+                className={`text-[11px] ${instagram && bytes > 1000 ? "text-red-700" : "text-muted-foreground"}`}
+              >
                 {instagram
-                  ? `${bytes}/1000 bytes · Instagram reply window applies.`
-                  : "Your reply appears in the visitor’s chat."}
+                  ? `${bytes}/1000 bytes · messaging window applies`
+                  : `${content.length}/2000 · visible in the visitor’s chat`}
               </p>
               <Button
                 type="submit"
                 size="sm"
                 disabled={
-                  !mine ||
-                  pending ||
-                  !content.trim() ||
-                  (instagram && bytes > 1000)
+                  pending || !content.trim() || (instagram && bytes > 1000)
                 }
               >
-                <ArrowUp aria-hidden />
+                {retry ? <RotateCcw aria-hidden /> : <ArrowUp aria-hidden />}
                 {pending
                   ? "Saving…"
                   : retry
@@ -319,90 +561,49 @@ export function InboxConversation({
               </Button>
             </div>
           </form>
-        </Card>
-        <Card className="p-5">
-          <h2 className="text-sm font-semibold">Conversation ownership</h2>
-          <p className="mt-3 text-xs leading-6 text-muted-foreground">
-            Claiming pauses AI. Human replies and release keep it paused. Resume
-            AI explicitly when your team is ready.
-          </p>
-          <div className="mt-5 flex flex-col gap-3">
-            {!mine && (
+        </div>
+      ) : (
+        <div className="claim-panel">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold">
+              {other
+                ? "A team member is helping this customer."
+                : c.ai_mode === "paused"
+                  ? "This conversation needs a person."
+                  : "Your agent is taking care of this conversation."}
+            </p>
+            <p className="mt-1.5 text-[11px] leading-5 text-muted-foreground">
+              {other
+                ? "You can follow along. Only the assignee can send a human reply."
+                : "Claim the conversation to reply. Claiming pauses automated answers."}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {c.ai_mode === "paused" && !other && (
               <Button
                 size="sm"
                 variant="outline"
-                disabled={pending || other}
-                onClick={() => void action("claim")}
-              >
-                <UserRound aria-hidden />
-                {other ? "Already claimed" : "Claim conversation"}
-              </Button>
-            )}
-            {mine && (
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={pending}
-                onClick={() => void action("release")}
-              >
-                <LogOut aria-hidden />
-                Release conversation
-              </Button>
-            )}
-            {c.ai_mode === "paused" && (
-              <Button
-                size="sm"
-                disabled={pending || other || retry}
+                disabled={pending || retry}
                 onClick={() => void action("resume")}
               >
                 <Play aria-hidden />
                 Resume AI
               </Button>
             )}
+            <Button
+              size="sm"
+              disabled={pending || other}
+              onClick={() => void action("claim")}
+            >
+              <UserRound aria-hidden />
+              {other
+                ? "Already claimed"
+                : pending
+                  ? "Updating…"
+                  : "Claim conversation"}
+            </Button>
           </div>
-          {instagram && (
-            <p className="mt-5 border-t border-border pt-4 text-xs leading-6 text-muted-foreground">
-              V1 replies must be within 24 hours of the customer’s last
-              Instagram message. An expired window is blocked and shown in the
-              thread.
-            </p>
-          )}
-          {snapshot.notifications.length > 0 && (
-            <div className="mt-5 border-t border-border pt-4">
-              <h3 className="text-xs font-semibold">Staff notifications</h3>
-              {snapshot.notifications.map((n) => (
-                <p
-                  key={n.id}
-                  className="mt-3 text-xs leading-5 text-muted-foreground"
-                >
-                  {n.kind === "qualified_lead"
-                    ? "Qualified inquiry"
-                    : "Human assistance"}{" "}
-                  ·{" "}
-                  {n.status === "sent"
-                    ? "email accepted"
-                    : n.status === "unknown"
-                      ? "delivery unconfirmed"
-                      : n.status === "failed"
-                        ? "email failed"
-                        : n.status === "suppressed"
-                          ? "no verified owner recipient"
-                          : n.status}
-                </p>
-              ))}
-            </div>
-          )}
-        </Card>
-      </div>
-      {error && (
-        <p role="alert" className="mt-4 text-sm leading-6 text-red-700">
-          {error}
-        </p>
-      )}
-      {notice && (
-        <p role="status" className="mt-4 text-sm leading-6 text-emerald-700">
-          {notice}
-        </p>
+        </div>
       )}
     </>
   );

@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -25,11 +25,17 @@ export function TestChat({
   conversationId,
   initialMessages,
   initialLeadId,
+  tone,
+  contactFields,
+  publishedCount,
 }: {
   workspaceId: string;
   conversationId: string | null;
   initialMessages: ChatMessage[];
   initialLeadId: string | null;
+  tone: string | null;
+  contactFields: string[] | null;
+  publishedCount: number | null;
 }) {
   const router = useRouter();
   const [messages, setMessages] = useState(initialMessages);
@@ -41,8 +47,16 @@ export function TestChat({
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(false);
   const request = useRef<RequestInput | null>(null);
+  const busy = useRef(false);
+  const scroll = useRef<HTMLDivElement>(null);
+  const follow = useRef(true);
+  const field = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    if (scroll.current && follow.current)
+      scroll.current.scrollTop = scroll.current.scrollHeight;
+  }, [messages, pending]);
   async function send() {
-    if (pending) return;
+    if (busy.current || routeSyncing) return;
     if (!request.current) {
       if (!content.trim()) return;
       request.current = {
@@ -54,6 +68,8 @@ export function TestChat({
     }
     const submitted = request.current;
     if (!submitted) return;
+    busy.current = true;
+    follow.current = true;
     setPending(true);
     setError("");
     try {
@@ -71,10 +87,10 @@ export function TestChat({
         if (!unknown) request.current = null;
         setError(
           result.code === "AGENT_NOT_CONFIGURED"
-            ? "Test Agent needs the local API, Supabase and OpenAI configuration."
+            ? "Your agent is not ready for testing yet. Review its setup and try again."
             : unknown
               ? "We could not confirm the result yet. Retry this same message safely."
-              : "This turn could not be completed. Check the API setup, then try a new message.",
+              : "This turn could not be completed. Please try again in a moment.",
         );
         return;
       }
@@ -93,9 +109,12 @@ export function TestChat({
         // Keep the composer locked until the server page remounts with that ID;
         // otherwise a fast second input can be lost during router.replace().
         setRouteSyncing(true);
-        router.replace(`/app/test-agent?conversation=${result.conversationId}`, {
-          scroll: false,
-        });
+        router.replace(
+          `/app/test-agent?conversation=${result.conversationId}`,
+          {
+            scroll: false,
+          },
+        );
       } else if (result.needsHuman) {
         // Refresh server-owned handoff state so the paused banner/action appear.
         router.refresh();
@@ -106,30 +125,39 @@ export function TestChat({
         "Connection interrupted. Retry the same message to check its result.",
       );
     } finally {
+      busy.current = false;
       setPending(false);
     }
   }
   return (
-    <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
-      <section className="overflow-hidden rounded-xl border border-border bg-white shadow-xs">
+    <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_260px]">
+      <section className="test-surface">
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div className="flex items-center gap-3">
-            <span className="grid size-8 place-items-center rounded-lg bg-[#efeffd] text-primary">
+            <span className="grid size-8 place-items-center rounded-lg bg-muted text-primary">
               <Sparkles aria-hidden className="size-4" />
             </span>
             <div>
               <h2 className="text-sm font-semibold">Your Avenlyo agent</h2>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Published knowledge · effective settings
+                Published knowledge · saved settings
               </p>
             </div>
           </div>
           <Badge>Test mode</Badge>
         </div>
         <div
+          ref={scroll}
+          onScroll={(event) => {
+            const node = event.currentTarget;
+            follow.current =
+              node.scrollHeight - node.scrollTop - node.clientHeight < 80;
+          }}
+          role="log"
+          aria-label="Test conversation"
           aria-live="polite"
           aria-busy={pending}
-          className="max-h-[560px] min-h-[340px] space-y-5 overflow-y-auto p-5 sm:p-7"
+          className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5 sm:p-7"
         >
           {!messages.length && (
             <div className="mx-auto max-w-sm py-10 text-center">
@@ -145,11 +173,12 @@ export function TestChat({
               <button
                 type="button"
                 className="mt-6 rounded-lg border border-border bg-muted px-3 py-2 text-xs leading-5 text-muted-foreground hover:border-primary"
-                onClick={() =>
+                onClick={() => {
                   setContent(
                     "I'm interested in a custom project but I'm not sure what I need.",
-                  )
-                }
+                  );
+                  field.current?.focus();
+                }}
               >
                 “I’m interested in a custom project…”
               </button>
@@ -161,14 +190,14 @@ export function TestChat({
               key={index}
             >
               <div
-                className={`max-w-[90%] rounded-xl px-4 py-3 ${message.role === "customer" ? "bg-primary text-white" : "border border-border bg-[#fafafe]"}`}
+                className={`max-w-[90%] rounded-xl px-4 py-3 ${message.role === "customer" ? "bg-primary text-white" : "border border-border bg-[#f7faf5]"}`}
               >
                 <p
-                  className={`mb-1.5 text-[10px] font-semibold uppercase tracking-wider ${message.role === "customer" ? "text-white/70" : "text-muted-foreground"}`}
+                  className={`mb-1.5 text-[11px] font-semibold uppercase tracking-wider ${message.role === "customer" ? "text-white/70" : "text-muted-foreground"}`}
                 >
                   {message.role === "customer" ? "Test customer" : "Avenlyo"}
                 </p>
-                <p className="whitespace-pre-wrap text-sm leading-6">
+                <p className="whitespace-pre-wrap break-words text-sm leading-6">
                   {message.content}
                 </p>
               </div>
@@ -193,8 +222,9 @@ export function TestChat({
             Customer message
           </label>
           <Textarea
+            ref={field}
             id="test-message"
-            className="min-h-20 resize-none border-0 bg-muted shadow-none"
+            className="min-h-20 resize-none bg-white shadow-none"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             maxLength={2000}
@@ -202,7 +232,7 @@ export function TestChat({
             placeholder="Type a customer question…"
           />
           <div className="mt-3 flex items-center justify-between gap-3">
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-[11px] text-muted-foreground">
               Test conversation · saved in this workspace
             </p>
             <Button
@@ -232,7 +262,25 @@ export function TestChat({
       </section>
       <aside className="space-y-4">
         <div className="rounded-xl border border-border bg-white p-5">
-          <h2 className="text-sm font-semibold">What to look for</h2>
+          <h2 className="text-sm font-semibold">What you are testing</h2>
+          <dl className="mt-4 space-y-3 border-b border-border pb-4 text-xs">
+            <div className="flex justify-between gap-3">
+              <dt className="text-muted-foreground">Tone</dt>
+              <dd className="capitalize">{tone ?? "Unavailable"}</dd>
+            </div>
+            <div className="flex justify-between gap-3">
+              <dt className="text-muted-foreground">Published items</dt>
+              <dd>{publishedCount ?? "Unavailable"}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Contact fields</dt>
+              <dd className="mt-1.5 capitalize leading-6">
+                {contactFields
+                  ? contactFields.join(", ") || "None selected"
+                  : "Unavailable"}
+              </dd>
+            </div>
+          </dl>
           <div className="mt-4 space-y-3 text-xs leading-5 text-muted-foreground">
             {[
               "Answers grounded in published information",
@@ -250,7 +298,7 @@ export function TestChat({
             ))}
           </div>
         </div>
-        <div className="rounded-xl border border-border bg-[#f2f2fd] p-5">
+        <div className="rounded-xl border border-border bg-muted/50 p-5">
           <h2 className="text-sm font-semibold">Conversation outcome</h2>
           {leadId ? (
             <>
@@ -280,6 +328,10 @@ export function TestChat({
             </Link>
           )}
         </div>
+        <p className="px-1 text-[11px] leading-6 text-muted-foreground">
+          Practice only. No external customer message or team notification is
+          sent.
+        </p>
       </aside>
     </div>
   );

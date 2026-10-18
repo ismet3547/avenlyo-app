@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { Plus, ArrowUpRight, Globe, FileText, HelpCircle } from "lucide-react";
+import {
+  Plus,
+  ChevronRight,
+  FileText,
+  HelpCircle,
+  Pencil,
+  BookOpen,
+} from "lucide-react";
 import { requireWorkspace } from "@/lib/workspace";
 import { PageHeader } from "@/components/page-header";
 import { KnowledgeActions } from "@/components/knowledge-actions";
@@ -7,6 +14,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
+import { dateLabel } from "@/lib/utils";
 export default async function KnowledgePage({
   searchParams,
 }: {
@@ -40,114 +48,141 @@ export default async function KnowledgePage({
   return (
     <>
       <PageHeader
-        eyebrow="Business knowledge"
-        title="Good answers start here"
-        description="Add information directly. No website needed. Only published items are available to your agent."
+        eyebrow="Build your agent"
+        title="A home for your business knowledge"
+        description="The services, details and answers your agent can draw on. You decide what gets published."
         action={action}
       />
-      <div
-        className="mb-6 flex flex-wrap gap-2"
-        aria-label="Knowledge status filters"
-      >
-        {["all", "published", "draft", "archived"].map((s) => (
-          <Button
-            key={s}
-            size="sm"
-            variant={status === s ? "default" : "ghost"}
-            asChild
-          >
-            <Link
-              className="capitalize"
-              href={`/app/knowledge${s === "all" ? "" : `?status=${s}`}`}
-            >
-              {s}
-            </Link>
-          </Button>
-        ))}
-      </div>
-      {params.notice === "draft-saved" && (
-        <p
-          role="status"
-          className="mb-5 rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-800"
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-white px-5 py-4">
+        <p className="flex max-w-xl items-start gap-3 text-xs leading-6 text-muted-foreground">
+          <BookOpen className="mt-1 size-4 shrink-0 text-primary" aria-hidden />
+          <span>
+            <strong className="font-medium text-foreground">
+              Write. Review. Publish.
+            </strong>{" "}
+            Saving keeps an item in Draft. Only published knowledge is available
+            in answers.
+          </span>
+        </p>
+        <Link
+          href="/app/test-agent"
+          className="text-xs font-medium text-primary"
         >
+          Try a published answer →
+        </Link>
+      </div>
+      <nav className="filter-bar" aria-label="Knowledge status filters">
+        {["all", "published", "draft", "archived"].map((s) => (
+          <Link
+            key={s}
+            aria-current={status === s ? "page" : undefined}
+            className="filter-tab capitalize"
+            href={`/app/knowledge${s === "all" ? "" : `?status=${s}`}`}
+          >
+            {s === "all" ? "All knowledge" : s}
+          </Link>
+        ))}
+      </nav>
+      {params.notice === "draft-saved" && (
+        <p role="status" className="form-message status-success mb-5">
           Draft saved. Review the content, then publish it for your agent.
         </p>
       )}
       {result.error ? (
-        <p role="alert">
-          Knowledge could not be loaded. Check your local database setup.
+        <p role="alert" className="form-message bg-red-50 text-red-700">
+          Knowledge could not be loaded. Try refreshing this page.
         </p>
       ) : !result.data.length ? (
         <EmptyState
           title={
             status === "all"
-              ? "Teach your agent about your business"
+              ? "What should your agent know?"
               : `No ${status} items`
           }
-          description="Start with a service description or a frequently asked question. Keep information clear and accurate."
+          description="Start with your services, a common question, or the details customers ask your team every day."
           action={action}
         />
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
-          {result.data.map((item) => (
-            <Card className="p-5" key={item.id}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  {item.type === "faq" ? (
-                    <HelpCircle className="size-4" aria-hidden />
-                  ) : (
-                    <FileText className="size-4" aria-hidden />
-                  )}
-                  {item.type === "faq" ? "FAQ" : "Text"}
-                </div>
-                <Badge
-                  className={
-                    item.status === "published"
-                      ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-                      : ""
-                  }
-                >
-                  {item.status === "published"
-                    ? "Published"
-                    : item.status === "draft"
-                      ? "Draft"
-                      : "Archived"}
-                </Badge>
-              </div>
-              <h2 className="mt-4 text-sm font-semibold leading-6">
-                {item.title}
-              </h2>
-              <p className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
-                {item.content}
-              </p>
-              {ctx.role === "owner" && (
-                <>
-                  <Link
-                    href={`/app/knowledge/${item.id}`}
-                    className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-primary"
-                  >
-                    Edit item
-                    <ArrowUpRight className="size-3" aria-hidden />
-                  </Link>
-                  <KnowledgeActions id={item.id} status={item.status} />
-                </>
-              )}
-            </Card>
-          ))}
-        </div>
+        <>
+          <div className="mb-3 flex items-center justify-between text-[11px] text-muted-foreground">
+            <span>
+              {result.data.length} item{result.data.length === 1 ? "" : "s"}
+              {result.data.length === 100
+                ? " · showing the 100 most recently updated"
+                : ""}
+            </span>
+            <span className="hidden sm:inline">
+              Most recently updated first
+            </span>
+          </div>
+          <Card>
+            {result.data.map((item) => (
+              <article className="library-row" key={item.id}>
+                <details>
+                  <summary>
+                    <span className="library-icon">
+                      {item.type === "faq" ? (
+                        <HelpCircle className="size-4" aria-hidden />
+                      ) : (
+                        <FileText className="size-4" aria-hidden />
+                      )}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[13px] font-semibold leading-6">
+                        {item.title}
+                      </span>
+                      <span className="mt-1 block text-[11px] text-muted-foreground">
+                        {item.type === "faq" ? "FAQ" : "Text"} · Updated{" "}
+                        {dateLabel(item.updated_at)}
+                      </span>
+                    </span>
+                    <Badge
+                      className={
+                        item.status === "published"
+                          ? "status-success"
+                          : item.status === "draft"
+                            ? "status-warning"
+                            : ""
+                      }
+                    >
+                      {item.status === "published"
+                        ? "Published"
+                        : item.status === "draft"
+                          ? "Draft"
+                          : "Archived"}
+                    </Badge>
+                    <ChevronRight
+                      className="size-4 shrink-0 text-muted-foreground"
+                      aria-hidden
+                    />
+                  </summary>
+                  <div className="library-preview">
+                    <p className="max-w-3xl whitespace-pre-wrap break-words text-sm leading-7 text-muted-foreground">
+                      {item.content}
+                    </p>
+                  </div>
+                </details>
+                {ctx.role === "owner" && (
+                  <div className="mt-4 flex flex-wrap items-start justify-between gap-3 sm:pl-[53px]">
+                    <Link
+                      href={`/app/knowledge/${item.id}`}
+                      className="inline-flex h-9 items-center gap-2 text-xs font-medium text-muted-foreground hover:text-primary"
+                    >
+                      <Pencil className="size-3" aria-hidden />
+                      Edit item
+                    </Link>
+                    <KnowledgeActions id={item.id} status={item.status} />
+                  </div>
+                )}
+              </article>
+            ))}
+          </Card>
+        </>
       )}
-      <Card className="mt-7 flex items-center gap-4 bg-transparent p-5 shadow-none">
-        <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-muted">
-          <Globe aria-hidden className="size-5 text-muted-foreground" />
-        </span>
-        <div className="flex-1">
-          <h2 className="text-sm font-medium">Website import</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Another way to add knowledge. Manual text and FAQs work today.
-          </p>
-        </div>
-        <Badge>Coming next</Badge>
-      </Card>
+      <p className="mt-6 text-xs leading-6 text-muted-foreground">
+        Clear, specific information makes a better starting point. Keep prices,
+        availability and service limits up to date.
+      </p>
     </>
   );
 }

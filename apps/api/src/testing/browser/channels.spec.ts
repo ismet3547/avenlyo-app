@@ -123,21 +123,59 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     "Automated answers are paused",
   );
   await expect(
-    page.getByText("Needs human · AI paused", { exact: true }),
+    page.locator(".thread-header").getByText("AI paused", { exact: false }),
   ).toBeVisible();
   await page
     .getByRole("button", { name: "Claim conversation", exact: true })
     .click();
-  await expect(page.getByText("Claimed by you", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Website Chat · Claimed by you", { exact: true }),
+  ).toBeVisible();
+  // The send is acknowledged, then the following thread read fails once.
+  // This must not turn the confirmed reply into another send attempt.
+  let replyPosts = 0;
+  let acknowledged = false;
+  let failRead = true;
+  await page.route("**/api/inbox/*", async (route) => {
+    const request = route.request();
+    if (
+      request.method() === "POST" &&
+      request.postDataJSON()?.operation === "reply"
+    ) {
+      replyPosts += 1;
+      const response = await route.fetch();
+      if (response.ok()) acknowledged = true;
+      await route.fulfill({ response });
+    } else if (request.method() === "GET" && acknowledged && failRead) {
+      failRead = false;
+      await route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ code: "API_UNAVAILABLE" }),
+      });
+    } else await route.continue();
+  });
   await page
     .getByLabel("Your human reply")
     .fill("Hi, this is Susan from Northstar Studio.");
   await page
     .getByRole("button", { name: "Send human reply", exact: true })
     .click();
-  await expect(page.getByRole("status")).toContainText(
-    "available to the website visitor",
-  );
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "available to the website visitor" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Your human reply")).toHaveValue("");
+  await expect(
+    page.getByRole("button", { name: "Retry same reply", exact: true }),
+  ).toHaveCount(0);
+  await expect(page.getByText(/Live updates are interrupted/)).toBeVisible();
+  await expect(page.getByText(/Live updates are interrupted/)).toHaveCount(0, {
+    timeout: 15000,
+  });
+  expect(replyPosts).toBe(1);
+  expect(failRead).toBe(false);
   await expect(
     visitor
       .locator('[data-role="human"]')
@@ -171,7 +209,9 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     .click();
   await expect(page.getByRole("status")).toContainText("AI remains paused");
   await page.getByRole("button", { name: "Resume AI", exact: true }).click();
-  await expect(page.getByText("AI active", { exact: true })).toBeVisible();
+  await expect(
+    page.locator(".thread-header").getByText("AI active", { exact: true }),
+  ).toBeVisible();
   await visitor
     .getByLabel("Your message", { exact: true })
     .fill("What logo design services do you offer?");
@@ -198,7 +238,9 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   ]) {
     await page.goto(url);
     if (url === inboxUrl)
-      await expect(page.getByLabel("Your human reply")).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Claim conversation", exact: true }),
+      ).toBeVisible();
     else
       await expect(
         page.getByRole("heading", {
@@ -219,8 +261,12 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     fullPage: true,
   });
   await page.goto(inboxUrl);
-  await expect(page.getByLabel("Your human reply")).toBeVisible();
-  await expect(page.getByText("AI active", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Claim conversation", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.locator(".thread-header").getByText("AI active", { exact: true }),
+  ).toBeVisible();
   await page.screenshot({
     path: "test-results/screenshots/inbox-mobile.png",
     fullPage: true,

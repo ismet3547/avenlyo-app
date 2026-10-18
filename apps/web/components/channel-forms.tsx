@@ -1,5 +1,5 @@
 "use client";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Copy, Check } from "lucide-react";
 import type { FormState } from "@/app/auth/actions";
 import {
@@ -69,8 +69,14 @@ export function WebsiteChannelForm({
 }
 export function EmbedSnippet({ snippet }: { snippet: string }) {
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 3000);
+    return () => clearTimeout(timer);
+  }, [copied]);
   return (
-    <div className="mt-6 border-t border-border pt-5">
+    <div className="mt-3">
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-sm font-semibold">Website embed</h3>
         <Button
@@ -80,8 +86,10 @@ export function EmbedSnippet({ snippet }: { snippet: string }) {
             try {
               await navigator.clipboard.writeText(snippet);
               setCopied(true);
+              setCopyError(false);
             } catch {
               setCopied(false);
+              setCopyError(true);
             }
           }}
         >
@@ -89,6 +97,11 @@ export function EmbedSnippet({ snippet }: { snippet: string }) {
           {copied ? "Copied" : "Copy snippet"}
         </Button>
       </div>
+      {copyError && (
+        <p role="status" className="mt-2 text-xs text-amber-800">
+          Copy is unavailable. Select and copy the snippet below.
+        </p>
+      )}
       <pre className="mt-3 overflow-x-auto whitespace-pre-wrap break-all rounded-lg border border-border bg-muted/50 p-4 text-[11px] leading-6">
         <code>{snippet}</code>
       </pre>
@@ -105,18 +118,30 @@ export function DisconnectInstagram({ editable }: { editable: boolean }) {
     status: "idle",
   } as FormState);
   return (
-    <form action={action} className="mt-5">
-      <Button size="sm" variant="outline" disabled={!editable || pending}>
-        Disconnect Instagram
-      </Button>
-      {state.message && (
-        <p
-          role="status"
-          className="mt-3 text-xs leading-6 text-muted-foreground"
-        >
-          {state.message}
+    <details className="mt-5">
+      <summary className="text-xs text-muted-foreground hover:text-red-700">
+        Disconnect Instagram…
+      </summary>
+      <form
+        action={action}
+        className="mt-3 rounded-lg border border-red-100 bg-red-50 p-4"
+      >
+        <p className="mb-3 text-xs leading-6 text-red-800">
+          Disconnect this account? New Instagram messages will stop reaching
+          this workspace.
         </p>
-      )}
-    </form>
+        <Button size="sm" variant="outline" disabled={!editable || pending}>
+          Confirm disconnect
+        </Button>
+        {state.message && (
+          <p
+            role="status"
+            className="mt-3 text-xs leading-6 text-muted-foreground"
+          >
+            {state.message}
+          </p>
+        )}
+      </form>
+    </details>
   );
 }
