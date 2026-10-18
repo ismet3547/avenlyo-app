@@ -72,6 +72,7 @@ test("new user completes the independent foundation flow on desktop and mobile",
     .getByRole("button", { name: "Save settings", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Agent settings saved");
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: `${shots}/agent-desktop.png`, fullPage: true });
   await page.goto("/app/knowledge/new");
   await page.getByLabel("Title", { exact: true }).fill("Custom projects");
@@ -133,7 +134,9 @@ test("new user completes the independent foundation flow on desktop and mobile",
     page.getByText("alex@example.test", { exact: true }),
   ).toBeVisible();
   await expect(page.getByText("Qualified", { exact: true })).toBeVisible();
-  await expect(page.getByText("Test Agent", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("main").getByText("Test Agent", { exact: true }),
+  ).toBeVisible();
   await page.screenshot({ path: `${shots}/lead-desktop.png`, fullPage: true });
   await page.goto("/app/leads");
   await expect(page.getByRole("link", { name: /Alex/ })).toHaveCount(0);

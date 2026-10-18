@@ -32,14 +32,12 @@ A successful human reply acknowledgement is separated from its following thread 
 - Repository lint and independence check: passed.
 - Unit tests: 98 passed across 9 files, including 7 new Inbox race / filtering regressions.
 - Public widget JavaScript: parsed and evaluated its no-embed exit successfully.
-- Core text contrast: primary on white 6.36:1; muted text on white 5.16:1 and muted surface 4.64:1.
+- Core text contrast: primary on white 16.29:1; muted text on white 5.33:1 and muted surface 4.89:1.
 - Local API artifact build and production smoke: passed.
 - Local web production build: blocked by this container's missing `/proc` memory interface (`uv_resident_set_memory`, ENOENT), before compilation completes. No application configuration was changed to hide that environment failure.
 - Local browser and disposable database acceptance: unavailable in this environment. The existing GitHub CI workflow runs a disposable Supabase stack and Playwright acceptance. Its scenarios were updated for the new mobile navigation, claim-first composer, customer/test separation, and acknowledged-send/read-failure regression.
 
-GitHub CI run `39130735460` passed production builds, typecheck, lint, unit tests, database isolation, upgrade, runtime and channel acceptance. The foundation browser flow passed, including 360px mobile navigation. The first Inbox browser run exposed an ambiguous test selector because a confirmed reply now appears both in the queue preview and the thread; the assertion was scoped to the thread log. Its acknowledged-send/read-failure regression passed before that assertion. Final acceptance and visual review remain tracked in the draft PR. No deployment or merge is part of this change.
-
-Visual inspection of the first CI screenshots found two rendering issues: the font variable belonged on the document root so theme tokens could resolve it, and mobile metric links needed an explicit block display. Both were corrected before the final validation run. The final patch also adds an explicit Inbox refresh action, preserves the exhausted widget history cursor across polls, improves long-text wrapping, and separates the password reveal control from its input label.
+Production builds, database isolation/upgrade, runtime and channel acceptance are verified in GitHub CI. Browser acceptance covers mobile navigation, customer/test separation, widget use, human handoff and claim-first replies. Confirmed-send/read-failure and focus restoration have dedicated browser regressions. The exact tested commit, final run and visual evidence are linked from the draft PR. No deployment or merge is part of this change.
 
 ## Visual direction refinement
 

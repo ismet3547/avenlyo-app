@@ -64,6 +64,10 @@ input[type="radio"] {
   outline: 2px solid var(--primary);
   outline-offset: 4px;
 }
+.text-field:focus-visible {
+  outline: none;
+  outline-offset: 0;
+}
 main:focus {
   outline: none;
 }
