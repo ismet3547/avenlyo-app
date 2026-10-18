@@ -1,0 +1,407 @@
+{
+  "title": "Avenlyo UI/UX deep research evidence",
+  "date": "2026-10-18",
+  "product_baseline": "ed945629cfe04b7097c6a94e8699603f2b9b5792",
+  "method": "Desk research, source audit carried forward, official static visual review; no signed-in walkthrough or participant study.",
+  "assets": [
+    {
+      "source_id": "U03",
+      "report_path": "references/front-inbox.jpg",
+      "original_repo_commit": "aaa34e726ceb331fa380e13a6e2396553a56823a",
+      "original_repo_path": "design-prototypes/frontend-visual-directions/references/front-inbox.jpg",
+      "git_blob_sha": "856613d71e02b9491e8cda1c070ec855c096e4a8",
+      "sha256": "d4ea25317433872d765b195a089f23b3a6aae35417e2d5a6962dd075531a64ed",
+      "bytes": 102679,
+      "source_page": "https://help.front.com/en/articles/3889728",
+      "original_asset_url": "https://usw1.frontkb-cdn.com/attachments/11/1/5d6d107c-3768-448a-9aee-b90590ec381d.png",
+      "first_retrieved": "2026-10-17",
+      "visual_review_date": "2026-10-18",
+      "source_publication_date": null,
+      "original_evidence_note": "Official publisher image; full interaction not verified.",
+      "use": "Attributed comparative UI/UX analysis. Static image or selected demo frame; not proof of the full current application, accessibility or timing."
+    },
+    {
+      "source_id": "U01",
+      "report_path": "references/intercom-inbox.jpg",
+      "original_repo_commit": "aaa34e726ceb331fa380e13a6e2396553a56823a",
+      "original_repo_path": "design-prototypes/frontend-visual-directions/references/intercom-inbox.jpg",
+      "git_blob_sha": "a2ecf8fc9efcde8687ac14ff129b937d01ab9f14",
+      "sha256": "660969c0572204ab4ed76cea4e79ca099ac697ce566305eef12374d329a058d6",
+      "bytes": 211196,
+      "source_page": "https://www.intercom.com/helpdesk/inbox",
+      "original_asset_url": "https://cdn.sanity.io/images/4bgok82s/monorepo-static-assets/b1b18a305bbce7f039c68bbdb044841365045a98-2436x1624.webp",
+      "first_retrieved": "2026-10-17",
+      "visual_review_date": "2026-10-18",
+      "source_publication_date": null,
+      "original_evidence_note": "Official publisher image; full interaction not verified.",
+      "use": "Attributed comparative UI/UX analysis. Static image or selected demo frame; not proof of the full current application, accessibility or timing."
+    },
+    {
+      "source_id": "U05",
+      "report_path": "references/attio-record.jpg",
+      "original_repo_commit": "aaa34e726ceb331fa380e13a6e2396553a56823a",
+      "original_repo_path": "design-prototypes/frontend-visual-directions/references/attio-record.jpg",
+      "git_blob_sha": "c09be3c7605a0bb753fc14b2e6c5a3152a41fb8f",
+      "sha256": "e1d0fd2addef6cdb566469175bbf9b3f761c83541b77e0b6de4a45efbc1098e5",
+      "bytes": 172010,
+      "source_page": "https://attio.com/changelog/2026/record-page-redesign",
+      "original_asset_url": "https://a.storyblok.com/f/234930/7680x4320/68fc5a1cc0/new-record-layout.png",
+      "first_retrieved": "2026-10-17",
+      "visual_review_date": "2026-10-18",
+      "source_publication_date": null,
+      "original_evidence_note": "Official publisher image; full interaction not verified.",
+      "use": "Attributed comparative UI/UX analysis. Static image or selected demo frame; not proof of the full current application, accessibility or timing."
+    },
+    {
+      "source_id": "U04",
+      "report_path": "references/linear-inbox.jpg",
+      "original_repo_commit": "aaa34e726ceb331fa380e13a6e2396553a56823a",
+      "original_repo_path": "design-prototypes/frontend-visual-directions/references/linear-inbox.jpg",
+      "git_blob_sha": "bcc10a5096bec2a830eca859b6d8cd489e6d683d",
+      "sha256": "36f4123041cce606bb2a5453e28ce4a2b8b7798e3f10e7277fc0f1f22ba282d0",
+      "bytes": 91350,
+      "source_page": "https://linear.app/changelog/2026-09-03-priority-inbox",
+      "original_asset_url": "https://webassets.linear.app/images/ornj730p/production/8005be22da38ee19e6ac56569976958564d9bbb1-3600x2080.png",
+      "first_retrieved": "2026-10-17",
+      "visual_review_date": "2026-10-18",
+      "source_publication_date": null,
+      "original_evidence_note": "Official publisher image; full interaction not verified.",
+      "use": "Attributed comparative UI/UX analysis. Static image or selected demo frame; not proof of the full current application, accessibility or timing."
+    },
+    {
+      "source_id": "U06",
+      "report_path": "references/01-granola.jpg",
+      "original_repo_commit": "aaa34e726ceb331fa380e13a6e2396553a56823a",
+      "original_repo_path": "design-prototypes/new-generation-research/01-granola.jpg",
+      "git_blob_sha": "cf42caaf03a816ca0b1cec024aa5362493e19b29",
+      "sha256": "6da9f37aed0099286fff063af03b94703a168f532da10711a730eacc22d0db7d",
+      "bytes": 147018,
+      "source_page": "https://www.granola.ai/blog/a-new-look-for-granola",
+      "original_asset_url": "https://www.granola.ai/blogImages/brand-announcement/Granola-Final-Identity-15124.png",
+      "first_retrieved": "2026-10-17",
+      "visual_review_date": "2026-10-18",
+      "source_publication_date": "2026-02-02",
+      "original_evidence_note": "Official redesign screenshot; campaign backdrop is outside the app.",
+      "use": "Attributed comparative UI/UX analysis. Static image or selected demo frame; not proof of the full current application, accessibility or timing."
+    },
+    {
+      "source_id": "U07",
+      "report_path": "references/02-dia.jpg",
+      "original_repo_commit": "aaa34e726ceb331fa380e13a6e2396553a56823a",
+      "original_repo_path": "design-prototypes/new-generation-research/02-dia.jpg",
+      "git_blob_sha": "2bb74dfd01f94f4223f5b196a27f027a4957e4b7",
+      "sha256": "5b7d3ffc6296feac78b7be52138692ba590667e1cf9a6b62f39476cb41b55274",
+      "bytes": 37931,
+      "source_page": "https://www.diabrowser.com/",
+      "original_asset_url": "https://image.mux.com/AfVIo00zNCeCXbiFeHQ7RuHZUfzl3agTCOno01XBF01lRs/thumbnail.webp?width=1200&fit_mode=preserve&time=0",
+      "first_retrieved": "2026-10-17",
+      "visual_review_date": "2026-10-18",
+      "source_publication_date": "Undated tour",
+      "original_evidence_note": "Official new-tab video poster; not a captured 2026 build or motion evidence.",
+      "use": "Attributed comparative UI/UX analysis. Static image or selected demo frame; not proof of the full current application, accessibility or timing."
+    },
+    {
+      "source_id": "U09",
+      "report_path": "references/03-wispr-demo.jpg",
+      "original_repo_commit": "aaa34e726ceb331fa380e13a6e2396553a56823a",
+      "original_repo_path": "design-prototypes/new-generation-research/03-wispr-demo.jpg",
+      "git_blob_sha": "58902443345584494121eaa2598393f10e2d5318",
+      "sha256": "6d1badb4392df3ee416b9699b8c4e20f9d546fab90251d82251916a00dbffcba",
+      "bytes": 69869,
+      "source_page": "https://wisprflow.ai/android",
+      "original_asset_url": "https://pub-52b834d421f14411919b1865799bb51a.r2.dev/Andorid_landing_page_high.mp4",
+      "first_retrieved": "2026-10-17",
+      "visual_review_date": "2026-10-18",
+      "source_publication_date": "Undated current demo",
+      "original_evidence_note": "Official edited Android demo frame at 4.229 seconds; native latency unverified.",
+      "use": "Attributed comparative UI/UX analysis. Static image or selected demo frame; not proof of the full current application, accessibility or timing."
+    },
+    {
+      "source_id": "U11",
+      "report_path": "references/04-docs-ui.jpg",
+      "original_repo_commit": "aaa34e726ceb331fa380e13a6e2396553a56823a",
+      "original_repo_path": "design-prototypes/new-generation-research/04-docs-ui.jpg",
+      "git_blob_sha": "d9551878e997dd90037e42e0c815438aaf29773f",
+      "sha256": "51d599ed4b5f46f16185c2264a210c4ebc99a9776bf9725206c9a464a1825b5e",
+      "bytes": 122699,
+      "source_page": "https://superhuman.com/docs",
+      "original_asset_url": "https://superhumanstatic.com/vwfkeyj6n9ac/uVbFVYFt5oSa6xjaAu8ES/accbc575300a55dea0e2370ab11e2d13/UI_Spotlight_Feature.png?w=1600",
+      "first_retrieved": "2026-10-17",
+      "visual_review_date": "2026-10-18",
+      "source_publication_date": "Undated current product crop",
+      "original_evidence_note": "Official product UI crop, not the brand reel.",
+      "use": "Attributed comparative UI/UX analysis. Static image or selected demo frame; not proof of the full current application, accessibility or timing."
+    },
+    {
+      "source_id": "U13",
+      "report_path": "references/05-go-suggestions.jpg",
+      "original_repo_commit": "aaa34e726ceb331fa380e13a6e2396553a56823a",
+      "original_repo_path": "design-prototypes/new-generation-research/05-go-suggestions.jpg",
+      "git_blob_sha": "0566f0966dce83fdad3be875056c2e7edfb229a7",
+      "sha256": "9a0d9d5893df7b772601f403497c27da7d12be81adb8fbe801303222634b1605",
+      "bytes": 76263,
+      "source_page": "https://blog.superhuman.com/go-1-0/",
+      "original_asset_url": "https://storage.ghost.io/c/c7/8e/c78e4b36-4930-4765-917f-f40bc2da20ee/content/media/2026/08/01_Suggestions_60fps.mp4",
+      "first_retrieved": "2026-10-17",
+      "visual_review_date": "2026-10-18",
+      "source_publication_date": "2026-08-12",
+      "original_evidence_note": "Official edited suggestion demo frame at 8.38 seconds.",
+      "use": "Attributed comparative UI/UX analysis. Static image or selected demo frame; not proof of the full current application, accessibility or timing."
+    },
+    {
+      "source_id": "U14",
+      "report_path": "references/06-notion-mobile.jpg",
+      "original_repo_commit": "aaa34e726ceb331fa380e13a6e2396553a56823a",
+      "original_repo_path": "design-prototypes/new-generation-research/06-notion-mobile.jpg",
+      "git_blob_sha": "65f90a588f2a5652479545d53788d5695204b87d",
+      "sha256": "6ca355fc16a9897819ed05076892c11e56e37a846ede36e38674737d285dff47",
+      "bytes": 105506,
+      "source_page": "https://www.notion.com/releases/2026-01-20",
+      "original_asset_url": "https://images.ctfassets.net/spoqsaf9291f/4pUcFp2Ym0ftJU1mYUuj1O/f0255b3da90f02bb3d34d31eba2d1b0c/01_AI_better_on_mobile.png",
+      "first_retrieved": "2026-10-17",
+      "visual_review_date": "2026-10-18",
+      "source_publication_date": "2026-01-20",
+      "original_evidence_note": "Official mobile Agent and recording state; not proof of complete mobile Home.",
+      "use": "Attributed comparative UI/UX analysis. Static image or selected demo frame; not proof of the full current application, accessibility or timing."
+    },
+    {
+      "source_id": "U17",
+      "report_path": "references/10-tana.jpg",
+      "original_repo_commit": "aaa34e726ceb331fa380e13a6e2396553a56823a",
+      "original_repo_path": "design-prototypes/new-generation-research/10-tana.jpg",
+      "git_blob_sha": "368ac7db3f55b509654a870e226b47387a547be8",
+      "sha256": "c3533f3abc31d670e256317f8176f34e640411b802bc57086b160ede27f041d3",
+      "bytes": 70916,
+      "source_page": "https://tana.inc/blog/tana-takes-it-from-here",
+      "original_asset_url": "https://eyl4fkc8ens6x2hl.public.blob.vercel-storage.com/tana/images/library-space-home-a3a21a08.png",
+      "first_retrieved": "2026-10-17",
+      "visual_review_date": "2026-10-18",
+      "source_publication_date": "2026-06-05",
+      "original_evidence_note": "Official space home; distinct from Tana Outliner.",
+      "use": "Attributed comparative UI/UX analysis. Static image or selected demo frame; not proof of the full current application, accessibility or timing."
+    },
+    {
+      "source_id": "U18",
+      "report_path": "references/tana-mobile.jpg",
+      "original_repo_commit": "aaa34e726ceb331fa380e13a6e2396553a56823a",
+      "original_repo_path": "design-prototypes/new-generation-research/tana-mobile.jpg",
+      "git_blob_sha": "14efbc58635bcab52c04a3de3cd70eb4baebb620",
+      "sha256": "16773acd22c38e23f04596e2dbde51ef3d4bebcc31be4a848e29979249c5dce1",
+      "bytes": 110681,
+      "source_page": "https://tana.inc/blog/tana-app-for-ios",
+      "original_asset_url": "https://eyl4fkc8ens6x2hl.public.blob.vercel-storage.com/tana/images/ios-lock-screen-and-call-88f822f4.png",
+      "first_retrieved": "2026-10-17",
+      "visual_review_date": "2026-10-18",
+      "source_publication_date": "2026-10-08",
+      "original_evidence_note": "Supplementary inspected official product reference.",
+      "use": "Attributed comparative UI/UX analysis. Static image or selected demo frame; not proof of the full current application, accessibility or timing."
+    }
+  ],
+  "sources": [
+    {
+      "id": "U01",
+      "title": "Intercom Inbox",
+      "url": "https://www.intercom.com/helpdesk/inbox",
+      "usage": "Çok bölmeli konuşma yüzeyi; V/D.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "U02",
+      "title": "Fin AI Agent",
+      "url": "https://fin.ai/help/en/articles/13975995-fin-ai-agent-explained",
+      "usage": "Bilgi, test ve devralma ilişkisi; D.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "U03",
+      "title": "Front Inbox",
+      "url": "https://help.front.com/en/articles/3889728",
+      "usage": "Navigasyon, liste, kompakt başlık; V/D.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "U04",
+      "title": "Linear Priority Inbox",
+      "url": "https://linear.app/changelog/2026-09-03-priority-inbox",
+      "usage": "Eylül 2026 öncelik görünümü; V/D.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "U05",
+      "title": "Attio kayıt sayfası",
+      "url": "https://attio.com/changelog/2026/record-page-redesign",
+      "usage": "Mayıs 2026 kayıt/işlem ilişkisi; V/D.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "U06",
+      "title": "Granola görsel yenileme",
+      "url": "https://www.granola.ai/blog/a-new-look-for-granola",
+      "usage": "Not yüzeyi ve kimlik; V/D.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "U07",
+      "title": "Dia ürün yüzeyi",
+      "url": "https://www.diabrowser.com/",
+      "usage": "Başlangıç/poster görüntüsü; V.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "U08",
+      "title": "Dia 1.53.0",
+      "url": "https://www.diabrowser.com/changelog/mac/1-53-0",
+      "usage": "Ekim 2026 sürüm notu; D.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "U09",
+      "title": "Wispr Flow Android",
+      "url": "https://wisprflow.ai/android",
+      "usage": "Resmî demo karesi; V.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "U10",
+      "title": "Wispr Flow kontrol çubuğu",
+      "url": "https://docs.wisprflow.ai/articles/1790396454-move-and-dock-the-flow-bar-on-desktop",
+      "usage": "Durumlar ve görünürlük; D.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "U11",
+      "title": "Superhuman Docs",
+      "url": "https://superhuman.com/docs",
+      "usage": "Ürün kesiti; V.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "U12",
+      "title": "Docs tasarım süreci",
+      "url": "https://blog.superhuman.com/docs-new-visual-identity/",
+      "usage": "Derinlik sistemi; D.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "U13",
+      "title": "Superhuman Go 1.0",
+      "url": "https://blog.superhuman.com/go-1-0/",
+      "usage": "Yerel öneri ve kaynak ilişkisi; V/D.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "U14",
+      "title": "Notion mobil Agent",
+      "url": "https://www.notion.com/releases/2026-01-20",
+      "usage": "Mobil yazma/kayıt kesiti; V.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "U15",
+      "title": "Notion Custom Agents",
+      "url": "https://www.notion.com/releases/2026-02-24",
+      "usage": "Kaynak/erişim kontrolü; D.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "U16",
+      "title": "Notion bağlam güncellemesi",
+      "url": "https://www.notion.com/releases/2026-10-13",
+      "usage": "Ekim 2026 bağlam yaklaşımı; D.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "U17",
+      "title": "Yeni Tana güncellemesi",
+      "url": "https://tana.inc/blog/tana-takes-it-from-here",
+      "usage": "Alan, nesne ve sonuç ilişkisi; V/D.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "U18",
+      "title": "Tana iOS",
+      "url": "https://tana.inc/blog/tana-app-for-ios",
+      "usage": "Mobil devam eden iş; V/D.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "U19",
+      "title": "Birleşik Claude",
+      "url": "https://claude.com/resources/articles/cowork-is-now-claude",
+      "usage": "Eylül 2026 mod birleştirme; D.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "R01",
+      "title": "Amershi vd., CHI 2019",
+      "url": "https://www.microsoft.com/en-us/research/publication/guidelines-for-human-ai-interaction/",
+      "usage": "İnsan-AI ilkeleri; yayımlanmış araştırma.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "R02",
+      "title": "Nielsen kullanılabilirlik heuristikleri",
+      "url": "https://www.nngroup.com/articles/ten-usability-heuristics/",
+      "usage": "Uzman değerlendirme çerçevesi.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "R03",
+      "title": "GOV.UK hata toparlanması",
+      "url": "https://design-system.service.gov.uk/patterns/validation/",
+      "usage": "Form girdi/hata ilişkisi.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "R04",
+      "title": "WCAG 2.2 Quick Reference",
+      "url": "https://www.w3.org/WAI/WCAG22/quickref/",
+      "usage": "Erişilebilirlik hedefleri.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "R05",
+      "title": "WAI-ARIA Modal Dialog",
+      "url": "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/",
+      "usage": "Modal odak ve klavye davranışı.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "R06",
+      "title": "Playwright erişilebilirlik",
+      "url": "https://playwright.dev/docs/accessibility-testing",
+      "usage": "Otomatik ve manuel incelemenin birlikte kullanımı.",
+      "research_date": "2026-10-18"
+    },
+    {
+      "id": "K01",
+      "title": "İncelenen kaynak sürümü",
+      "url": "https://github.com/ismet3547/avenlyo-app/tree/ed945629cfe04b7097c6a94e8699603f2b9b5792",
+      "usage": "Mevcut ürün, veri ve işlem sınırları.",
+      "research_date": "2026-10-18"
+    }
+  ],
+  "fonts": [
+    {
+      "family": "inter",
+      "source_repo_path": "design-prototypes/frontend-visual-directions/assets/fonts/inter.ttf",
+      "license_repo_path": "design-prototypes/frontend-visual-directions/assets/fonts/inter-OFL.txt",
+      "commit": "aaa34e726ceb331fa380e13a6e2396553a56823a",
+      "use": "Embedded PDF typography specimens, default font instance."
+    },
+    {
+      "family": "geist",
+      "source_repo_path": "design-prototypes/frontend-visual-directions/assets/fonts/geist.ttf",
+      "license_repo_path": "design-prototypes/frontend-visual-directions/assets/fonts/geist-OFL.txt",
+      "commit": "aaa34e726ceb331fa380e13a6e2396553a56823a",
+      "use": "Embedded PDF typography specimens, default font instance."
+    },
+    {
+      "family": "instrument-sans",
+      "source_repo_path": "design-prototypes/frontend-visual-directions/assets/fonts/instrument-sans.ttf",
+      "license_repo_path": "design-prototypes/frontend-visual-directions/assets/fonts/instrument-sans-OFL.txt",
+      "commit": "aaa34e726ceb331fa380e13a6e2396553a56823a",
+      "use": "Embedded PDF typography specimens, default font instance."
+    }
+  ]
+}
