@@ -220,6 +220,11 @@ test("Knowledge is a structured, responsive, published-only business workspace",
       width === 390 ? "mobile-390-populated" : `responsive-${width}-populated`,
     );
   }
+  const firstRow = page.getByRole("article").first();
+  await firstRow.getByText("More", {exact:true}).click();
+  await firstRow.getByText("Delete", {exact:true}).click();
+  await capture("mobile-390-actions");
+  await firstRow.getByText("More", {exact:true}).click();
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.getByRole("link", { name: /^Published/ }).click();
   await expect(page.getByRole("article")).toHaveCount(5);

@@ -64,7 +64,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     .click();
   await expect(page.getByRole("status")).toContainText("Agent settings saved");
   await page.goto("/app/knowledge/new");
-  await page.getByRole("radio", { name: "Custom note", exact: true }).check();
+  await page.getByRole("radio", { name: "Custom note", exact: true }).click();
   await page.getByLabel("Title", { exact: true }).fill("Logo design");
   await page
     .getByLabel("Content", { exact: true })
