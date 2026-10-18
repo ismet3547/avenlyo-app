@@ -175,10 +175,10 @@ export function InboxView({
       } catch {
         if (!disposed) setPollError(true);
       } finally {
-        if (!disposed) timer = setTimeout(poll, 5000);
+        if (!disposed) timer = setTimeout(poll, 2000);
       }
     };
-    timer = setTimeout(poll, 5000);
+    void poll();
     return () => {
       disposed = true;
       clearTimeout(timer);

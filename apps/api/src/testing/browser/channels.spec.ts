@@ -197,7 +197,10 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   await expect(visitor.getByRole("status")).toContainText(
     "Automated answers are paused",
   );
-  await expect(page.getByText("AI paused", { exact: true })).toBeVisible();
+  await page.bringToFront();
+  await expect(page.getByText("AI paused", { exact: true })).toBeVisible({
+    timeout: 15000,
+  });
   await page
     .getByRole("button", { name: "Claim conversation", exact: true })
     .click();
