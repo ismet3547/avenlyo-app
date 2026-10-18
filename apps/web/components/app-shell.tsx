@@ -224,7 +224,7 @@ export function AppShell({
               <Badge tone="accent">Design preview</Badge>
             ) : (
               <Link href="/workspaces" className="topbar-workspace">
-                {workspace.name}
+                <span>{workspace.name}</span>
                 <ChevronDown aria-hidden="true" />
               </Link>
             )}

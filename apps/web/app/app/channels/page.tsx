@@ -5,7 +5,7 @@ import { Badge, ChannelIcon, PageHeader, Panel } from "@/components/ui";
 import {
   DisconnectInstagram,
   EmbedSnippet,
-  WebsiteForm,
+  WebsiteConfiguration,
 } from "@/components/product-forms";
 export default async function Page() {
   const ctx = await productContext();
@@ -67,13 +67,7 @@ export default async function Page() {
               </div>
             </dl>
           ) : null}
-          <details className="disclosure" open={!website?.enabled}>
-            <summary>
-              Configure Website Chat
-              <ChevronDown aria-hidden="true" />
-            </summary>
-            <WebsiteForm channel={website} editable={editable} />
-          </details>
+          <WebsiteConfiguration channel={website} editable={editable} />
           {website && (
             <details className="disclosure">
               <summary>

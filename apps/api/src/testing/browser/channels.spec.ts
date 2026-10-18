@@ -81,7 +81,9 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   ).toBeVisible();
   await page.goto("/app/channels");
   await expect(page.getByText("Not connected", { exact: true })).toHaveCount(2);
-  await page.getByLabel("Approved websites").fill("http://localhost:3001");
+  await page
+    .getByLabel("Approved websites", { exact: true })
+    .fill("http://localhost:3001");
   await page.getByRole("checkbox", { name: "Enable Website Chat" }).check();
   await page.getByRole("button", { name: "Save channel", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("ready");

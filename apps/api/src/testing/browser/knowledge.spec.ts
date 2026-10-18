@@ -71,7 +71,9 @@ test("all knowledge types, publication, filters, collections and safe deletion",
   await page
     .getByRole("button", { name: "Create collection", exact: true })
     .click();
-  await expect(page.getByRole("status")).toContainText("Collection created");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Collection created" }),
+  ).toContainText("Collection created");
   const collection = await user
     .from("knowledge_collections")
     .select("id")
@@ -196,7 +198,9 @@ test("all knowledge types, publication, filters, collections and safe deletion",
     .last()
     .fill("Design services");
   await page.getByRole("button", { name: "Save name", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Collection renamed");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Collection renamed" }),
+  ).toContainText("Collection renamed");
   expect(
     (
       await user

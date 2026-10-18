@@ -2829,3 +2829,22 @@ h3 {
   margin-top: 5px;
   box-shadow: none;
 }
+
+.topbar-workspace {
+  max-width: 220px;
+  min-width: 0;
+}
+.topbar-workspace > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 767px) {
+  .page-header > div:first-child {
+    flex-basis: 100%;
+  }
+}
+.profile strong {
+  white-space: nowrap;
+}

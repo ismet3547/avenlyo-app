@@ -799,6 +799,28 @@ export function WebsiteForm({
     </form>
   );
 }
+export function WebsiteConfiguration({
+  channel,
+  editable,
+}: {
+  channel?: ChannelConnection;
+  editable: boolean;
+}) {
+  const [open, setOpen] = useState(!channel?.enabled);
+  return (
+    <details
+      className="disclosure"
+      open={open}
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
+      <summary>
+        Configure Website Chat
+        <ChevronDown aria-hidden="true" />
+      </summary>
+      <WebsiteForm channel={channel} editable={editable} />
+    </details>
+  );
+}
 export function EmbedSnippet({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);
   const [failed, setFailed] = useState(false);
