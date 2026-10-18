@@ -11,10 +11,8 @@ import { dateLabel } from "@/lib/utils";
 import { PageHeader } from "@/components/page-header";
 import { KnowledgeActions } from "@/components/knowledge-actions";
 import { KnowledgeCollectionForm } from "@/components/knowledge-collection-form";
-import {
-  KnowledgeIcon,
-  KnowledgeTypeChoices,
-} from "@/components/knowledge-types";
+import { KnowledgeIcon } from "@/components/knowledge-types";
+import { KnowledgeImportPanel } from "@/components/knowledge-import-panel";
 import { Button } from "@/components/ui/button";
 export default async function KnowledgePage({
   searchParams,
@@ -123,46 +121,33 @@ export default async function KnowledgePage({
       ) : total === 0 ? (
         <section className="knowledge-first-workspace">
           <div className="knowledge-first-intro">
-            <span className="knowledge-workspace-mark">
-              <Library aria-hidden />
-            </span>
             <div>
-              <h2>Teach Avenlyo about your business.</h2>
-              <p>
-                Choose what you want to add. Save a draft and publish when
-                ready.
-              </p>
+              <p className="knowledge-kicker">Start here</p>
+              <h2>Build your knowledge base.</h2>
+              <p>Import what you already have, or add structured business knowledge manually.</p>
             </div>
           </div>
           {owner ? (
             <>
-              <KnowledgeTypeChoices />
+              <div className="knowledge-start-grid">
+                <Link href="/app/knowledge/new" className="knowledge-start-manual">
+                  <span className="knowledge-start-icon"><Plus aria-hidden /></span>
+                  <span>
+                    <strong>Add manually</strong>
+                    <span>Service, pricing, FAQ, policy and more.</span>
+                  </span>
+                </Link>
+                <KnowledgeImportPanel mode="start" />
+              </div>
+              <p className="knowledge-manual-types">
+                Manual types: Service · Pricing · FAQ · Policy · Business info · Custom note
+              </p>
               <div className="knowledge-first-footer">
-                <Button asChild>
-                  <Link href="/app/knowledge/new">
-                    <Plus aria-hidden />
-                    Add knowledge
-                  </Link>
-                </Button>
                 <KnowledgeCollectionForm />
               </div>
             </>
           ) : (
-            <p>
-              Your workspace owner can add services, pricing, FAQs and business
-              information here.
-            </p>
-          )}
-          {!!collections.data?.length && (
-            <div className="knowledge-first-collections">
-              <h3>Collections</h3>
-              {collections.data.map((c) => (
-                <span key={c.id}>
-                  <FolderClosed aria-hidden className="size-4" />
-                  {c.name}
-                </span>
-              ))}
-            </div>
+            <p>Your workspace owner can add or import business knowledge here.</p>
           )}
         </section>
       ) : (
@@ -203,6 +188,7 @@ export default async function KnowledgePage({
             {owner && <KnowledgeCollectionForm />}
           </aside>
           <section className="min-w-0" aria-label="Knowledge library">
+            {owner && <KnowledgeImportPanel mode="toolbar" />}
             <form
               className="knowledge-filter-bar"
               action="/app/knowledge"
@@ -264,6 +250,11 @@ export default async function KnowledgePage({
                 </Link>
               ))}
             </nav>
+            {params.notice === "imported" && (
+              <p role="status" className="knowledge-save-notice">
+                Imported as a draft. Review the content, then publish it when ready.
+              </p>
+            )}
             {params.notice === "draft-saved" &&
               result.data?.some((i) => i.status === "draft") && (
                 <p role="status" className="knowledge-save-notice">
