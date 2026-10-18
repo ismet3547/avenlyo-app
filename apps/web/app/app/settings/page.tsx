@@ -1,1 +1,53 @@
-import {SkeletonPage} from "@/components/skeleton-page";export default function Page(){return <SkeletonPage title="Settings" description="Settings UI removed. Workspace backend remains untouched."/>}
+import { ShieldCheck } from "lucide-react";
+import { productContext } from "@/lib/product-data";
+import { PageHeader, Panel, Badge } from "@/components/ui";
+import { BusinessForm } from "@/components/product-forms";
+export default async function Page() {
+  const ctx = await productContext();
+  return (
+    <>
+      <PageHeader
+        eyebrow="THE DETAILS THAT MAKE IT YOURS"
+        title="Workspace settings."
+        description="A few essentials for your business and your account."
+      />
+      <div className="form-layout">
+        <div className="stack">
+          <Panel
+            title="Your business"
+            description="How your business appears in this workspace."
+          >
+            <BusinessForm
+              name={ctx.workspace.name}
+              editable={ctx.role === "owner"}
+            />
+          </Panel>
+          <Panel title="Your account">
+            <dl className="detail-dl">
+              <div>
+                <dt>Email address</dt>
+                <dd>{ctx.user.email}</dd>
+              </div>
+              <div>
+                <dt>Workspace role</dt>
+                <dd>
+                  <Badge tone="accent">
+                    {ctx.role === "owner" ? "Owner" : "Team member"}
+                  </Badge>
+                </dd>
+              </div>
+            </dl>
+          </Panel>
+        </div>
+        <Panel className="help-copy">
+          <ShieldCheck aria-hidden="true" />
+          <h3>Your workspace, protected.</h3>
+          <p>
+            Only active members can access this workspace. Business settings and
+            agent configuration are managed by its owner.
+          </p>
+        </Panel>
+      </div>
+    </>
+  );
+}

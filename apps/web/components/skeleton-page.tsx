@@ -1,2 +1,0 @@
-import type { ReactNode } from "react";
-export function SkeletonPage({title,description="Frontend intentionally reset. This route is kept as a working product skeleton.",children}:{title:string;description?:string;children?:ReactNode}){return <section className="skeleton-page"><h1>{title}</h1><p>{description}</p>{children??<div className="skeleton-note">UI removed. Backend and route boundary preserved for the next frontend build.</div>}</section>}

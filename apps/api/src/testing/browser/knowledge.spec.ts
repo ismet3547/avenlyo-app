@@ -8,9 +8,7 @@ import {
   type Database,
 } from "@avenlyo-app/shared";
 
-test.use({actionTimeout: 15000});
-
-test("Knowledge is a structured, responsive, published-only business workspace", async ({
+test("all knowledge types, publication, filters, collections and safe deletion", async ({
   page,
 }, testInfo) => {
   test.setTimeout(240000);
@@ -20,14 +18,17 @@ test("Knowledge is a structured, responsive, published-only business workspace",
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { persistSession: false, autoRefreshToken: false } },
   );
-  const email = `knowledge-${randomUUID()}@example.test`;
-  const password = `Local-knowledge-${randomUUID()}!`;
-  const created = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  });
-  expect(created.error).toBeNull();
+  const email = `knowledge-${randomUUID()}@example.test`,
+    password = `Local-knowledge-${randomUUID()}!`;
+  expect(
+    (
+      await admin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+      })
+    ).error,
+  ).toBeNull();
   const user = createClient<Database>(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_PUBLISHABLE_KEY!,
@@ -44,39 +45,29 @@ test("Knowledge is a structured, responsive, published-only business workspace",
   await mkdir(shots, { recursive: true });
   const capture = async (name: string) => {
     await page.evaluate(() => window.scrollTo(0, 0));
-    await expect
-      .poll(() =>
-        page.evaluate(
-          () => document.documentElement.scrollWidth <= window.innerWidth,
-        ),
-      )
-      .toBe(true);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth + 1,
+      ),
+    ).toBe(true);
     const path = `${shots}/${name}.png`;
     await page.screenshot({ path, fullPage: true });
     await testInfo.attach(name, { path, contentType: "image/png" });
   };
   await page.goto("/auth/sign-in");
-  await page.getByLabel("Email", { exact: true }).fill(email);
+  await page.getByLabel("Email address", { exact: true }).fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/app$/);
   await page.goto("/app/knowledge");
   await expect(
-    page.getByRole("heading", { name: "Teach Avenlyo about your business." }),
+    page.getByRole("heading", {
+      name: "A home for everything your business knows",
+    }),
   ).toBeVisible();
-  await expect(
-    page.getByRole("navigation", { name: "Knowledge status filters" }),
-  ).toHaveCount(0);
-  await expect(
-    page.getByRole("link", { name: "Add knowledge", exact: true }),
-  ).toHaveCount(1);
-  await capture("desktop-1440-zero");
-  await page.setViewportSize({ width: 390, height: 844 });
-  await capture("mobile-390-zero");
-  await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.getByText("+ Create collection", { exact: true }).click();
+  await capture("empty-desktop");
+  await page.getByText("Organize with collections", { exact: true }).click();
   await page.getByLabel("Collection name", { exact: true }).fill("Services");
-  await capture("desktop-1440-collection-create");
   await page
     .getByRole("button", { name: "Create collection", exact: true })
     .click();
@@ -87,91 +78,54 @@ test("Knowledge is a structured, responsive, published-only business workspace",
     .eq("workspace_id", workspace.data!)
     .single();
   expect(collection.error).toBeNull();
-  await page.goto("/app/knowledge/new");
-  await expect(page.getByLabel("Service name", { exact: true })).toHaveCount(0);
-  await capture("desktop-1440-type-picker");
-  await page.setViewportSize({ width: 390, height: 844 });
-  await capture("mobile-390-type-picker");
-  await page.setViewportSize({ width: 1440, height: 1000 });
-  const titleLabels = {
-    service: "Service name",
-    pricing: "Pricing title",
-    faq: "Question",
-    policy: "Policy title",
-    business_info: "Title / category",
-    custom_note: "Title",
-  };
-  const contentLabels = {
-    service: "Description",
-    pricing: "Details / conditions (optional)",
-    faq: "Answer",
-    policy: "Policy details",
-    business_info: "Information",
-    custom_note: "Content",
-  };
   for (const type of knowledgeTypes) {
     await page.goto("/app/knowledge/new");
-    const radio = page.getByRole("radio", {
-      name: knowledgeLabels[type],
-      exact: true,
-    });
-    await radio.focus();
-    await page.keyboard.press("Space");
+    await page.getByLabel("Knowledge type", { exact: true }).selectOption(type);
+    const title = `${knowledgeLabels[type]} — Logo design`;
     await page
-      .getByLabel(titleLabels[type], { exact: true })
-      .fill(
+      .getByLabel(type === "faq" ? "Question" : "Title", { exact: true })
+      .fill(title);
+    await page
+      .getByLabel(
         type === "faq"
-          ? "Do you work with small businesses?"
-          : `${knowledgeLabels[type]} — Logo design`,
-      );
-    await page
-      .getByLabel(contentLabels[type], { exact: true })
+          ? "Answer"
+          : type === "pricing"
+            ? "Additional context"
+            : "Content",
+        { exact: true },
+      )
       .fill(
         "We provide logo design for small businesses. Two revisions are included.",
       );
     if (type === "service")
       await page
-        .getByLabel("Details / limits (optional)", { exact: true })
+        .getByLabel("Details and limits", { exact: true })
         .fill("Delivery within five working days.");
     if (type === "pricing") {
       await page
-        .getByLabel("Price / pricing statement", { exact: true })
+        .getByLabel("Price or pricing statement", { exact: true })
         .fill("Starting at $50");
-      await page.getByLabel("Currency (optional)", { exact: true }).fill("USD");
+      await page.getByLabel("Currency", { exact: true }).fill("USD");
     }
     await page
-      .getByRole("combobox", { name: "Collection", exact: true })
+      .getByLabel("Collection", { exact: true })
       .selectOption(collection.data!.id);
-    await capture(`desktop-1440-add-${type}`);
-    if (type === "pricing" || type === "faq") {
-      await page.setViewportSize({ width: 390, height: 844 });
-      await capture(`mobile-390-${type}-editor`);
-      for (const width of [768, 1024, 1280]) {
-        await page.setViewportSize({ width, height: 1000 });
-        await capture(`responsive-${width}-${type}-editor`);
-      }
-      await page.setViewportSize({ width: 1440, height: 1000 });
+    for (const width of [1440, 1024, 390]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await capture(`editor-${type}-${width}`);
     }
+    await page.setViewportSize({ width: 1440, height: 1000 });
     await page.getByRole("button", { name: "Save draft", exact: true }).click();
-    await expect(page).toHaveURL(/\/app\/knowledge\?notice=draft-saved/);
+    await expect(page).toHaveURL(/notice=draft-saved/);
     const row = page
-      .getByRole("article")
-      .filter({
-        has: page.getByRole("heading", {
-          name:
-            type === "faq"
-              ? "Do you work with small businesses?"
-              : `${knowledgeLabels[type]} — Logo design`,
-          exact: true,
-        }),
-      });
+      .getByRole("row")
+      .filter({ has: page.getByRole("link", { name: title, exact: true }) });
     await expect(row.getByText("Draft", { exact: true })).toBeVisible();
-    if (type === "service") await capture("desktop-1440-one-item");
     await row.getByRole("button", { name: "Publish", exact: true }).click();
     await expect(row.getByRole("status")).toContainText("Published.");
     const persisted = await user
       .from("knowledge_items")
-      .select("id,status,revision,runtime_content")
+      .select("status,runtime_content")
       .eq("workspace_id", workspace.data!)
       .eq("type", type)
       .single();
@@ -180,22 +134,16 @@ test("Knowledge is a structured, responsive, published-only business workspace",
       expect(persisted.data?.runtime_content).toContain(
         "Price: Starting at $50\nCurrency: USD",
       );
-      await row.getByRole("heading").getByRole("link").click();
+      await row.getByRole("link", { name: title, exact: true }).click();
       await page
-        .getByLabel("Price / pricing statement", { exact: true })
+        .getByLabel("Price or pricing statement", { exact: true })
         .fill("$50–$100");
       await page
         .getByRole("button", { name: "Save draft", exact: true })
         .click();
-      await expect(
-        page
-          .getByRole("article")
-          .filter({ hasText: "Pricing — Logo design" })
-          .getByText("Draft", { exact: true }),
-      ).toBeVisible();
+      await expect(row.getByText("Draft", { exact: true })).toBeVisible();
     }
   }
-  // More than twenty records validate density and long names without fixture-only UI paths.
   for (let i = 0; i < 18; i++)
     expect(
       (
@@ -214,55 +162,66 @@ test("Knowledge is a structured, responsive, published-only business workspace",
       ).error,
     ).toBeNull();
   await page.goto("/app/knowledge");
-  await expect(page.getByRole("article")).toHaveCount(24);
-  await capture("desktop-1440-populated");
-  for (const width of [1280, 1024, 768, 390]) {
-    await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 });
-    await capture(
-      width === 390 ? "mobile-390-populated" : `responsive-${width}-populated`,
-    );
+  await expect(page.getByRole("row")).toHaveCount(25);
+  for (const width of [1440, 1280, 1024, 768, 390]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await capture(`library-${width}`);
   }
-  const firstRow = page.getByRole("article").first();
-  await firstRow.getByText("More", {exact:true}).click();
-  await firstRow.getByText("Delete", {exact:true}).click();
-  await capture("mobile-390-actions");
-  await firstRow.getByText("More", {exact:true}).click();
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.getByRole("link", { name: /^Published/ }).click();
-  await expect(page.getByRole("article")).toHaveCount(5);
-  await capture("desktop-1440-published");
+  await page.getByRole("button", { name: /^Published/ }).click();
+  await expect(page.getByRole("row")).toHaveCount(6);
   await page
     .getByLabel("Search knowledge", { exact: true })
     .fill("No matching business facts");
-  await page.getByRole("button", { name: "Apply", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "No knowledge matches these filters." }),
+    page.getByRole("heading", { name: "No matching knowledge" }),
   ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Teach Avenlyo about your business." }),
-  ).toHaveCount(0);
-  await capture("desktop-1440-filter-empty");
-  await page.getByRole("link", { name: "Clear filters", exact: true }).click();
-  await expect(page).toHaveURL(/\/app\/knowledge$/);
-  await expect(page.getByRole("article")).toHaveCount(24);
+  await page.getByLabel("Search knowledge", { exact: true }).fill("");
+  await page.getByRole("button", { name: /^All knowledge/ }).click();
   await page.getByLabel("Knowledge type filter").selectOption("pricing");
-  await page.getByRole("button", { name: "Apply", exact: true }).click();
-  await expect(page.getByRole("article")).toHaveCount(1);
-  await expect(page.getByRole("article")).toContainText("$50–$100");
-  await page.getByRole("article").getByText("More", { exact: true }).click();
-  await page.getByRole("button", { name: "Archive", exact: true }).click();
+  await expect(page.getByRole("row")).toHaveCount(2);
+  await expect(page.getByRole("row").last()).toContainText("$50–$100");
+  await page.getByRole("row").last().getByText("More", { exact: true }).click();
+  await page.getByRole("button", { name: "Archive item", exact: true }).click();
+  await page.getByRole("button", { name: /^Archived/ }).click();
   await expect(
-    page.getByRole("article").getByText("Archived", { exact: true }),
+    page.getByRole("row").last().getByText("Archived", { exact: true }),
   ).toBeVisible();
   await page.goto(`/app/knowledge?collection=${collection.data!.id}`);
-  await page.getByText("Rename collection", { exact: true }).click();
+  await expect(page.getByRole("row")).toHaveCount(6);
+  await page.getByText("Organize with collections", { exact: true }).click();
+  await page.getByText("Rename Services", { exact: true }).click();
   await page
     .getByLabel("Collection name", { exact: true })
     .last()
     .fill("Design services");
   await page.getByRole("button", { name: "Save name", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("Collection renamed");
+  expect(
+    (
+      await user
+        .from("knowledge_collections")
+        .select("name")
+        .eq("id", collection.data!.id)
+        .single()
+    ).data?.name,
+  ).toBe("Design services");
+  await page.goto("/app/knowledge");
+  const firstRow = page.getByRole("row").nth(1);
+  const title = await firstRow.getByRole("link").first().innerText();
+  await firstRow.getByText("More", { exact: true }).click();
+  page.once("dialog", (dialog) => dialog.dismiss());
+  await firstRow
+    .getByRole("button", { name: "Delete item", exact: true })
+    .click();
+  await expect(firstRow).toContainText(title);
+  page.once("dialog", (dialog) => dialog.accept());
+  await firstRow
+    .getByRole("button", { name: "Delete item", exact: true })
+    .click();
   await expect(
-    page.getByRole("heading", { name: "Design services", exact: true }),
-  ).toBeVisible();
+    page
+      .getByRole("row")
+      .filter({ has: page.getByRole("link", { name: title, exact: true }) }),
+  ).toHaveCount(0);
 });

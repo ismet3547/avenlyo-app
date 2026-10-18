@@ -1,1 +1,45 @@
-import {requireUser} from "@/lib/workspace";import {SkeletonWorkspaceForm} from "@/components/skeleton-workspace-form";import {signOut} from "../auth/actions";import {switchWorkspace} from "./actions";export default async function WorkspacesPage(){const{supabase}=await requireUser();const{data}=await supabase.from("workspaces").select("id,name").order("created_at");return <main className="skeleton-auth"><section className="skeleton-auth-card"><div className="skeleton-topbar-actions"><strong>Avenlyo</strong><form action={signOut}><button type="submit">Sign out</button></form></div><h1>Workspaces</h1>{data?.length?<div className="skeleton-list">{data.map(w=><form action={switchWorkspace} key={w.id}><input type="hidden" name="workspaceId" value={w.id}/><button type="submit">{w.name}</button></form>)}</div>:null}<hr className="skeleton-divider"/><h2>Create workspace</h2><SkeletonWorkspaceForm/></section></main>}
+import { ArrowRight } from "lucide-react";
+import { requireUser } from "@/lib/workspace";
+import { switchWorkspace } from "./actions";
+import { Brand, Panel, PageHeader, Avatar } from "@/components/ui";
+import { WorkspaceForm } from "@/components/product-forms";
+export default async function Page() {
+  const ctx = await requireUser();
+  const spaces = await ctx.supabase
+    .from("workspaces")
+    .select("id,name")
+    .order("created_at");
+  if (spaces.error) throw new Error("Your workspaces could not be loaded.");
+  return (
+    <main className="workspace-page">
+      <Brand />
+      <PageHeader
+        title="A place for your business."
+        description="Choose a workspace, or create a fresh one for your team."
+      />
+      {spaces.data.length > 0 && (
+        <div className="workspace-choices">
+          {spaces.data.map((w) => (
+            <form action={switchWorkspace} key={w.id}>
+              <input type="hidden" name="workspaceId" value={w.id} />
+              <button className="workspace-choice">
+                <Avatar name={w.name} />
+                <span>
+                  <strong>{w.name}</strong>
+                  <p>Open workspace</p>
+                </span>
+                <ArrowRight aria-hidden="true" />
+              </button>
+            </form>
+          ))}
+        </div>
+      )}
+      <Panel
+        title="Create a workspace"
+        description="A little setup. A lot more clarity."
+      >
+        <WorkspaceForm />
+      </Panel>
+    </main>
+  );
+}
