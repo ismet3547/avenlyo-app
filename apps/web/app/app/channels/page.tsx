@@ -1,4 +1,11 @@
-import { Globe, MessageCircle, ArrowUpRight } from "lucide-react";
+import {
+  Globe,
+  MessageCircle,
+  ArrowUpRight,
+  ArrowRight,
+  BookOpen,
+  SlidersHorizontal,
+} from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
@@ -11,6 +18,7 @@ import {
 } from "@/components/channel-forms";
 import { requireWorkspace } from "@/lib/workspace";
 import { websiteOriginSchema } from "@avenlyo-app/shared";
+import { dateLabel } from "@/lib/utils";
 export default async function ChannelsPage() {
   const ctx = await requireWorkspace();
   const connections = await ctx.supabase
@@ -37,122 +45,192 @@ export default async function ChannelsPage() {
     ? "Connected"
     : instagram?.status === "needs_attention"
       ? "Needs attention"
-      : instagram
+      : instagram && instagram.status !== "disconnected"
         ? "Managed setup required"
         : "Not configured";
   return (
     <>
       <PageHeader
-        title="Meet customers where they are"
-        description="Your agent settings and published knowledge power every channel. Real customer conversations come together in Inbox."
+        eyebrow="Workspace"
+        title="Channels"
+        description="Connect Website Chat and Instagram to your Inbox."
+        action={
+          <Button variant="outline" asChild>
+            <Link href="/app/inbox">
+              Open Inbox
+              <ArrowRight aria-hidden />
+            </Link>
+          </Button>
+        }
       />
-      <div className="grid items-start gap-5 xl:grid-cols-2">
-        <Card className="min-w-0 p-6">
-          <div className="flex items-center justify-between">
-            <span className="grid size-11 place-items-center rounded-xl border border-border bg-muted">
-              <Globe className="size-5" aria-hidden />
-            </span>
-            <Badge
-              className={
-                website?.enabled
-                  ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-                  : ""
-              }
-            >
+      <div className="mb-7 flex flex-wrap gap-x-6 gap-y-3 text-xs text-muted-foreground">
+        <Link
+          href="/app/agent"
+          className="inline-flex items-center gap-2 hover:text-primary"
+        >
+          <SlidersHorizontal className="size-3.5" aria-hidden />
+          Shared agent settings
+          <ArrowUpRight className="size-3" aria-hidden />
+        </Link>
+        <Link
+          href="/app/knowledge"
+          className="inline-flex items-center gap-2 hover:text-primary"
+        >
+          <BookOpen className="size-3.5" aria-hidden />
+          Published knowledge
+          <ArrowUpRight className="size-3" aria-hidden />
+        </Link>
+      </div>
+      <div className="space-y-6">
+        <Card className="overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border px-6 py-5">
+            <div className="flex items-center gap-4">
+              <span className="grid size-11 place-items-center rounded-xl border border-border bg-muted/50">
+                <Globe
+                  className="size-5 text-primary"
+                  strokeWidth={1.6}
+                  aria-hidden
+                />
+              </span>
+              <div>
+                <h2 className="text-base font-semibold tracking-tight">
+                  Website Chat
+                </h2>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Website conversations and installation.
+                </p>
+              </div>
+            </div>
+            <Badge className={website?.enabled ? "status-success" : ""}>
+              <span className="status-dot" />
               {websiteState}
             </Badge>
           </div>
-          <h2 className="mt-5 text-lg font-semibold tracking-tight">
-            Website Chat
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            A small chat widget for customer questions, useful inquiries and a
-            clear handoff to your team.
-          </p>
-          <WebsiteChannelForm
-            enabled={website?.enabled ?? false}
-            origins={
-              website?.approved_origins ??
-              (local ? ["http://localhost:3001"] : [])
-            }
-            editable={ctx.role === "owner"}
-          />
-          {website && (
-            <EmbedSnippet
-              snippet={`<script async src="${publicUrl}/widget.js" data-avenlyo-channel="${website.public_id}"></script>`}
-            />
-          )}
-          {website && local && (
-            <Link
-              href={`/chat-demo?channel=${website.public_id}`}
-              target="_blank"
-              className="mt-4 inline-flex items-center gap-2 text-xs font-medium text-primary"
-            >
-              Open local widget demo
-              <ArrowUpRight className="size-3" aria-hidden />
-            </Link>
-          )}
+          <div className="grid gap-8 p-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-12">
+            <div>
+              <p className="eyebrow">01 · Choose your websites</p>
+              <p className="text-xs leading-6 text-muted-foreground">
+                Enable chat on the exact websites you approve. Visitors can ask
+                questions without an Avenlyo account.
+              </p>
+              <WebsiteChannelForm
+                enabled={website?.enabled ?? false}
+                origins={
+                  website?.approved_origins ??
+                  (local ? ["http://localhost:3001"] : [])
+                }
+                editable={ctx.role === "owner"}
+              />
+            </div>
+            <div>
+              <p className="eyebrow">02 · Install your chat widget</p>
+              {website ? (
+                <>
+                  <EmbedSnippet
+                    snippet={`<script async src="${publicUrl}/widget.js" data-avenlyo-channel="${website.public_id}"></script>`}
+                  />
+                  {local && (
+                    <Link
+                      href={`/chat-demo?channel=${website.public_id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-primary"
+                    >
+                      Open local widget demo
+                      <ArrowUpRight className="size-3.5" aria-hidden />
+                    </Link>
+                  )}
+                  {website.last_activity_at && (
+                    <p className="mt-5 text-[11px] text-muted-foreground">
+                      Last customer activity ·{" "}
+                      {dateLabel(website.last_activity_at)}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/30 p-6">
+                  <Globe className="size-6 text-muted-foreground" aria-hidden />
+                  <p className="mt-4 text-sm font-medium">
+                    Your snippet will appear here.
+                  </p>
+                  <p className="mt-2 text-xs leading-6 text-muted-foreground">
+                    Save your website settings first. Then copy the snippet into
+                    the websites you approved.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         </Card>
-        <Card className="min-w-0 p-6">
-          <div className="flex items-center justify-between">
-            <span className="grid size-11 place-items-center rounded-xl border border-border bg-muted">
-              <MessageCircle className="size-5" aria-hidden />
-            </span>
+        <Card className="overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border px-6 py-5">
+            <div className="flex items-center gap-4">
+              <span className="grid size-11 place-items-center rounded-xl border border-border bg-muted/50">
+                <MessageCircle
+                  className="size-5 text-primary"
+                  strokeWidth={1.6}
+                  aria-hidden
+                />
+              </span>
+              <div>
+                <h2 className="text-base font-semibold tracking-tight">
+                  Instagram
+                </h2>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Customer questions in your direct messages.
+                </p>
+              </div>
+            </div>
             <Badge
               className={
                 connected
-                  ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-                  : ""
+                  ? "status-success"
+                  : instagram?.status === "needs_attention"
+                    ? "status-warning"
+                    : ""
               }
             >
+              <span className="status-dot" />
               {instagramState}
             </Badge>
           </div>
-          <h2 className="mt-5 text-lg font-semibold tracking-tight">
-            Instagram
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Reply to supported customer-initiated direct messages through the
-            same agent, with human replies from Inbox.
-          </p>
-          {connected ? (
-            <div className="mt-6 rounded-lg border border-emerald-100 bg-emerald-50/60 p-4">
-              <p className="text-sm font-semibold">
-                @{instagram?.provider_username}
+          <div className="grid gap-7 p-6 lg:grid-cols-2 lg:gap-12">
+            <div>
+              <h3 className="text-sm font-medium">
+                {connected
+                  ? `Connected to @${instagram?.provider_username ?? "your business"}`
+                  : "Managed connection"}
+              </h3>
+              <p className="mt-3 max-w-lg text-xs leading-7 text-muted-foreground">
+                {connected
+                  ? "Supported customer-initiated direct messages use your saved agent settings and published knowledge. Your team can continue the conversation from Inbox."
+                  : "Instagram uses managed setup. Your Avenlyo operator verifies the professional account, messaging access and webhook connection for this workspace."}
               </p>
-              <p className="mt-2 break-all text-xs text-muted-foreground">
-                Professional account · {instagram?.provider_account_id}
+              {connected && instagram?.verified_at && (
+                <p className="mt-4 text-[11px] text-muted-foreground">
+                  Connection verified · {dateLabel(instagram.verified_at)}
+                </p>
+              )}
+              {instagram && instagram.status !== "disconnected" && (
+                <DisconnectInstagram editable={ctx.role === "owner"} />
+              )}
+            </div>
+            <div className="rounded-xl bg-muted/50 p-5">
+              <h3 className="text-xs font-semibold">Messaging and delivery</h3>
+              <p className="mt-2 text-xs leading-7 text-muted-foreground">
+                Replies follow Instagram’s supported messaging window. Delivery
+                failures and unconfirmed sends are visible in the conversation,
+                so your team can decide what to do next.
               </p>
             </div>
-          ) : (
-            <div className="mt-6 rounded-lg border border-border bg-muted/50 p-4">
-              <p className="text-sm font-medium">Founder-assisted setup</p>
-              <p className="mt-2 text-xs leading-6 text-muted-foreground">
-                A verified professional account, messaging access and webhook
-                setup are required. Ask your Avenlyo operator to connect the
-                correct account for this workspace.
-              </p>
-            </div>
-          )}
-          <p className="mt-5 text-xs leading-6 text-muted-foreground">
-            Replies follow Instagram’s supported messaging window. Delivery
-            failures and unconfirmed sends are visible in Inbox.
-          </p>
-          {instagram && instagram.status !== "disconnected" && (
-            <DisconnectInstagram editable={ctx.role === "owner"} />
-          )}
+          </div>
         </Card>
       </div>
-      <div className="mt-7 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-white p-5">
-        <p className="max-w-xl text-sm leading-6 text-muted-foreground">
-          When a real inquiry qualifies or needs a person, a staff email is
-          recorded for a verified workspace owner. Delivery status appears with
-          the conversation.
-        </p>
-        <Button asChild variant="outline">
-          <Link href="/app/inbox">Open Inbox</Link>
-        </Button>
-      </div>
+      <p className="mt-6 max-w-3xl text-xs leading-7 text-muted-foreground">
+        Qualified inquiries and requests for human help can notify a verified
+        workspace owner by email. Notification status appears in the
+        conversation details. Test conversations do not send notifications.
+      </p>
     </>
   );
 }

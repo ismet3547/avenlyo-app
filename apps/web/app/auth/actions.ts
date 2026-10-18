@@ -28,7 +28,7 @@ export async function signIn(
   if (!supabase)
     return {
       status: "error",
-      message: "Configure local Supabase using the .env.example files first.",
+      message: "Sign-in is temporarily unavailable. Please try again later.",
     };
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error)
@@ -56,7 +56,7 @@ export async function signUp(
   if (!supabase)
     return {
       status: "error",
-      message: "Configure local Supabase using the .env.example files first.",
+      message: "Sign-in is temporarily unavailable. Please try again later.",
     };
   const origin = new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001",
@@ -75,7 +75,7 @@ export async function signUp(
   return {
     status: "success",
     message:
-      "Check your email to confirm your account. Locally, open the mail inbox at http://localhost:55324.",
+      "Check your email to confirm your account, then sign in to continue.",
   };
 }
 export async function signOut() {

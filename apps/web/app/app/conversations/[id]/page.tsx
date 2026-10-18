@@ -86,7 +86,7 @@ export default async function ConversationDetail({
                   {m.role === "assistant" ? "Avenlyo" : "Test customer"}
                 </span>
                 <time
-                  className="text-[10px] text-muted-foreground"
+                  className="text-[11px] text-muted-foreground"
                   dateTime={m.created_at}
                 >
                   {dateLabel(m.created_at)}

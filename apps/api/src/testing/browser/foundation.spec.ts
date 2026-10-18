@@ -19,8 +19,9 @@ test("new user completes the independent foundation flow on desktop and mobile",
   await mkdir(shots, { recursive: true });
   await page.goto("/auth/sign-up");
   await expect(
-    page.getByRole("heading", { name: "Start with your business" }),
+    page.getByRole("heading", { name: "Create an account" }),
   ).toBeVisible();
+  await page.screenshot({ path: `${shots}/auth-desktop.png`, fullPage: true });
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page
@@ -46,8 +47,12 @@ test("new user completes the independent foundation flow on desktop and mobile",
     .getByRole("button", { name: "Create workspace", exact: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Your AI front office", exact: true }),
+    page.getByRole("heading", { name: "Overview", exact: true }),
   ).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  expect(
+    await page.evaluate(() => getComputedStyle(document.body).fontFamily),
+  ).toContain("geist");
   await page.screenshot({
     path: `${shots}/overview-desktop.png`,
     fullPage: true,
@@ -67,6 +72,8 @@ test("new user completes the independent foundation flow on desktop and mobile",
     .getByRole("button", { name: "Save settings", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Agent settings saved");
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: `${shots}/agent-desktop.png`, fullPage: true });
   await page.goto("/app/knowledge/new");
   await page.getByLabel("Title", { exact: true }).fill("Custom projects");
   await page
@@ -127,8 +134,14 @@ test("new user completes the independent foundation flow on desktop and mobile",
     page.getByText("alex@example.test", { exact: true }),
   ).toBeVisible();
   await expect(page.getByText("Qualified", { exact: true })).toBeVisible();
-  await expect(page.getByText("Test Agent", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("main").getByText("Test Agent", { exact: true }),
+  ).toBeVisible();
   await page.screenshot({ path: `${shots}/lead-desktop.png`, fullPage: true });
+  await page.goto("/app/leads");
+  await expect(page.getByRole("link", { name: /Alex/ })).toHaveCount(0);
+  await page.getByRole("link", { name: "Test data", exact: true }).click();
+  await page.getByRole("link", { name: /Alex/ }).click();
   await page
     .getByRole("link", { name: "View conversation", exact: true })
     .click();
@@ -171,6 +184,26 @@ test("new user completes the independent foundation flow on desktop and mobile",
     path: `${shots}/overview-mobile.png`,
     fullPage: true,
   });
+  await page.setViewportSize({ width: 360, height: 780 });
+  await page
+    .getByRole("button", { name: "Open navigation", exact: true })
+    .click();
+  await expect(
+    page.getByRole("dialog", { name: "Workspace navigation" }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(
+    page.getByRole("dialog", { name: "Workspace navigation" }),
+  ).not.toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Open navigation", exact: true }),
+  ).toBeFocused();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth + 1,
+    ),
+  ).toBe(true);
+  await page.getByLabel("Account options").click();
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page).toHaveURL(/\/auth\/sign-in$/);
   await page.goto("/app/leads");

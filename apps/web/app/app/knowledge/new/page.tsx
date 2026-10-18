@@ -8,7 +8,7 @@ export default async function NewKnowledge() {
     <>
       <PageHeader
         title="Add knowledge"
-        description="Write something useful about your business. A service description or a clear FAQ is a great start."
+        description="Create a text source or FAQ. Save as a draft before publishing."
       />
       <KnowledgeForm />
     </>

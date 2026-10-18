@@ -2,84 +2,107 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
-  Inbox,
-  UsersRound,
-  MessageSquare,
-  Sparkles,
   BookOpen,
   Cable,
-  Settings,
-  ArrowUpRight,
+  FlaskConical,
+  House,
+  Inbox,
+  Settings2,
+  SlidersHorizontal,
+  UsersRound,
 } from "lucide-react";
+import { Brand } from "./brand";
 import { cn } from "@/lib/utils";
-const nav = [
-  { href: "/app", label: "Overview", icon: LayoutDashboard },
-  { href: "/app/inbox", label: "Inbox", icon: Inbox },
-  { href: "/app/leads", label: "Leads", icon: UsersRound },
-  { href: "/app/conversations", label: "Conversations", icon: MessageSquare },
-  { href: "/app/agent", label: "Agent", icon: Sparkles },
-  { href: "/app/knowledge", label: "Knowledge", icon: BookOpen },
-  { href: "/app/channels", label: "Channels", icon: Cable },
-  { href: "/app/settings", label: "Settings", icon: Settings },
+const groups = [
+  {
+    label: "Workspace",
+    links: [
+      { href: "/app", label: "Home", icon: House },
+      { href: "/app/inbox", label: "Inbox", icon: Inbox },
+      { href: "/app/leads", label: "Leads", icon: UsersRound },
+    ],
+  },
+  {
+    label: "Agent",
+    links: [
+      { href: "/app/agent", label: "Agent", icon: SlidersHorizontal },
+      { href: "/app/knowledge", label: "Knowledge", icon: BookOpen },
+      { href: "/app/channels", label: "Channels", icon: Cable },
+    ],
+  },
 ];
-export function Sidebar() {
+export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const path = usePathname();
   return (
-    <>
-      <Link
-        href="/app"
-        className="mb-8 flex items-center gap-2.5 px-3 text-xl font-semibold tracking-tight"
-      >
-        <span className="grid size-8 place-items-center rounded-lg bg-primary text-white">
-          <Sparkles className="size-4" aria-hidden />
-        </span>
-        Avenlyo
-      </Link>
-      <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[.15em] text-muted-foreground">
-        Workspace
-      </p>
-      <nav aria-label="Main navigation" className="space-y-1">
-        {nav.map(({ href, label, icon: Icon }, i) => {
-          const active =
-            href === "/app"
-              ? path === href
-              : path.startsWith(href) ||
-                (href === "/app/agent" && path === "/app/test-agent");
-          return (
-            <Link
-              key={href}
-              href={href}
-              aria-current={active ? "page" : undefined}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted",
-                active ? "bg-[#efeffd] text-primary" : "text-[#73788a]",
-                i === 4 && "mt-6",
-              )}
-            >
-              <Icon aria-hidden className="size-[17px]" />
-              {label}
-            </Link>
-          );
-        })}
+    <div className="sidebar-content">
+      <div className="px-2 pb-8 pt-1" onClick={onNavigate}>
+        <Brand />
+      </div>
+      <nav aria-label="Main navigation" className="space-y-7">
+        {groups.map((group) => (
+          <div key={group.label}>
+            <p className="nav-label">{group.label}</p>
+            <div className="space-y-1">
+              {group.links.map(({ href, label, icon: Icon }) => {
+                const active =
+                  href === "/app" ? path === href : path.startsWith(href);
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={onNavigate}
+                    aria-current={active ? "page" : undefined}
+                    className={cn("nav-link", active && "nav-link-active")}
+                  >
+                    <Icon
+                      aria-hidden="true"
+                      className="size-[18px]"
+                      strokeWidth={1.7}
+                    />
+                    {label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
-      <div className="mt-auto pt-8">
+      <div className="mt-auto border-t border-border pt-4">
         <Link
           href="/app/test-agent"
-          className="block rounded-xl border border-border bg-gradient-to-b from-white to-muted p-4"
+          onClick={onNavigate}
+          className={cn(
+            "nav-link",
+            (path.startsWith("/app/test-agent") ||
+              path.startsWith("/app/conversations")) &&
+              "nav-link-active",
+          )}
+          aria-current={path === "/app/test-agent" ? "page" : undefined}
         >
-          <span className="flex items-center justify-between text-sm font-semibold">
-            Meet your agent
-            <ArrowUpRight
-              className="size-4 text-muted-foreground"
-              aria-hidden
-            />
-          </span>
-          <span className="mt-2 block text-xs leading-5 text-muted-foreground">
-            Try a customer question before connecting channels.
-          </span>
+          <FlaskConical
+            className="size-[17px]"
+            strokeWidth={1.6}
+            aria-hidden="true"
+          />
+          Test Agent
+        </Link>
+        <Link
+          href="/app/settings"
+          onClick={onNavigate}
+          aria-current={path.startsWith("/app/settings") ? "page" : undefined}
+          className={cn(
+            "nav-link",
+            path.startsWith("/app/settings") && "nav-link-active",
+          )}
+        >
+          <Settings2
+            className="size-[17px]"
+            aria-hidden="true"
+            strokeWidth={1.6}
+          />
+          Workspace settings
         </Link>
       </div>
-    </>
+    </div>
   );
 }

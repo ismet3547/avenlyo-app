@@ -1,3 +1,4 @@
+import { AgentNavigation } from "@/components/agent-navigation";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { z } from "zod";
@@ -42,12 +43,24 @@ export default async function TestAgentPage({
         .eq("conversation_id", authorizedId)
         .maybeSingle()
     : null;
+  const [saved, knowledge] = await Promise.all([
+    ctx.supabase
+      .from("agent_settings")
+      .select("tone,contact_fields")
+      .eq("workspace_id", ctx.workspace.id)
+      .single(),
+    ctx.supabase
+      .from("knowledge_items")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", ctx.workspace.id)
+      .eq("status", "published"),
+  ]);
   return (
     <>
       <PageHeader
         eyebrow="Test Agent"
-        title="Try a customer conversation"
-        description="Test your effective settings and published knowledge. Conversations and leads are test data; no external customer message or team notification is sent."
+        title="Test Agent"
+        description="Test the saved agent settings and published knowledge."
         action={
           <Button asChild variant="outline">
             <Link href="/app/test-agent">
@@ -57,9 +70,10 @@ export default async function TestAgentPage({
           </Button>
         }
       />
+      <AgentNavigation active="test" />
       {conversation?.data?.ai_mode === "paused" && (
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm text-amber-900">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/50 p-4">
+          <p className="text-sm text-foreground">
             This test needs human assistance. Automated answers are paused.
           </p>
           <form action={resumeTest}>
@@ -74,8 +88,16 @@ export default async function TestAgentPage({
         key={authorizedId ?? "new"}
         workspaceId={ctx.workspace.id}
         conversationId={authorizedId}
-        initialMessages={messages?.data?.map(m => ({role: m.role === "customer" ? "customer" : "assistant", content: m.content})) ?? []}
+        initialMessages={
+          messages?.data?.map((m) => ({
+            role: m.role === "customer" ? "customer" : "assistant",
+            content: m.content,
+          })) ?? []
+        }
         initialLeadId={lead?.data?.id ?? null}
+        tone={saved.data?.tone ?? null}
+        contactFields={saved.data?.contact_fields ?? null}
+        publishedCount={knowledge.error ? null : (knowledge.count ?? 0)}
       />
     </>
   );

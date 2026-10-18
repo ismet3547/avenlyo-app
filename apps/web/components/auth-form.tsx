@@ -1,7 +1,7 @@
 "use client";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { signIn, signUp, type FormState } from "@/app/auth/actions";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
@@ -16,6 +16,7 @@ export function AuthForm({
     mode === "sign-in" ? signIn : signUp,
     { message: "", status: "idle" } as FormState,
   );
+  const [showPassword, setShowPassword] = useState(false);
   return (
     <form action={action} className="mt-7 space-y-5">
       <label className="block text-sm font-medium">
@@ -26,37 +27,56 @@ export function AuthForm({
           type="email"
           autoComplete="email"
           placeholder="you@company.com"
+          autoCapitalize="none"
+          spellCheck={false}
           required
         />
       </label>
-      <label className="block text-sm font-medium">
-        Password
-        <Input
-          className="mt-2"
-          name="password"
-          type="password"
-          minLength={8}
-          maxLength={128}
-          autoComplete={
-            mode === "sign-in" ? "current-password" : "new-password"
-          }
-          placeholder="At least 8 characters"
-          required
-        />
-      </label>
+      <div className="text-sm font-medium">
+        <label htmlFor="auth-password">Password</label>
+        <span className="relative mt-2 block">
+          <Input
+            className="pr-12"
+            id="auth-password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            minLength={8}
+            maxLength={128}
+            autoComplete={
+              mode === "sign-in" ? "current-password" : "new-password"
+            }
+            placeholder={
+              mode === "sign-in" ? "Your password" : "At least 8 characters"
+            }
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((previous) => !previous)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-pressed={showPassword}
+            className="absolute right-0 top-0 grid size-11 place-items-center rounded-r-lg text-muted-foreground"
+          >
+            {showPassword ? (
+              <EyeOff className="size-4" aria-hidden />
+            ) : (
+              <Eye className="size-4" aria-hidden />
+            )}
+          </button>
+        </span>
+      </div>
       {!configured && (
         <p
           role="status"
-          className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
+          className="rounded-lg border border-border bg-muted/50 p-3 text-sm text-foreground"
         >
-          Local setup required. Add your Supabase URL and publishable key to the
-          environment file.
+          Sign-in is temporarily unavailable. Please try again later.
         </p>
       )}
       {state.message && (
         <p
-          role="status"
-          className={`rounded-lg p-3 text-sm ${state.status === "error" ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-800"}`}
+          role={state.status === "error" ? "alert" : "status"}
+          className={`rounded-lg p-3 text-sm ${state.status === "error" ? "bg-red-50 text-red-700" : "status-success border border-border"}`}
         >
           {state.message}
         </p>

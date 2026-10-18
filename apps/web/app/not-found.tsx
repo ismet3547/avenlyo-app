@@ -11,7 +11,7 @@ export default function NotFound() {
         className="mt-6 inline-block text-sm text-primary underline"
         href="/app"
       >
-        Back to overview
+        Back to Home
       </Link>
     </main>
   );

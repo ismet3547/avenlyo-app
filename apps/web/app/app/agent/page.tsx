@@ -1,5 +1,6 @@
+import { AgentNavigation } from "@/components/agent-navigation";
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
+import { FlaskConical } from "lucide-react";
 import { agentSettingsSchema } from "@avenlyo-app/shared";
 import { requireWorkspace } from "@/lib/workspace";
 import { AgentForm } from "@/components/agent-form";
@@ -15,7 +16,8 @@ export default async function AgentPage() {
   if (result.error)
     return (
       <p>
-        Agent settings are unavailable. Check your local database migrations.
+        Agent settings are temporarily unavailable. Refresh this page to try
+        again.
       </p>
     );
   const settings = agentSettingsSchema.parse({
@@ -29,17 +31,18 @@ export default async function AgentPage() {
     <>
       <PageHeader
         eyebrow="Your agent"
-        title="Helpful by design"
-        description="Define how Avenlyo helps your customers, with clear goals and sensible boundaries."
+        title="Agent settings"
+        description="Configure goals, tone and contact requirements."
         action={
           <Button asChild variant="outline">
             <Link href="/app/test-agent">
-              <Sparkles aria-hidden />
-              Test agent
+              <FlaskConical aria-hidden />
+              Test saved settings
             </Link>
           </Button>
         }
       />
+      <AgentNavigation active="settings" />
       <AgentForm settings={settings} editable={ctx.role === "owner"} />
     </>
   );

@@ -1,53 +1,31 @@
 import type { ReactNode } from "react";
-import { Sparkles, BookOpen, MessageSquare, ArrowUpRight } from "lucide-react";
+import { Brand } from "@/components/brand";
 export const dynamic = "force-dynamic";
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <main className="min-h-screen lg:grid lg:grid-cols-2">
-      <section className="relative hidden overflow-hidden bg-[#edeefb] p-14 lg:flex lg:flex-col">
-        <div className="flex items-center gap-2.5 text-xl font-semibold tracking-tight">
-          <span className="grid size-8 place-items-center rounded-lg bg-primary text-white">
-            <Sparkles className="size-4" aria-hidden />
-          </span>
-          Avenlyo
-        </div>
+    <main className="auth-shell">
+      <section className="auth-story">
+        <Brand />
         <div className="my-auto max-w-lg py-16">
-          <p className="text-xs font-semibold uppercase tracking-[.16em] text-primary">
-            A clearer front office
+          <p className="mb-6 text-xs text-white/60">
+            Customer conversations, managed.
           </p>
-          <h1 className="mt-5 text-5xl font-semibold leading-[1.12] tracking-[-.05em]">
-            Good questions.
+          <h2 className="text-[clamp(42px,4vw,64px)] font-medium leading-[1.06] tracking-[-.055em]">
+            Every conversation.
             <br />
-            Useful answers.
-            <br />
-            <span className="text-primary">Real opportunities.</span>
-          </h1>
-          <p className="mt-6 max-w-sm text-base leading-7 text-[#72758f]">
-            Give Avenlyo your business knowledge. Help customers understand your
-            services and take the next step.
+            One workspace.
+          </h2>
+          <p className="mt-7 max-w-sm text-sm leading-7 text-white/65">
+            Website and Instagram messages, business knowledge, and your team in
+            one place.
           </p>
-          <div className="mt-10 space-y-4 text-sm">
-            <p className="flex items-center gap-3">
-              <BookOpen className="size-4 text-primary" aria-hidden />
-              Knowledge you control
-            </p>
-            <p className="flex items-center gap-3">
-              <MessageSquare className="size-4 text-primary" aria-hidden />
-              Helpful, bounded conversations
-            </p>
-            <p className="flex items-center gap-3">
-              <ArrowUpRight className="size-4 text-primary" aria-hidden />
-              Inquiries your team can act on
-            </p>
-          </div>
         </div>
-        <p className="text-xs text-[#72758f]">
-          Your business. Your knowledge. Your team.
-        </p>
       </section>
-      <section className="flex min-h-screen items-center justify-center bg-white px-6 py-12">
-        <div className="w-full max-w-sm">
-          <p className="mb-10 text-xl font-semibold lg:hidden">Avenlyo</p>
+      <section className="auth-content">
+        <div className="w-full max-w-[360px]">
+          <div className="mb-12 lg:hidden">
+            <Brand />
+          </div>
           {children}
         </div>
       </section>

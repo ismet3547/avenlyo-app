@@ -1,3 +1,4 @@
+import { AgentNavigation } from "@/components/agent-navigation";
 import Link from "next/link";
 import { requireWorkspace } from "@/lib/workspace";
 import { PageHeader } from "@/components/page-header";
@@ -13,19 +14,22 @@ export default async function ConversationsPage() {
     .from("conversations")
     .select("*")
     .eq("workspace_id", ctx.workspace.id)
+    .eq("channel", "test_agent")
     .order("updated_at", { ascending: false })
     .limit(100);
   return (
     <>
       <PageHeader
-        title="Conversations"
-        description="A record of customer and Test Agent conversations, with their channel and human assistance state."
+        eyebrow="Your agent"
+        title="Test history"
+        description="Revisit test conversations, review their outcomes, and continue where you left off."
         action={
           <Button asChild variant="outline">
             <Link href="/app/test-agent">New test</Link>
           </Button>
         }
       />
+      <AgentNavigation active="history" />
       {result.error ? (
         <p role="alert">Conversations could not be loaded.</p>
       ) : !result.data.length ? (
@@ -42,13 +46,19 @@ export default async function ConversationsPage() {
         <Card className="divide-y divide-border">
           {result.data.map((c) => (
             <Link
-              href={c.channel === "test_agent" ? `/app/conversations/${c.id}` : `/app/inbox/${c.id}`}
+              href={
+                c.channel === "test_agent"
+                  ? `/app/conversations/${c.id}`
+                  : `/app/inbox/${c.id}`
+              }
               className="flex flex-wrap items-center justify-between gap-4 px-5 py-5 hover:bg-muted/40"
               key={c.id}
             >
               <div>
                 <p className="text-sm font-medium">
-                  {c.channel === "test_agent" ? "Test conversation" : "Customer conversation"}{" "}
+                  {c.channel === "test_agent"
+                    ? "Test conversation"
+                    : "Customer conversation"}{" "}
                   <span className="font-normal text-muted-foreground">
                     · {c.id.slice(0, 8)}
                   </span>
@@ -58,11 +68,7 @@ export default async function ConversationsPage() {
                 </p>
               </div>
               <Badge
-                className={
-                  c.status === "needs_human"
-                    ? "border-amber-100 bg-amber-50 text-amber-800"
-                    : ""
-                }
+                className={c.status === "needs_human" ? "status-warning" : ""}
               >
                 {c.status === "needs_human"
                   ? "Needs human · AI paused"
