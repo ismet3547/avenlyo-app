@@ -1,26 +1,25 @@
-# Fresh application design
+# Intercom interface reference
 
-Rebuilds the application UI from `8bfc52f84c59a8ddee384553822531cf5a377617`. The new interface uses cool neutral surfaces, a restrained indigo accent, locally hosted Manrope, and shared semantic components. It is independent of previous visual implementations and design guides.
+The frontend replaces the previous custom visual design with a close implementation of Intercom's product layout. The reference is the actual application UI shown on Intercom's official Inbox and Knowledge Hub pages:
 
-## Interface
+- https://www.intercom.com/helpdesk/inbox
+- https://www.intercom.com/helpdesk/knowledge-hub
+- https://www.intercom.com/help/en/articles/6258745-the-inbox-explained
 
-- Overview summarizes real customer conversations, captured leads, qualified inquiries and paused conversations. Test activity is excluded. Setup progress is derived from persisted state; unavailable reads are never presented as completed setup.
-- A consistent sidebar, workspace picker, mobile modal navigation, skip link and visible focus styles support all routes. Mobile onboarding puts setup ahead of empty operational sections.
-- Inbox provides searchable conversation navigation, live thread updates, human ownership, personal replies, release and explicit AI resume. Customer context follows the thread. Ambiguous reply failures retain the original message ID for retry. Older messages remain loadable.
-- Agent settings include instructions, tone, capabilities and contact fields, with a live configuration summary. Human assistance remains available.
-- Knowledge supports all six business knowledge types, drafts, publishing, unpublishing, archiving, restoration and confirmed deletion. Search, status/type/collection filters, collection creation/renaming, webpage import and file import use the existing actions.
-- Leads separates customer inquiries from test leads and links each detail to the appropriate conversation. Test Agent supports persisted history, published knowledge references, handoff, verified resume and new test sessions.
-- Channels reuse the existing website and managed Instagram connections. Installation snippets use the widget’s existing `data-avenlyo-channel` contract. The standalone widget and backend runtime are unchanged.
-- Auth, workspace selection, settings, loading, errors and missing-page states share the new typography and visual language.
+## Layout
 
-Theme values are centralized in `apps/web/app/globals.css`; reusable primitives are in `apps/web/components/ui.tsx`. User-provided text wraps, small-screen tables become stacked records, and motion respects the OS preference. Manrope’s OFL license is included with its local font files.
+A 56px neutral application rail switches products. The separate gray sidebar contains navigation for the current area. The white work surface uses compact headers, black primary buttons, fine dividers, system sans-serif typography, and light purple selection and message states. Decorative marketing panels, slogans, the previous theme and Manrope assets are removed. Avenlyo retains its own name and mark.
 
-## Local design preview
+Inbox lays out the conversation list, thread and customer details side by side on desktop. Customer messages appear on the left; team and AI replies appear on the right. The test agent retains the customer's chat perspective. Tablets move customer details below the thread; phones show a single conversation and a modal navigation drawer. Data tables turn into readable records on narrow screens.
 
-Run `pnpm dev:web`, then open `http://localhost:3001/preview`. This development-only route uses explicitly fictional data, never reads user data and disables persistence/sending. Use its navigation to inspect each screen. Add `?empty=1` for an empty overview. The route returns 404 in production.
+Overview presents persisted customer metrics, setup tasks, recent conversations, channel status and published knowledge counts. It does not fabricate activity or charts. Existing Auth, permissions, live updates, ownership, reply retries, knowledge management, collections, imports, test history and channel configuration remain connected to the real application actions.
 
-## Validation
+Shared tokens and layout rules live in `apps/web/app/globals.css`; UI primitives are in `apps/web/components/ui.tsx`. Focus indicators, semantic controls, a skip link, modal focus containment, long content wrapping and reduced motion remain supported.
 
-Run `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build` and `pnpm smoke:api`. Browser acceptance remains in `apps/api/src/testing/browser` and follows the new labels and layouts while retaining real local Auth, publication, customer/test separation, ownership, handoff, widget and access-control checks. It captures the actual application at 1440, 1280, 1024, 768 and 390 pixels.
+## Development preview
 
-The design also has a backend-free development preview. It supplements rather than replaces the real-data browser acceptance flow. Full browser/database acceptance requires the disposable local Supabase stack, its fake providers and Chromium.
+`pnpm dev:web` exposes `/preview` in development only, using labeled fictional fixtures with persistence and sending disabled. Production returns 404. This supplements real-data testing.
+
+## Verification
+
+Use `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build` and `pnpm smoke:api`. The existing browser acceptance suite exercises real local Auth, workspace setup, all knowledge types and lifecycle operations, customer/test separation, channel handoff, ownership and human replies. Responsive coverage includes 1440, 1280, 1024, 768 and 390 pixels, with screenshots at 1440, 768 and 390. The full database/browser suite runs against a disposable Supabase stack in CI. Current screenshots are available in the successful run's `foundation-browser-qa` artifact.

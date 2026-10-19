@@ -6,13 +6,13 @@ import {
   ArrowUpRight,
   BookOpen,
   ChevronDown,
-  ChevronsUpDown,
   FlaskConical,
   House,
   Inbox,
   LogOut,
   Menu,
   Network,
+  PanelLeft,
   Settings2,
   Sparkles,
   UsersRound,
@@ -22,24 +22,24 @@ import { signOut } from "@/app/auth/actions";
 import { switchWorkspace } from "@/app/workspaces/actions";
 import { Brand, Avatar, Badge } from "./ui";
 import { screenHref } from "@/lib/presentation";
-const groups = [
-  {
-    label: "WORKSPACE",
-    items: [
-      { label: "Overview", href: "/app", icon: House },
-      { label: "Inbox", href: "/app/inbox", icon: Inbox },
-      { label: "Leads", href: "/app/leads", icon: UsersRound },
-    ],
-  },
-  {
-    label: "YOUR AI",
-    items: [
-      { label: "Agent", href: "/app/agent", icon: Sparkles },
-      { label: "Knowledge", href: "/app/knowledge", icon: BookOpen },
-      { label: "Channels", href: "/app/channels", icon: Network },
-    ],
-  },
+
+const applications = [
+  { label: "Overview", href: "/app", icon: House },
+  { label: "Inbox", href: "/app/inbox", icon: Inbox },
+  { label: "Agent", href: "/app/agent", icon: Sparkles },
+  { label: "Knowledge", href: "/app/knowledge", icon: BookOpen },
+  { label: "Leads", href: "/app/leads", icon: UsersRound },
+  { label: "Channels", href: "/app/channels", icon: Network },
 ];
+const utilities = [
+  { label: "Test agent", href: "/app/test-agent", icon: FlaskConical },
+  { label: "Settings", href: "/app/settings", icon: Settings2 },
+];
+const history = {
+  label: "Test history",
+  href: "/app/conversations",
+  icon: Inbox,
+};
 type Props = {
   children: ReactNode;
   workspace: { id: string; name: string };
@@ -64,98 +64,104 @@ export function AppShell({
   const menu = useRef<HTMLButtonElement>(null);
   const active = (href: string) =>
     href === "/app" ? current === href : current.startsWith(href);
-  const label =
-    [
-      ...groups.flatMap((g) => g.items),
-      { label: "Settings", href: "/app/settings" },
-      { label: "Test agent", href: "/app/test-agent" },
-      { label: "Test history", href: "/app/conversations" },
-    ].find((item) => active(item.href) && item.href !== "/app")?.label ??
-    "Overview";
+  const selected =
+    [...applications, ...utilities, history].find(
+      (item) => item.href !== "/app" && active(item.href),
+    ) ?? applications[0];
+  const isInbox = current.startsWith("/app/inbox");
+  const isAI = [
+    "/app/agent",
+    "/app/knowledge",
+    "/app/channels",
+    "/app/test-agent",
+    "/app/conversations",
+  ].some((path) => current.startsWith(path));
+  const contextItems =
+    isInbox || current.startsWith("/app/leads")
+      ? applications.filter((item) => ["Inbox", "Leads"].includes(item.label))
+      : isAI
+        ? [
+            ...applications.filter((item) =>
+              ["Agent", "Knowledge", "Channels"].includes(item.label),
+            ),
+            utilities[0],
+            history,
+          ]
+        : [applications[0], utilities[1]];
   const close = () => dialog.current?.close();
-  const navigation = (
-    <>
+  const navLinks = (items: typeof applications) =>
+    items.map(({ href, label, icon: Icon }) => (
       <Link
-        className="sidebar-brand"
-        href={screenHref("/app", preview)}
+        className={`nav-link ${active(href) ? "is-active" : ""}`}
+        href={screenHref(href, preview)}
+        key={href}
         onClick={close}
-        aria-label="Avenlyo overview"
+        aria-current={active(href) ? "page" : undefined}
       >
-        <Brand />
+        <Icon aria-hidden="true" />
+        <span>{label}</span>
       </Link>
-      <form
-        className="workspace-picker"
-        action={preview ? undefined : switchWorkspace}
+    ));
+  const workspacePicker = (
+    <form
+      className="workspace-picker"
+      action={preview ? undefined : switchWorkspace}
+    >
+      <span className="workspace-monogram">{workspace.name[0]}</span>
+      <select
+        aria-label="Workspace"
+        name="workspaceId"
+        defaultValue={workspace.id}
+        disabled={preview || workspaces.length < 2}
+        onChange={(e) => e.currentTarget.form?.requestSubmit()}
       >
-        <span className="workspace-monogram">{workspace.name[0]}</span>
-        <div>
-          <select
-            aria-label="Workspace"
-            name="workspaceId"
-            defaultValue={workspace.id}
-            disabled={preview || workspaces.length < 2}
-            onChange={(e) => e.currentTarget.form?.requestSubmit()}
-          >
-            {workspaces.map((w) => (
-              <option key={w.id} value={w.id}>
-                {w.name}
-              </option>
-            ))}
-          </select>
-          <span className="workspace-caption">
-            {role === "owner" ? "Your workspace" : "Team workspace"}
-          </span>
-        </div>
-        <ChevronsUpDown aria-hidden="true" />
-      </form>
-      <nav aria-label="Main navigation">
-        {groups.map((group) => (
-          <div className="nav-group" key={group.label}>
-            <p className="nav-label">{group.label}</p>
-            {group.items.map(({ href, label, icon: Icon }) => (
-              <Link
-                className={`nav-link ${active(href) ? "is-active" : ""}`}
-                href={screenHref(href, preview)}
-                key={href}
-                onClick={close}
-                aria-current={active(href) ? "page" : undefined}
-              >
-                <Icon aria-hidden="true" />
-                {label}
-                {active(href) && <span className="nav-active-dot" />}
-              </Link>
-            ))}
-          </div>
+        {workspaces.map((w) => (
+          <option key={w.id} value={w.id}>
+            {w.name}
+          </option>
         ))}
+      </select>
+      <ChevronDown aria-hidden="true" />
+    </form>
+  );
+  const secondary = (mobile = false) => (
+    <>
+      <div className="sidebar-heading">
+        {mobile ? <Brand /> : <p className="sidebar-title">{selected.label}</p>}
+      </div>
+      <nav aria-label="Main navigation">
+        <div className="nav-group">
+          {navLinks(mobile ? applications : contextItems)}
+        </div>
+        {mobile && (
+          <div className="nav-group">
+            <p className="nav-label">Manage</p>
+            {navLinks([...utilities, history])}
+          </div>
+        )}
       </nav>
-      <div className="sidebar-bottom">
+      <div className="sidebar-resources">
+        <p className="nav-label">Workspace</p>
         <Link
-          className={`nav-link ${active("/app/test-agent") ? "is-active" : ""}`}
-          href={screenHref("/app/test-agent", preview)}
+          href={screenHref("/app", preview)}
+          className="nav-link"
           onClick={close}
         >
-          <FlaskConical aria-hidden="true" />
-          Test agent
+          <House aria-hidden="true" />
+          Getting started
           <ArrowUpRight className="nav-end-icon" aria-hidden="true" />
         </Link>
         <Link
-          className={`nav-link ${active("/app/settings") ? "is-active" : ""}`}
-          href={screenHref("/app/settings", preview)}
+          href={screenHref("/app/test-agent", preview)}
+          className="nav-link"
           onClick={close}
         >
-          <Settings2 aria-hidden="true" />
-          Settings
+          <FlaskConical aria-hidden="true" />
+          Agent playground
         </Link>
-        <div className="sidebar-tip">
-          <span className="tip-icon">
-            <Sparkles aria-hidden="true" />
-          </span>
-          <strong>A little setup. A lot less busywork.</strong>
-          <p>Give your agent the knowledge to help your customers.</p>
-          <Link href={screenHref("/app/agent", preview)} onClick={close}>
-            Make it yours <ArrowUpRight aria-hidden="true" />
-          </Link>
-        </div>
+      </div>
+      <div className="sidebar-bottom">
+        {workspacePicker}
         <div className="profile">
           <Avatar name={email.split("@")[0] || "Team"} small />
           <span>
@@ -164,26 +170,77 @@ export function AppShell({
               {role === "owner" ? "Workspace owner" : "Team member"}
             </small>
           </span>
+        </div>
+        {mobile && (
           <form action={preview ? undefined : signOut}>
-            <button
-              type="submit"
-              className="icon-button"
-              aria-label="Sign out"
-              disabled={preview}
-            >
+            <button className="nav-link" disabled={preview}>
               <LogOut aria-hidden="true" />
+              Sign out
             </button>
           </form>
-        </div>
+        )}
       </div>
     </>
   );
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${isInbox ? "is-inbox" : ""}`}>
       <a href="#main-content" className="skip-link">
         Skip to content
       </a>
-      <aside className="sidebar desktop-sidebar">{navigation}</aside>
+      <aside className="application-rail" aria-label="Applications">
+        <Link
+          className="rail-brand"
+          href={screenHref("/app", preview)}
+          aria-label="Avenlyo overview"
+        >
+          <Brand compact />
+        </Link>
+        <nav aria-label="Application switcher">
+          {applications.map(({ href, label, icon: Icon }) => (
+            <Link
+              key={href}
+              href={screenHref(href, preview)}
+              className={`rail-link ${active(href) ? "is-active" : ""}`}
+              aria-label={`Open ${label}`}
+              aria-current={active(href) ? "page" : undefined}
+            >
+              <Icon aria-hidden="true" />
+              <span className="rail-tooltip">{label}</span>
+            </Link>
+          ))}
+        </nav>
+        <div className="rail-bottom">
+          {utilities.map(({ href, label, icon: Icon }) => (
+            <Link
+              key={href}
+              href={screenHref(href, preview)}
+              className={`rail-link ${active(href) ? "is-active" : ""}`}
+              aria-label={`Open ${label}`}
+            >
+              <Icon aria-hidden="true" />
+              <span className="rail-tooltip">{label}</span>
+            </Link>
+          ))}
+          <form action={preview ? undefined : signOut}>
+            <button
+              className="rail-link"
+              aria-label="Sign out"
+              disabled={preview}
+            >
+              <LogOut aria-hidden="true" />
+              <span className="rail-tooltip">Sign out</span>
+            </button>
+          </form>
+          <Link
+            href="/workspaces"
+            className="rail-profile"
+            aria-label="Choose workspace"
+          >
+            <Avatar name={email.split("@")[0] || "Team"} small />
+          </Link>
+        </div>
+      </aside>
+      <aside className="sidebar desktop-sidebar">{secondary()}</aside>
       <dialog
         ref={dialog}
         className="mobile-drawer"
@@ -201,48 +258,32 @@ export function AppShell({
           >
             <X aria-hidden="true" />
           </button>
-          {navigation}
+          {secondary(true)}
         </div>
       </dialog>
       <div className="app-workspace">
-        <header className="topbar">
+        <header className="mobile-topbar">
           <button
             ref={menu}
-            className="icon-button mobile-menu"
+            className="icon-button"
             onClick={() => dialog.current?.showModal()}
             aria-label="Open navigation"
           >
             <Menu aria-hidden="true" />
           </button>
-          <div className="breadcrumbs">
-            <span>Workspace</span>
-            <span className="breadcrumb-divider">/</span>
-            <strong>{label}</strong>
-          </div>
-          <div className="topbar-right">
-            {preview ? (
-              <Badge tone="accent">Design preview</Badge>
-            ) : (
-              <Link href="/workspaces" className="topbar-workspace">
-                <span>{workspace.name}</span>
-                <ChevronDown aria-hidden="true" />
-              </Link>
-            )}
-            <span className="topbar-avatar">
-              <Avatar name={email.split("@")[0] || "Team"} small />
-            </span>
-          </div>
+          <Brand compact />
+          <span>{workspace.name}</span>
+          {preview && <Badge>Preview</Badge>}
         </header>
+        {preview && (
+          <div className="preview-mode">
+            <PanelLeft aria-hidden="true" />
+            Design preview<span>Fictional data · read only</span>
+          </div>
+        )}
         <main id="main-content" className="main-content" tabIndex={-1}>
           {children}
         </main>
-        <footer className="app-footer">
-          <span>Made for better conversations.</span>
-          <span>
-            <span className="footer-dot" />
-            Avenlyo
-          </span>
-        </footer>
       </div>
     </div>
   );

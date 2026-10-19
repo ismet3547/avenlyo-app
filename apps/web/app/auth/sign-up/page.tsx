@@ -3,9 +3,8 @@ import { AuthForm } from "@/components/product-forms";
 export default function Page() {
   return (
     <div className="auth-form-card">
-      <p className="eyebrow">LET’S MAKE ROOM FOR BETTER</p>
-      <h1>A fresh start for your front office.</h1>
-      <p>Create your account. Make your agent your own.</p>
+      <h1>Create your account</h1>
+      <p>Get started with your customer workspace.</p>
       <AuthForm mode="signup" />
       <div className="auth-bottom">
         Already have an account?<Link href="/auth/sign-in">Sign in</Link>

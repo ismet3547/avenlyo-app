@@ -24,7 +24,7 @@ test("signup, setup, published knowledge and isolated test conversations", async
   };
   await page.goto("/auth/sign-up");
   await expect(
-    page.getByRole("heading", { name: "A fresh start for your front office." }),
+    page.getByRole("heading", { name: "Create your account" }),
   ).toBeVisible();
   await capture("auth-sign-up-desktop");
   await page.getByLabel("Email address", { exact: true }).fill(email);
@@ -51,9 +51,7 @@ test("signup, setup, published knowledge and isolated test conversations", async
   await page
     .getByRole("button", { name: "Create workspace", exact: true })
     .click();
-  await expect(
-    page.getByRole("heading", { name: "A little clarity for your day." }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible();
   await expect(page.getByTestId("customer-conversation-count")).toHaveText("0");
   await expect(
     page.getByRole("progressbar", { name: "Launch setup" }),
@@ -61,7 +59,7 @@ test("signup, setup, published knowledge and isolated test conversations", async
   await capture("overview-desktop");
   await page.setViewportSize({ width: 390, height: 844 });
   const setup = await page
-    .getByRole("heading", { name: "Your launch checklist" })
+    .getByRole("heading", { name: "Get started" })
     .boundingBox();
   const conversations = await page
     .getByRole("heading", { name: "Recent conversations" })
@@ -102,11 +100,9 @@ test("signup, setup, published knowledge and isolated test conversations", async
           : "We provide custom design and manufacturing services. Share your project scope to discuss suitable options.",
       );
     await page.getByRole("button", { name: "Save draft", exact: true }).click();
-    const row = page
-      .getByRole("row")
-      .filter({
-        hasText: faq ? "Do you work with small businesses?" : "Custom projects",
-      });
+    const row = page.getByRole("row").filter({
+      hasText: faq ? "Do you work with small businesses?" : "Custom projects",
+    });
     await expect(row.getByText("Draft", { exact: true })).toBeVisible();
     await row.getByRole("button", { name: "Publish", exact: true }).click();
     await expect(row.getByRole("status")).toContainText("Published.");
@@ -180,13 +176,13 @@ test("signup, setup, published knowledge and isolated test conversations", async
       .first(),
   ).toBeVisible();
   const routes = [
-    ["/app", "A little clarity for your day."],
-    ["/app/agent", "Meet your agent."],
-    ["/app/knowledge", "What your business knows."],
-    ["/app/test-agent", "See your agent in action."],
-    ["/app/leads", "People worth a follow-up."],
-    ["/app/channels", "Meet customers where they are."],
-    ["/app/settings", "Workspace settings."],
+    ["/app", "Overview"],
+    ["/app/agent", "Agent settings"],
+    ["/app/knowledge", "Content"],
+    ["/app/test-agent", "Test agent"],
+    ["/app/leads", "Leads"],
+    ["/app/channels", "Channels"],
+    ["/app/settings", "Settings"],
   ];
   await page.setViewportSize({ width: 390, height: 844 });
   for (const [route, title] of routes) {

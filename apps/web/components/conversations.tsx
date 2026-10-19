@@ -51,13 +51,19 @@ function messageSources(message: Message) {
       : [],
   );
 }
-export function MessageTimeline({ messages }: { messages: Message[] }) {
+export function MessageTimeline({
+  messages,
+  perspective = "support",
+}: {
+  messages: Message[];
+  perspective?: "support" | "customer";
+}) {
   return (
     <>
       {messages.map((message) => (
         <article
           key={message.id}
-          className={`message ${message.role === "customer" ? "message-self" : ""} ${message.role === "human" ? "message-human" : ""}`}
+          className={`message ${(perspective === "customer" ? message.role === "customer" : message.role !== "customer") ? "message-self" : ""} ${message.role === "human" ? "message-human" : ""}`}
         >
           <span className="message-avatar">
             {message.role === "assistant" ? (
@@ -329,7 +335,7 @@ export function InboxView({
         .includes(query.toLowerCase()),
     );
   return (
-    <>
+    <div className={`inbox-workspace ${contact ? "has-contact" : ""}`}>
       <Panel className={`inbox-layout ${thread ? "has-thread" : ""}`}>
         <aside className="inbox-list">
           <div className="inbox-list-heading">
@@ -594,7 +600,7 @@ export function InboxView({
         </section>
       </Panel>
       {contact && (
-        <Panel title="Customer details" className="">
+        <Panel title="Customer details" className="customer-details">
           <dl className="detail-dl">
             {[
               ["Name", contact.name],
@@ -622,7 +628,7 @@ export function InboxView({
           </div>
         </Panel>
       )}
-    </>
+    </div>
   );
 }
 export function TestAgent({
@@ -744,7 +750,7 @@ export function TestAgent({
         </div>
         {messages.length ? (
           <div className="thread-messages">
-            <MessageTimeline messages={messages} />
+            <MessageTimeline messages={messages} perspective="customer" />
             {busy && (
               <p className="muted small" role="status">
                 Your agent is thinking…

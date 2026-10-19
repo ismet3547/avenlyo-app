@@ -33,9 +33,8 @@ export default async function Page() {
   return (
     <>
       <PageHeader
-        eyebrow="A NATURAL EXTENSION OF YOUR TEAM"
-        title="Meet your agent."
-        description="Give it a voice, a purpose and a clear way to help your customers."
+        title="Agent settings"
+        description="Configure your agent’s behavior, tone and instructions."
         action={
           <ActionLink href="/app/test-agent" secondary>
             <Play aria-hidden="true" />

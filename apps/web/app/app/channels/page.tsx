@@ -31,9 +31,8 @@ export default async function Page() {
   return (
     <>
       <PageHeader
-        eyebrow="BE THERE WHEN THEY SAY HELLO"
-        title="Meet customers where they are."
-        description="One helpful agent, connected to the places your customers already use."
+        title="Channels"
+        description="Connect your website and Instagram to receive conversations."
       />
       <div className="channel-cards">
         <Panel>

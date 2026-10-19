@@ -27,9 +27,8 @@ export default async function Page({
   return (
     <>
       <PageHeader
-        eyebrow="GOOD ANSWERS START HERE"
-        title="What your business knows."
-        description="The services, details and answers that make your agent helpful."
+        title="Content"
+        description="Manage the content your AI agent uses to answer customers."
         action={
           editable && (
             <ActionLink href="/app/knowledge/new">

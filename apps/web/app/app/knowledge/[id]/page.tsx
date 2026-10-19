@@ -40,7 +40,7 @@ export default async function Page({
         Back to knowledge
       </Link>
       <PageHeader
-        title="A little more detail."
+        title="Edit knowledge"
         description="Keep your knowledge accurate, useful and up to date."
         action={
           <KnowledgeActions item={item.data} editable={ctx.role === "owner"} />

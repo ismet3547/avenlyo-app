@@ -12,9 +12,8 @@ export default async function Page() {
   return (
     <>
       <PageHeader
-        eyebrow="CURIOUS? START A CONVERSATION."
-        title="See your agent in action."
-        description="Ask, explore and fine-tune. A little practice makes a more helpful agent."
+        title="Test agent"
+        description="Test answers using your published knowledge."
         action={
           <ActionLink href="/app/conversations" secondary>
             <History aria-hidden="true" />

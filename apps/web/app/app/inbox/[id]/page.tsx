@@ -27,8 +27,8 @@ export default async function Page({
   return (
     <>
       <PageHeader
-        title="The whole conversation."
-        description="Context, clarity and a thoughtful next step."
+        title="Inbox"
+        description="View messages and customer details."
       />
       {result.status === 200 ? (
         <div className="stack">

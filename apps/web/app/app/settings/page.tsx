@@ -7,9 +7,8 @@ export default async function Page() {
   return (
     <>
       <PageHeader
-        eyebrow="THE DETAILS THAT MAKE IT YOURS"
-        title="Workspace settings."
-        description="A few essentials for your business and your account."
+        title="Settings"
+        description="Manage your business profile and account."
       />
       <div className="form-layout">
         <div className="stack">

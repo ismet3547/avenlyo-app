@@ -26,7 +26,7 @@ export default async function Page({
         Back to knowledge
       </Link>
       <PageHeader
-        title="Share a little knowledge."
+        title="Add knowledge"
         description="One clear piece of information. Better answers for your customers."
       />
       <div className="form-layout">

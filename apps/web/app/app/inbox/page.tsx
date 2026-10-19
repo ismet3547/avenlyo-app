@@ -18,9 +18,8 @@ export default async function Page({
   return (
     <>
       <PageHeader
-        eyebrow="A PLACE FOR EVERY CONVERSATION"
-        title="A calmer kind of inbox."
-        description="Your agent handles the first hello. You’re here when a human touch matters."
+        title="Inbox"
+        description="Manage customer conversations and reply with your team."
       />
       <InboxView
         items={items}

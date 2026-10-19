@@ -32,7 +32,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   await mkdir("test-results/screenshots", { recursive: true });
   await page.goto("/auth/sign-in");
   await expect(
-    page.getByRole("heading", { name: "Welcome back.", exact: true }),
+    page.getByRole("heading", { name: "Sign in to Avenlyo", exact: true }),
   ).toBeVisible();
   await capturePage({
     path: "test-results/screenshots/auth-desktop.png",
@@ -50,7 +50,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     .click();
   await expect(
     page.getByRole("heading", {
-      name: "A little clarity for your day.",
+      name: "Overview",
       exact: true,
     }),
   ).toBeVisible();
@@ -173,7 +173,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   ).toBe(0);
   await page.goto("/app/inbox");
   await expect(
-    page.getByRole("heading", { name: "A calmer kind of inbox.", exact: true }),
+    page.getByRole("heading", { name: "Inbox", exact: true }),
   ).toBeVisible();
   await capturePage({
     path: "test-results/screenshots/inbox-list-desktop.png",
@@ -331,9 +331,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     else
       await expect(
         page.getByRole("heading", {
-          name: url.endsWith("/app/inbox")
-            ? "A calmer kind of inbox."
-            : "Meet customers where they are.",
+          name: url.endsWith("/app/inbox") ? "Inbox" : "Channels",
           exact: true,
         }),
       ).toBeVisible();
@@ -403,7 +401,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   await drawer.getByRole("link", { name: "Agent", exact: true }).click();
   await expect(drawer).not.toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Meet your agent.", exact: true }),
+    page.getByRole("heading", { name: "Agent settings", exact: true }),
   ).toBeVisible();
   await expect(
     page
@@ -413,22 +411,22 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   await page.goto("/app/conversations");
   await expect(
     page.getByRole("heading", {
-      name: "Your test conversations.",
+      name: "Test history",
       exact: true,
     }),
   ).toBeVisible();
   const routes = [
-    ["/app", "A little clarity for your day.", "home-active"],
-    ["/app/inbox", "A calmer kind of inbox.", "inbox-list"],
+    ["/app", "Overview", "home-active"],
+    ["/app/inbox", "Inbox", "inbox-list"],
     [inboxUrl, "Alex", "inbox-conversation"],
-    ["/app/agent", "Meet your agent.", "agent"],
-    ["/app/knowledge", "What your business knows.", "knowledge"],
-    ["/app/channels", "Meet customers where they are.", "channels"],
-    ["/app/leads", "People worth a follow-up.", "leads"],
+    ["/app/agent", "Agent settings", "agent"],
+    ["/app/knowledge", "Content", "knowledge"],
+    ["/app/channels", "Channels", "channels"],
+    ["/app/leads", "Leads", "leads"],
     [leadUrl!, "Alex", "lead"],
-    ["/app/conversations", "Your test conversations.", "conversations"],
-    ["/app/test-agent", "See your agent in action.", "test-agent"],
-    ["/app/settings", "Workspace settings.", "settings"],
+    ["/app/conversations", "Test history", "conversations"],
+    ["/app/test-agent", "Test agent", "test-agent"],
+    ["/app/settings", "Settings", "settings"],
   ];
   for (const width of [1440, 1280, 1024, 768, 390]) {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 });
@@ -472,7 +470,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
         ),
         `No overflow at ${width}px: ${name}`,
       ).toBe(true);
-      if (width === 1440 || width === 390)
+      if (width === 1440 || width === 768 || width === 390)
         await capturePage({
           path: `test-results/screenshots/product-${name}-${width}.png`,
           fullPage: true,

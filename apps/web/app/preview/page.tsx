@@ -40,9 +40,8 @@ export default async function PreviewPage({
     content = (
       <>
         <PageHeader
-          eyebrow="A NATURAL EXTENSION OF YOUR TEAM"
-          title="Meet your agent."
-          description="Give it a voice, a purpose and a clear way to help your customers."
+          title="Agent settings"
+          description="Configure your agent’s behavior, tone and instructions."
           action={
             <ActionLink secondary href={href("/app/test-agent")}>
               Test your agent
@@ -68,9 +67,8 @@ export default async function PreviewPage({
     content = (
       <>
         <PageHeader
-          eyebrow="A PLACE FOR EVERY CONVERSATION"
-          title="A calmer kind of inbox."
-          description="Your agent handles the first hello. You’re here when a human touch matters."
+          title="Inbox"
+          description="Manage customer conversations and reply with your team."
         />
         <div className="stack">
           <InboxView
@@ -90,9 +88,8 @@ export default async function PreviewPage({
     content = (
       <>
         <PageHeader
-          eyebrow="GOOD ANSWERS START HERE"
-          title="What your business knows."
-          description="The services, details and answers that make your agent helpful."
+          title="Content"
+          description="Manage the content your AI agent uses to answer customers."
           action={
             <ActionLink href={href("/app/knowledge/new")}>
               <Plus aria-hidden="true" />
@@ -121,7 +118,7 @@ export default async function PreviewPage({
           Back to knowledge
         </Link>
         <PageHeader
-          title={item ? "A little more detail." : "Share a little knowledge."}
+          title={item ? "Edit knowledge" : "Add knowledge"}
           description="One clear piece of information. Better answers for your customers."
         />
         <Panel title={item?.title || "Create a knowledge item"}>
@@ -154,9 +151,8 @@ export default async function PreviewPage({
     content = (
       <>
         <PageHeader
-          eyebrow="TURN INTEREST INTO OPPORTUNITY"
-          title="People worth a follow-up."
-          description="Useful inquiries, captured details and a clear next step for your team."
+          title="Leads"
+          description="Customer inquiries and contact details captured by your agent."
         />
         <LeadsList leads={empty ? [] : leads} preview />
       </>
@@ -200,9 +196,8 @@ export default async function PreviewPage({
     content = (
       <>
         <PageHeader
-          eyebrow="CURIOUS? START A CONVERSATION."
-          title="See your agent in action."
-          description="Ask, explore and fine-tune. A little practice makes a more helpful agent."
+          title="Test agent"
+          description="Test answers using your published knowledge."
         />
         <TestAgent workspaceId={workspaceId} preview published={5} />
       </>
@@ -211,8 +206,8 @@ export default async function PreviewPage({
     content = (
       <>
         <PageHeader
-          title="Your test conversations."
-          description="A record of the questions you’ve tried and the answers you can improve."
+          title="Test history"
+          description="Review previous test sessions and continue a conversation."
         />
         <Panel>
           <div className="conversation-row">
@@ -233,9 +228,8 @@ export default async function PreviewPage({
     content = (
       <>
         <PageHeader
-          eyebrow="BE THERE WHEN THEY SAY HELLO"
-          title="Meet customers where they are."
-          description="One helpful agent, connected to the places your customers already use."
+          title="Channels"
+          description="Connect your website and Instagram to receive conversations."
         />
         <div className="channel-cards">
           {channels.map((c) => (
@@ -298,9 +292,8 @@ export default async function PreviewPage({
     content = (
       <>
         <PageHeader
-          eyebrow="THE DETAILS THAT MAKE IT YOURS"
-          title="Workspace settings."
-          description="A few essentials for your business and your account."
+          title="Settings"
+          description="Manage your business profile and account."
         />
         <Panel title="Your business">
           <div className="form-section">

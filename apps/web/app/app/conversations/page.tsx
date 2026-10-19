@@ -21,9 +21,8 @@ export default async function Page() {
   return (
     <>
       <PageHeader
-        eyebrow="LEARN FROM EVERY PRACTICE RUN"
-        title="Your test conversations."
-        description="A record of the questions you’ve tried and the answers you can improve."
+        title="Test history"
+        description="Review previous test sessions and continue a conversation."
         action={
           <ActionLink href="/app/test-agent">
             <Plus aria-hidden="true" />

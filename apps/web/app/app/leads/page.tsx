@@ -13,9 +13,8 @@ export default async function Page() {
   return (
     <>
       <PageHeader
-        eyebrow="TURN INTEREST INTO OPPORTUNITY"
-        title="People worth a follow-up."
-        description="Useful inquiries, captured details and a clear next step for your team."
+        title="Leads"
+        description="Customer inquiries and contact details captured by your agent."
       />
       <LeadsList leads={leads.data} />
     </>
