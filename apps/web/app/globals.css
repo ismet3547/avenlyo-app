@@ -1361,6 +1361,7 @@ legend.field-label {
 }
 .search-field {
   position: relative;
+  min-width: 0;
   flex: 1;
   max-width: 340px;
 }
@@ -1382,11 +1383,13 @@ legend.field-label {
   font-size: 12px;
 }
 .table-wrap {
+  position: relative;
   overflow: auto;
 }
 .data-table {
   border-collapse: collapse;
   width: 100%;
+  min-width: 760px;
   font-size: 12px;
   text-align: left;
 }
@@ -2367,6 +2370,69 @@ legend.field-label {
     grid-template-columns: 1fr;
   }
 }
+@media (max-width: 1023px) {
+  .table-wrap {
+    overflow: visible;
+  }
+  .data-table,
+  .data-table thead,
+  .data-table tbody,
+  .data-table tr,
+  .data-table td {
+    display: block;
+  }
+  .data-table {
+    min-width: 0;
+  }
+  .data-table thead {
+    display: none;
+  }
+  .data-table tr {
+    padding: 17px 18px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 10px;
+    row-gap: 10px;
+    align-items: center;
+  }
+  .data-table tr:last-child {
+    border: 0;
+  }
+  .data-table td {
+    padding: 0;
+    border: 0;
+    max-width: none;
+    min-width: 0;
+  }
+  .data-table td:first-child {
+    grid-column: 1/-1;
+  }
+  .data-table td:first-child .row > span:last-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .data-table .item-title {
+    font-size: 12px;
+  }
+  .data-table .item-subtitle {
+    margin-top: 4px;
+  }
+  .data-table td[data-hide-mobile] {
+    display: none;
+  }
+  .data-table td[data-mobile-label]:before {
+    content: attr(data-mobile-label) ": ";
+    font-size: 10px;
+    color: var(--subtle);
+  }
+  .table-actions {
+    justify-content: flex-start;
+  }
+  .knowledge-actions {
+    justify-content: flex-end;
+  }
+}
 @media (max-width: 767px) {
   h1 {
     font-size: 26px;
@@ -2583,59 +2649,6 @@ legend.field-label {
   }
   .tab {
     font-size: 11px;
-  }
-  .table-wrap {
-    overflow: visible;
-  }
-  .data-table,
-  .data-table thead,
-  .data-table tbody,
-  .data-table tr,
-  .data-table td {
-    display: block;
-  }
-  .data-table thead {
-    display: none;
-  }
-  .data-table tr {
-    padding: 17px 18px;
-    border-bottom: 1px solid var(--border);
-    display: grid;
-    grid-template-columns: 1fr auto;
-    column-gap: 10px;
-    row-gap: 10px;
-    align-items: center;
-  }
-  .data-table tr:last-child {
-    border: 0;
-  }
-  .data-table td {
-    padding: 0;
-    border: 0;
-    max-width: none;
-  }
-  .data-table td:first-child {
-    grid-column: 1/-1;
-  }
-  .data-table .item-title {
-    font-size: 12px;
-  }
-  .data-table .item-subtitle {
-    margin-top: 4px;
-  }
-  .data-table td[data-hide-mobile] {
-    display: none;
-  }
-  .data-table td[data-mobile-label]:before {
-    content: attr(data-mobile-label) ": ";
-    font-size: 10px;
-    color: var(--subtle);
-  }
-  .table-actions {
-    justify-content: flex-start;
-  }
-  .knowledge-actions {
-    justify-content: flex-end;
   }
   .inbox-layout {
     display: block;
