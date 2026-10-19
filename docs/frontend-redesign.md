@@ -16,6 +16,10 @@ Overview presents persisted customer metrics, setup tasks, recent conversations,
 
 Shared tokens and layout rules live in `apps/web/app/globals.css`; UI primitives are in `apps/web/components/ui.tsx`. Focus indicators, semantic controls, a skip link, modal focus containment, long content wrapping and reduced motion remain supported.
 
+## Screenshots
+
+Captured from the actual application during CI: [Inbox](design-preview/inbox-desktop.png), [Content](design-preview/knowledge-desktop.png), [Overview](design-preview/overview-desktop.png).
+
 ## Development preview
 
 `pnpm dev:web` exposes `/preview` in development only, using labeled fictional fixtures with persistence and sending disabled. Production returns 404. This supplements real-data testing.

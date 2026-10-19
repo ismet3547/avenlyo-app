@@ -2193,9 +2193,6 @@ fieldset {
   .thread-header {
     padding: 15px;
   }
-  .thread-header .badge {
-    display: none;
-  }
   .thread-messages {
     padding: 20px 15px;
   }
