@@ -10,6 +10,7 @@ export type Workspace = {
   name: string;
   slug: string;
   created_at: string;
+  onboarding_completed_at: string | null;
 };
 export type Member = {
   workspace_id: string;
@@ -236,6 +237,8 @@ export type Database = {
     };
     Views: Record<never, never>;
     Functions: {
+      sync_onboarding: RPC<{ target_workspace_id: string }, Json>;
+      home_snapshot: RPC<{ target_workspace_id: string }, Json>;
       configure_website_channel: RPC<
         {
           target_workspace_id: string;

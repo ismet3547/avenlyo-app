@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { z } from "zod";
+import { homeSchema } from "./home-model";
 import { requireWorkspace } from "./workspace";
 export const productContext = cache(requireWorkspace);
 const inboxItem = z.object({
@@ -31,70 +32,16 @@ export const readInbox = cache(async (offset = 0) => {
 });
 export const overviewData = cache(async () => {
   const ctx = await productContext();
-  const db = ctx.supabase;
-  const id = ctx.workspace.id;
-  const [
-    conversations,
-    leads,
-    qualified,
-    waiting,
-    channels,
-    knowledge,
-    settings,
-    tests,
-    inbox,
-  ] = await Promise.all([
-    db
-      .from("conversations")
-      .select("id", { count: "exact", head: true })
-      .eq("workspace_id", id)
-      .neq("channel", "test_agent"),
-    db
-      .from("leads")
-      .select("id", { count: "exact", head: true })
-      .eq("workspace_id", id)
-      .neq("source", "test_agent"),
-    db
-      .from("leads")
-      .select("id", { count: "exact", head: true })
-      .eq("workspace_id", id)
-      .neq("source", "test_agent")
-      .eq("qualification", "qualified"),
-    db
-      .from("conversations")
-      .select("id", { count: "exact", head: true })
-      .eq("workspace_id", id)
-      .neq("channel", "test_agent")
-      .eq("ai_mode", "paused"),
-    db.from("channel_connections").select("*").eq("workspace_id", id),
-    db
-      .from("knowledge_items")
-      .select("id", { count: "exact", head: true })
-      .eq("workspace_id", id)
-      .eq("status", "published"),
-    db.from("agent_settings").select("*").eq("workspace_id", id).single(),
-    db
-      .from("conversations")
-      .select("id")
-      .eq("workspace_id", id)
-      .eq("channel", "test_agent")
-      .limit(1),
-    readInbox(),
+  const [snapshot, channels] = await Promise.all([
+    ctx.supabase.rpc("home_snapshot", {
+      target_workspace_id: ctx.workspace.id,
+    }),
+    ctx.supabase
+      .from("channel_connections")
+      .select("*")
+      .eq("workspace_id", ctx.workspace.id),
   ]);
-  return {
-    metrics: [conversations, leads, qualified, waiting].map((v) =>
-      v.error ? null : (v.count ?? 0),
-    ),
-    channels: channels.error ? null : channels.data,
-    published: knowledge.error ? null : (knowledge.count ?? 0),
-    configured: settings.error
-      ? false
-      : Boolean(
-          settings.data.setup_brief.trim() ||
-            new Date(settings.data.updated_at) >
-              new Date(ctx.workspace.created_at),
-        ),
-    tested: !tests.error && tests.data.length > 0,
-    inbox,
-  };
+  if (snapshot.error || channels.error)
+    throw new Error("Home could not be loaded. Please try again.");
+  return { ...homeSchema.parse(snapshot.data), channels: channels.data };
 });

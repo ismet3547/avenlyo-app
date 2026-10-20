@@ -639,6 +639,8 @@ export function TestAgent({
   initialLead,
   preview = false,
   published = 0,
+  focused = false,
+  onSuccessfulTurn,
 }: {
   workspaceId: string;
   initialMessages?: Message[];
@@ -647,6 +649,8 @@ export function TestAgent({
   initialLead?: Lead | null;
   preview?: boolean;
   published?: number | null;
+  focused?: boolean;
+  onSuccessfulTurn?: () => void;
 }) {
   const [messages, setMessages] = useState(initialMessages);
   const [id, setId] = useState(conversationId);
@@ -724,6 +728,7 @@ export function TestAgent({
       setText("");
       request.current = null;
       setFailed(false);
+      onSuccessfulTurn?.();
       setTimeout(
         () => bottom.current?.scrollIntoView({ block: "nearest" }),
         50,
@@ -736,7 +741,7 @@ export function TestAgent({
     }
   };
   return (
-    <div className="test-layout">
+    <div className={`test-layout ${focused ? "focused-test" : ""}`}>
       <Panel className="inbox-thread test-thread">
         <div className="thread-header">
           <span className="message-avatar">
@@ -760,8 +765,12 @@ export function TestAgent({
           </div>
         ) : (
           <div className="test-welcome">
-            <Brand />
-            <h2>Take your agent for a spin.</h2>
+            {!focused && <Brand />}
+            <h2>
+              {focused
+                ? "See how your agent responds."
+                : "Take your agent for a spin."}
+            </h2>
             <p>
               Ask a question like a customer would. Your agent will answer using
               your published knowledge.
@@ -856,104 +865,106 @@ export function TestAgent({
           </div>
         </form>
       </Panel>
-      <aside className="stack">
-        <Panel title="This conversation">
-          <dl className="summary-list" style={{ paddingTop: 5 }}>
-            <div>
-              <dt>Mode</dt>
-              <dd>Test only</dd>
-            </div>
-            <div>
-              <dt>Published knowledge</dt>
-              <dd>
-                {published === null ? "Unavailable" : `${published} items`}
-              </dd>
-            </div>
-            <div>
-              <dt>Human assistance</dt>
-              <dd>{needsHuman ? "Requested" : "Available"}</dd>
-            </div>
-            <div>
-              <dt>Lead</dt>
-              <dd>
-                {leadId ? (
-                  <Link
-                    className="text-link"
-                    href={screenHref(`/app/leads/${leadId}`, preview)}
-                  >
-                    View lead
-                    <ArrowRight aria-hidden="true" />
-                  </Link>
-                ) : (
-                  "None yet"
-                )}
-              </dd>
-            </div>
-          </dl>
-          {sources.length > 0 && (
-            <div
-              className="panel-body"
-              style={{ borderTop: "1px solid var(--border)" }}
+      {!focused && (
+        <aside className="stack">
+          <Panel title="This conversation">
+            <dl className="summary-list" style={{ paddingTop: 5 }}>
+              <div>
+                <dt>Mode</dt>
+                <dd>Test only</dd>
+              </div>
+              <div>
+                <dt>Published knowledge</dt>
+                <dd>
+                  {published === null ? "Unavailable" : `${published} items`}
+                </dd>
+              </div>
+              <div>
+                <dt>Human assistance</dt>
+                <dd>{needsHuman ? "Requested" : "Available"}</dd>
+              </div>
+              <div>
+                <dt>Lead</dt>
+                <dd>
+                  {leadId ? (
+                    <Link
+                      className="text-link"
+                      href={screenHref(`/app/leads/${leadId}`, preview)}
+                    >
+                      View lead
+                      <ArrowRight aria-hidden="true" />
+                    </Link>
+                  ) : (
+                    "None yet"
+                  )}
+                </dd>
+              </div>
+            </dl>
+            {sources.length > 0 && (
+              <div
+                className="panel-body"
+                style={{ borderTop: "1px solid var(--border)" }}
+              >
+                <h3>Knowledge used</h3>
+                <ul className="small muted">
+                  {sources.map((source, i) => (
+                    <li key={`${source}-${i}`}>{source}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </Panel>
+          <Panel className="help-copy">
+            <ShieldCheck aria-hidden="true" />
+            <h3>A real conversation, without the pressure.</h3>
+            <p>
+              Try different questions, check the answers and refine your
+              knowledge. Test messages never contact customers.
+            </p>
+            <Link
+              className="text-link"
+              href={screenHref("/app/knowledge", preview)}
             >
-              <h3>Knowledge used</h3>
-              <ul className="small muted">
-                {sources.map((source, i) => (
-                  <li key={`${source}-${i}`}>{source}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </Panel>
-        <Panel className="help-copy">
-          <ShieldCheck aria-hidden="true" />
-          <h3>A real conversation, without the pressure.</h3>
-          <p>
-            Try different questions, check the answers and refine your
-            knowledge. Test messages never contact customers.
-          </p>
+              Review knowledge
+              <ArrowRight aria-hidden="true" />
+            </Link>
+          </Panel>
           <Link
-            className="text-link"
-            href={screenHref("/app/knowledge", preview)}
+            className="button button-secondary"
+            href={screenHref("/app/conversations", preview)}
           >
-            Review knowledge
-            <ArrowRight aria-hidden="true" />
+            <History aria-hidden="true" />
+            View test history
           </Link>
-        </Panel>
-        <Link
-          className="button button-secondary"
-          href={screenHref("/app/conversations", preview)}
-        >
-          <History aria-hidden="true" />
-          View test history
-        </Link>
-        {id && (
-          <Button
-            type="button"
-            variant="ghost"
-            disabled={busy || preview}
-            onClick={() => {
-              setMessages(NO_MESSAGES);
-              setId(null);
-              setText("");
-              setError("");
-              setNeedsHuman(false);
-              setLeadId(null);
-              setSources([]);
-              setFailed(false);
-              request.current = null;
-            }}
-          >
-            <RotateCcw aria-hidden="true" />
-            Start a new test
-          </Button>
-        )}
-        {initialLead && (
-          <Notice>
-            {qualificationLabel[initialLead.qualification]} ·{" "}
-            {initialLead.summary}
-          </Notice>
-        )}
-      </aside>
+          {id && (
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={busy || preview}
+              onClick={() => {
+                setMessages(NO_MESSAGES);
+                setId(null);
+                setText("");
+                setError("");
+                setNeedsHuman(false);
+                setLeadId(null);
+                setSources([]);
+                setFailed(false);
+                request.current = null;
+              }}
+            >
+              <RotateCcw aria-hidden="true" />
+              Start a new test
+            </Button>
+          )}
+          {initialLead && (
+            <Notice>
+              {qualificationLabel[initialLead.qualification]} ·{" "}
+              {initialLead.summary}
+            </Notice>
+          )}
+        </aside>
+      )}
     </div>
   );
 }

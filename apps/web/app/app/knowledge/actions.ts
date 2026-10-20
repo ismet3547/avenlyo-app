@@ -57,9 +57,14 @@ export async function saveKnowledge(
       message:
         "Could not save this item. Check owner access or reload if someone edited it.",
     };
+  revalidatePath("/onboarding");
   revalidatePath("/app/knowledge");
   revalidatePath("/app");
-  redirect("/app/knowledge?notice=draft-saved");
+  redirect(
+    form.get("onboarding") === "true"
+      ? `/onboarding?step=knowledge&item=${result.data}`
+      : "/app/knowledge?notice=draft-saved",
+  );
 }
 export async function knowledgeOperation(
   _state: FormState,
@@ -103,6 +108,7 @@ export async function knowledgeOperation(
         message: "Action failed. Only owners can change knowledge.",
       };
   }
+  revalidatePath("/onboarding");
   revalidatePath("/app/knowledge");
   revalidatePath("/app");
   return {
@@ -314,6 +320,7 @@ async function saveImportedDraft(
     item_collection_id: null,
   });
   if (result.error) throw new Error("The imported draft could not be saved.");
+  return result.data;
 }
 
 export async function importKnowledgeFromUrl(
@@ -323,6 +330,7 @@ export async function importKnowledgeFromUrl(
   const ctx = await requireWorkspace();
   if (ctx.role !== "owner")
     return { status: "error", message: "Only workspace owners can import knowledge." };
+  let importedId: string;
   try {
     let url = normalizeImportUrl(form.get("url"));
     let response: Response | undefined;
@@ -370,16 +378,21 @@ export async function importKnowledgeFromUrl(
       ? htmlToKnowledge(raw)
       : { title: "", text: raw };
     const fallbackTitle = `${url.hostname}${url.pathname === "/" ? "" : url.pathname}`;
-    await saveImportedDraft(ctx, extracted.title || fallbackTitle, extracted.text);
+    importedId = await saveImportedDraft(ctx, extracted.title || fallbackTitle, extracted.text);
   } catch (error) {
     return {
       status: "error",
       message: error instanceof Error ? error.message : "The webpage could not be imported.",
     };
   }
+  revalidatePath("/onboarding");
   revalidatePath("/app/knowledge");
   revalidatePath("/app");
-  redirect("/app/knowledge?notice=imported");
+  redirect(
+    form.get("onboarding") === "true"
+      ? `/onboarding?step=knowledge&item=${importedId}`
+      : "/app/knowledge?notice=imported",
+  );
 }
 
 export async function importKnowledgeFile(
@@ -397,13 +410,14 @@ export async function importKnowledgeFile(
   const extension = entry.name.split(".").pop()?.toLowerCase() ?? "";
   if (!supportedFileExtensions.has(extension))
     return { status: "error", message: "Use TXT, Markdown, CSV, JSON or HTML files for now." };
+  let importedId: string;
   try {
     const raw = await entry.text();
     const extracted = ["html", "htm"].includes(extension)
       ? htmlToKnowledge(raw)
       : { title: "", text: raw };
     const filenameTitle = entry.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim();
-    await saveImportedDraft(
+    importedId = await saveImportedDraft(
       ctx,
       extracted.title || filenameTitle || "Imported file",
       extracted.text,
@@ -414,7 +428,12 @@ export async function importKnowledgeFile(
       message: error instanceof Error ? error.message : "The file could not be imported.",
     };
   }
+  revalidatePath("/onboarding");
   revalidatePath("/app/knowledge");
   revalidatePath("/app");
-  redirect("/app/knowledge?notice=imported");
+  redirect(
+    form.get("onboarding") === "true"
+      ? `/onboarding?step=knowledge&item=${importedId}`
+      : "/app/knowledge?notice=imported",
+  );
 }

@@ -435,11 +435,13 @@ export function KnowledgeForm({
   collections,
   editable = true,
   initialType,
+  onboarding = false,
 }: {
   item?: KnowledgeItem;
   collections: KnowledgeCollection[];
   editable?: boolean;
   initialType?: string;
+  onboarding?: boolean;
 }) {
   const [state, action, pending] = useActionState(saveKnowledge, initial);
   const [type, setType] = useState(
@@ -450,6 +452,7 @@ export function KnowledgeForm({
   const [content, setContent] = useState(item?.content ?? "");
   return (
     <form action={action}>
+      {onboarding && <input type="hidden" name="onboarding" value="true" />}
       <input type="hidden" name="id" value={item?.id ?? ""} />
       <input type="hidden" name="revision" value={item?.revision ?? ""} />
       <fieldset disabled={!editable || pending}>
@@ -523,7 +526,7 @@ export function KnowledgeForm({
             <textarea
               className="textarea"
               name="content"
-              rows={10}
+              rows={onboarding ? 5 : 10}
               required={type !== "pricing"}
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -548,20 +551,28 @@ export function KnowledgeForm({
               />
             </Field>
           )}
-          <Field label="Collection">
-            <select
-              className="select"
+          {onboarding ? (
+            <input
+              type="hidden"
               name="collection_id"
-              defaultValue={item?.collection_id ?? ""}
-            >
-              <option value="">No collection</option>
-              {collections.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </Field>
+              value={item?.collection_id ?? ""}
+            />
+          ) : (
+            <Field label="Collection">
+              <select
+                className="select"
+                name="collection_id"
+                defaultValue={item?.collection_id ?? ""}
+              >
+                <option value="">No collection</option>
+                {collections.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          )}
         </div>
       </fieldset>
       {state.status !== "idle" && (
@@ -572,7 +583,10 @@ export function KnowledgeForm({
       <div className="form-footer">
         <p>Saved as a draft. Publish when you’re ready.</p>
         <div className="row">
-          <Link className="button button-ghost" href="/app/knowledge">
+          <Link
+            className="button button-ghost"
+            href={onboarding ? "/onboarding?step=knowledge" : "/app/knowledge"}
+          >
             Cancel
           </Link>
           <Button disabled={!editable || pending}>

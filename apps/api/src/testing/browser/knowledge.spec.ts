@@ -58,7 +58,7 @@ test("all knowledge types, publication, filters, collections and safe deletion",
   await page.getByLabel("Email address", { exact: true }).fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  await expect(page).toHaveURL(/\/app$/);
+  await expect(page).toHaveURL(/\/onboarding$/);
   await page.goto("/app/knowledge");
   await expect(
     page.getByRole("heading", {

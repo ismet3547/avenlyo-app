@@ -51,21 +51,104 @@ test("signup, setup, published knowledge and isolated test conversations", async
   await page
     .getByRole("button", { name: "Create workspace", exact: true })
     .click();
-  await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible();
-  await expect(page.getByTestId("customer-conversation-count")).toHaveText("0");
+  await expect(page).toHaveURL(/\/onboarding$/);
   await expect(
-    page.getByRole("progressbar", { name: "Launch setup" }),
+    page.getByRole("heading", { name: "Let’s get your front office ready." }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("progressbar", { name: "Front office setup" }),
   ).toHaveAttribute("aria-valuenow", "0");
-  await capture("overview-desktop");
+  await expect(
+    page.getByRole("navigation", { name: "Main navigation" }),
+  ).toHaveCount(0);
+  await capture("onboarding-agent-desktop");
   await page.setViewportSize({ width: 390, height: 844 });
-  const setup = await page
-    .getByRole("heading", { name: "Get started" })
-    .boundingBox();
-  const conversations = await page
-    .getByRole("heading", { name: "Recent conversations" })
-    .boundingBox();
-  expect(setup!.y).toBeLessThan(conversations!.y);
-  await capture("overview-mobile");
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth + 1,
+    ),
+  ).toBe(true);
+  await capture("onboarding-agent-mobile");
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page
+    .getByLabel("What should your agent help customers with?", { exact: true })
+    .fill(
+      "Help customers with custom design projects and connect them with our team.",
+    );
+  await page
+    .getByRole("button", { name: "Save and continue", exact: true })
+    .click();
+  await expect(page.getByRole("progressbar")).toHaveAttribute(
+    "aria-valuenow",
+    "1",
+  );
+  await page.goto("/app");
+  await expect(page).toHaveURL(/\/onboarding$/);
+  await expect(
+    page.getByRole("button", { name: /Add business knowledge/ }),
+  ).toHaveAttribute("aria-expanded", "true");
+  await page.getByRole("button", { name: /Add manually/ }).click();
+  await page.getByLabel("Title", { exact: true }).fill("Setup knowledge");
+  await page
+    .getByLabel("Content", { exact: true })
+    .fill(
+      "We provide custom design and manufacturing services. Share your project scope to discuss suitable options.",
+    );
+  await page.getByRole("button", { name: "Save draft", exact: true }).click();
+  await expect(page.getByRole("progressbar")).toHaveAttribute(
+    "aria-valuenow",
+    "1",
+  );
+  await page.reload();
+  await page.getByRole("button", { name: "Publish", exact: true }).click();
+  await expect(page.getByRole("progressbar")).toHaveAttribute(
+    "aria-valuenow",
+    "2",
+  );
+  await page.getByRole("link", { name: "Continue to test" }).click();
+  await expect(
+    page.getByRole("link", { name: "Looks good, continue" }),
+  ).toHaveCount(0);
+  await page
+    .getByLabel("Message your agent", { exact: true })
+    .fill("What services do you offer?");
+  await page.getByRole("button", { name: "Send message", exact: true }).click();
+  await page.getByRole("link", { name: "Looks good, continue" }).click();
+  await page
+    .getByLabel("Approved websites", { exact: true })
+    .fill("https://northstar.example");
+  await page
+    .getByRole("button", { name: "Prepare Website Chat", exact: true })
+    .click();
+  await expect(page.locator("pre.code-snippet")).toContainText(
+    "data-avenlyo-channel",
+  );
+  await expect(page.getByRole("progressbar")).toHaveAttribute(
+    "aria-valuenow",
+    "3",
+  );
+  await capture("onboarding-channel-desktop");
+  await page
+    .getByRole("button", { name: "Activate Website Chat", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Your front office is ready." }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Go to Home" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Your front office is live" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("No action needed", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Avenlyo is ready for your first customer conversation.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await capture("home-desktop");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await capture("home-mobile");
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/app/agent");
   await page.getByRole("radio", { name: "Warm", exact: true }).check();
@@ -145,8 +228,11 @@ test("signup, setup, published knowledge and isolated test conversations", async
   await capture("lead-desktop");
   const testLeadUrl = page.url();
   await page.goto("/app");
-  await expect(page.getByTestId("customer-conversation-count")).toHaveText("0");
-  await expect(page.getByTestId("customer-qualified-count")).toHaveText("0");
+  await expect(
+    page.getByText("Avenlyo is ready for your first customer conversation.", {
+      exact: true,
+    }),
+  ).toBeVisible();
   await page.goto(testLeadUrl);
   await page
     .getByRole("link", { name: "Open conversation", exact: true })
@@ -175,8 +261,39 @@ test("signup, setup, published knowledge and isolated test conversations", async
       .filter({ hasText: /Test conversation/ })
       .first(),
   ).toBeVisible();
+  const workspace = await admin
+    .from("workspaces")
+    .select("id")
+    .eq("name", "Northstar Studio")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+  const staff = createClient<Database>(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_PUBLISHABLE_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  );
+  expect(
+    (await staff.auth.signInWithPassword({ email, password })).error,
+  ).toBeNull();
+  expect(
+    (
+      await staff.rpc("configure_website_channel", {
+        target_workspace_id: workspace.data!.id,
+        channel_enabled: false,
+        origins: ["https://northstar.example"],
+      })
+    ).error,
+  ).toBeNull();
+  await page.goto("/app");
+  await expect(
+    page.getByRole("heading", {
+      name: "Your front office needs attention",
+      exact: true,
+    }),
+  ).toBeVisible();
   const routes = [
-    ["/app", "Overview"],
+    ["/app", "Your front office needs attention"],
     ["/app/agent", "Agent settings"],
     ["/app/knowledge", "Content"],
     ["/app/test-agent", "Test agent"],
@@ -198,7 +315,9 @@ test("signup, setup, published knowledge and isolated test conversations", async
     ).toBe(true);
   }
   await page.goto("/app");
-  await expect(page.getByTestId("customer-needs-you-count")).toHaveText("0");
+  await expect(
+    page.getByText("No action needed", { exact: true }),
+  ).toBeVisible();
   await page
     .getByRole("button", { name: "Open navigation", exact: true })
     .click();
@@ -209,8 +328,8 @@ test("signup, setup, published knowledge and isolated test conversations", async
   await expect(page).toHaveURL(/\/auth\/sign-in$/);
   await page.goto("/app/leads");
   await expect(page).toHaveURL(/\/auth\/sign-in$/);
-  await testInfo.attach("Overview", {
-    path: `${shots}/overview-desktop.png`,
+  await testInfo.attach("Home", {
+    path: `${shots}/home-desktop.png`,
     contentType: "image/png",
   });
   async function scan(directory: string): Promise<void> {

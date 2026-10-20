@@ -308,15 +308,37 @@ export default async function PreviewPage({
   else
     content = (
       <Overview
-        name="Forma Studio"
         preview
         data={{
-          metrics: empty ? [0, 0, 0, 0] : [128, 24, 18, 3],
-          channels: empty ? [] : channels,
-          published: empty ? 0 : 5,
-          configured: !empty,
-          tested: false,
-          inbox: empty ? [] : items,
+          channels,
+          attentionCount: empty
+            ? 0
+            : items.filter((i) => i.aiMode === "paused").length,
+          attention: empty
+            ? []
+            : items
+                .filter((i) => i.aiMode === "paused")
+                .slice(0, 3)
+                .map((i) => ({
+                  id: i.id,
+                  name: i.customerRef,
+                  channel: i.channel,
+                  preview: i.preview,
+                  at: i.updatedAt,
+                  activity: "Conversation handed to your team",
+                })),
+          recent: empty
+            ? []
+            : items
+                .slice(0, 5)
+                .map((i) => ({
+                  id: i.id,
+                  name: i.customerRef,
+                  channel: i.channel,
+                  preview: i.preview,
+                  at: i.updatedAt,
+                  activity: "Customer asked",
+                })),
         }}
       />
     );

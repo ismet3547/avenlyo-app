@@ -50,7 +50,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     .click();
   await expect(
     page.getByRole("heading", {
-      name: "Overview",
+      name: "Let’s get your front office ready.",
       exact: true,
     }),
   ).toBeVisible();
@@ -79,6 +79,12 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   await expect(
     page.getByRole("status").filter({ hasText: "Published." }),
   ).toBeVisible();
+  await page.goto("/app/test-agent");
+  await page
+    .getByLabel("Message your agent", { exact: true })
+    .fill("What services do you offer?");
+  await page.getByRole("button", { name: "Send message", exact: true }).click();
+  await expect(page.locator(".thread-messages .message")).toHaveCount(2);
   await page.goto("/app/channels");
   await expect(page.getByText("Not connected", { exact: true })).toHaveCount(2);
   await page
@@ -262,8 +268,18 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   ).toBe("visible");
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/app");
-  await expect(page.getByTestId("customer-conversation-count")).toHaveText("1");
-  await expect(page.getByTestId("customer-needs-you-count")).toHaveText("1");
+  await expect(
+    page.getByRole("heading", {
+      name: "Your front office is live",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole("region", { name: "Needs your attention", exact: true })
+      .getByRole("link")
+      .filter({ hasText: "Alex" }),
+  ).toHaveCount(1);
   await expect(
     page.getByRole("link").filter({ hasText: "Alex" }).first(),
   ).toBeVisible();
@@ -416,7 +432,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     }),
   ).toBeVisible();
   const routes = [
-    ["/app", "Overview", "home-active"],
+    ["/app", "Your front office is live", "home-active"],
     ["/app/inbox", "Inbox", "inbox-list"],
     [inboxUrl, "Alex", "inbox-conversation"],
     ["/app/agent", "Agent settings", "agent"],

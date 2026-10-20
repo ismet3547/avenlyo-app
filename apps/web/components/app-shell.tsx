@@ -24,7 +24,7 @@ import { Brand, Avatar, Badge } from "./ui";
 import { screenHref } from "@/lib/presentation";
 
 const applications = [
-  { label: "Overview", href: "/app", icon: House },
+  { label: "Home", href: "/app", icon: House },
   { label: "Inbox", href: "/app/inbox", icon: Inbox },
   { label: "Agent", href: "/app/agent", icon: Sparkles },
   { label: "Knowledge", href: "/app/knowledge", icon: BookOpen },
@@ -148,7 +148,7 @@ export function AppShell({
           onClick={close}
         >
           <House aria-hidden="true" />
-          Getting started
+          Home
           <ArrowUpRight className="nav-end-icon" aria-hidden="true" />
         </Link>
         <Link
@@ -191,7 +191,7 @@ export function AppShell({
         <Link
           className="rail-brand"
           href={screenHref("/app", preview)}
-          aria-label="Avenlyo overview"
+          aria-label="Avenlyo Home"
         >
           <Brand compact />
         </Link>

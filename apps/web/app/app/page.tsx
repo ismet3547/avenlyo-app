@@ -1,6 +1,9 @@
 import { Overview } from "@/components/overview";
-import { overviewData, productContext } from "@/lib/product-data";
+import { redirect } from "next/navigation";
+import { overviewData } from "@/lib/product-data";
+import { onboardingState } from "@/lib/onboarding";
 export default async function Page() {
-  const [ctx, data] = await Promise.all([productContext(), overviewData()]);
-  return <Overview name={ctx.workspace.name} data={data} />;
+  const state = await onboardingState();
+  if (!state.completedAt) redirect("/onboarding");
+  return <Overview data={await overviewData()} />;
 }
