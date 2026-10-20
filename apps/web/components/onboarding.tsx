@@ -50,7 +50,7 @@ export function SetupAccordion({
   const { done, count, next } = setupProgress(state);
   return (
     <>
-      <header className="setup-heading">
+      <header className="onboarding-heading">
         <h1>Let’s get your front office ready.</h1>
         <p>Four steps, then Avenlyo can start helping your customers.</p>
       </header>
@@ -66,10 +66,10 @@ export function SetupAccordion({
           <span style={{ width: `${count * 25}%` }} />
         </div>
       </div>
-      <div className="setup-steps">
+      <div className="onboarding-steps">
         {setupSteps.map(([key, title, success], index) => (
           <section
-            className={`setup-step ${active === index ? "is-current" : ""}`}
+            className={`onboarding-step ${active === index ? "is-current" : ""}`}
             key={key}
           >
             <h2>
@@ -83,7 +83,7 @@ export function SetupAccordion({
                 }
               >
                 <span
-                  className={`setup-step-number ${done[index] ? "is-done" : ""}`}
+                  className={`onboarding-step-number ${done[index] ? "is-done" : ""}`}
                 >
                   {done[index] ? <Check aria-hidden="true" /> : index + 1}
                 </span>
@@ -93,7 +93,7 @@ export function SetupAccordion({
             </h2>
             {active === index && (
               <div
-                className="setup-step-content"
+                className="onboarding-step-content"
                 role="region"
                 id={`panel-${key}`}
                 aria-labelledby={`step-${key}`}

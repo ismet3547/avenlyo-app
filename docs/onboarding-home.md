@@ -4,7 +4,7 @@ This change continues PR #6 from `9b4347251c71b95fed7f08d8e5558cfa652f5d78`. It 
 
 ## Experience and reused behavior
 
-`/app` sends an unfinished workspace to `/onboarding`. Setup uses the Avenlyo brand, workspace/account controls and one expanded task in a 780px working column. Normal navigation appears after activation. Existing deep links remain usable in the minimal shell, with a Back to setup link; this preserves working Knowledge and Agent flows.
+`/app` sends an unfinished workspace to `/onboarding`. Setup uses the Avenlyo brand, workspace/account controls and one expanded task in a 780px working column. Normal navigation appears after activation. Existing deep links remain usable in the minimal shell, with a Back to setup link; this preserves working Knowledge and Agent flows. The shared shell keeps its main subtree mounted when activation reveals normal navigation, so ordinary form saves retain their success feedback.
 
 1. **Agent:** a short form saves the existing setup brief, tone and contact requirements through `saveAgent` / `save_agent_settings`. Existing goals and mandatory human assistance remain intact. Advanced configuration stays on Agent.
 2. **Knowledge:** choose manual entry, webpage import or file upload. All six supported types use `KnowledgeForm` and the existing save/import/publish actions. Imports remain drafts; saved drafts can be reviewed, edited and explicitly published. Collection data is preserved when the compact editor hides collection selection.
@@ -44,7 +44,7 @@ Use the repository's pinned Node/pnpm versions and normal disposable Supabase st
 
 The implementation adds unit routing/presentation tests, extends all three existing browser flows for the changed behavior, and adds `supabase/tests/database/onboarding_home.test.sql`. The database assertions cover draft/failed-test rejection, durable completion, global attention ordering beyond fifty newer conversations, bounded/deduplicated Recent, and unauthorized access.
 
-Local checks in this sandbox passed typecheck, lint/independence, all **120 unit tests**, and the production build. The build required a temporary external preload because this sandbox lacks `/proc` memory reporting; no workaround is included in the repository. A separate PGlite PostgreSQL check executed the new migration against isolated schema fixtures and passed state, queue, deduplication and access checks. It does not replace the full Supabase RLS/pgTAP suite.
+Local checks in this sandbox passed typecheck, lint/independence, all **122 unit tests**, and the production build. The build required a temporary external preload because this sandbox lacks `/proc` memory reporting; no workaround is included in the repository. A separate PGlite PostgreSQL check executed the new migration against isolated schema fixtures and passed state, queue, deduplication and access checks. It does not replace the full Supabase RLS/pgTAP suite.
 
 This sandbox has no Docker/Supabase stack or installed browser. The local browser acceptance command could not start its fixture server, and the browser download was unavailable. The existing PR's CI is the appropriate full-stack validation environment; consult its checks for the final result. No PR merge or hosted deployment is part of this change.
 
@@ -56,5 +56,5 @@ For visual review, create a workspace and follow `/onboarding`, reload after eac
 - UI: `apps/web/components/{onboarding,setup-shell,overview,app-shell,conversations,product-forms}.tsx`, `apps/web/app/globals.css`, `apps/web/app/preview/page.tsx`, `apps/web/public/fonts/{manrope-regular.ttf,manrope-bold.ttf,OFL.txt}`.
 - Reused-action adaptation: `apps/web/app/app/knowledge/actions.ts` adds a fixed onboarding return destination and revalidation; existing regular destinations remain intact.
 - Database/types: `packages/shared/src/database.ts`, the new migration, and `supabase/tests/database/onboarding_home.test.sql`.
-- Tests: `apps/web/app/{app,onboarding}/page.test.ts`, `apps/web/lib/{onboarding-model,home-model}.test.ts`, the existing three `apps/api/src/testing/browser/*.spec.ts` flows, and `vitest.config.ts` for the application path alias.
+- Tests: `apps/web/app/{app,onboarding}/page.test.ts`, `apps/web/app/app/layout.test.ts`, `apps/web/lib/{onboarding-model,home-model}.test.ts`, the existing three `apps/api/src/testing/browser/*.spec.ts` flows, and `vitest.config.ts` for the application path alias.
 - Review notes: this file.

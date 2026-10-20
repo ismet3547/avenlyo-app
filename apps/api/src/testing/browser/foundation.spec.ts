@@ -68,6 +68,29 @@ test("signup, setup, published knowledge and isolated test conversations", async
       () => document.documentElement.scrollWidth <= innerWidth + 1,
     ),
   ).toBe(true);
+  const setupTitle = await page
+    .getByRole("heading", {
+      name: "Let’s get your front office ready.",
+      exact: true,
+    })
+    .boundingBox();
+  const setupDescription = await page
+    .getByText("Four steps, then Avenlyo can start helping your customers.", {
+      exact: true,
+    })
+    .boundingBox();
+  expect(setupDescription!.y).toBeGreaterThanOrEqual(
+    setupTitle!.y + setupTitle!.height,
+  );
+  const expandedStep = await page
+    .getByRole("button", { name: /Configure your agent/ })
+    .boundingBox();
+  const briefField = await page
+    .getByLabel("What should your agent help customers with?", { exact: true })
+    .boundingBox();
+  expect(briefField!.y).toBeGreaterThanOrEqual(
+    expandedStep!.y + expandedStep!.height,
+  );
   await capture("onboarding-agent-mobile");
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page
@@ -95,6 +118,12 @@ test("signup, setup, published knowledge and isolated test conversations", async
       "We provide custom design and manufacturing services. Share your project scope to discuss suitable options.",
     );
   await page.getByRole("button", { name: "Save draft", exact: true }).click();
+  await expect(page).toHaveURL(
+    /\/onboarding\?step=knowledge&item=[a-f0-9-]{36}$/,
+  );
+  await expect(
+    page.getByRole("button", { name: "Publish", exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole("progressbar")).toHaveAttribute(
     "aria-valuenow",
     "1",

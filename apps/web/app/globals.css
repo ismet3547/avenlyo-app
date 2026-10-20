@@ -2581,13 +2581,13 @@ fieldset {
 @font-face {
   font-family: "Manrope";
   src: url("/fonts/manrope-regular.ttf") format("truetype");
-  font-weight: 400 600;
+  font-weight: 400;
   font-display: swap;
 }
 @font-face {
   font-family: "Manrope";
   src: url("/fonts/manrope-bold.ttf") format("truetype");
-  font-weight: 700 800;
+  font-weight: 700;
   font-display: swap;
 }
 .focused-type {
@@ -2690,10 +2690,10 @@ fieldset {
 .setup-back {
   margin-bottom: 24px;
 }
-.setup-heading h1 {
+.onboarding-heading h1 {
   margin: 0 0 12px;
 }
-.setup-heading p {
+.onboarding-heading p {
   color: var(--muted);
   font-size: 16px;
 }
@@ -2719,16 +2719,16 @@ fieldset {
   background: var(--primary);
   height: 100%;
 }
-.setup-steps {
+.onboarding-steps {
   border-top: 1px solid #dfe1e6;
 }
-.setup-step {
+.onboarding-step {
   border-bottom: 1px solid #dfe1e6;
 }
-.setup-step h2 {
+.onboarding-step h2 {
   margin: 0;
 }
-.setup-step h2 > button {
+.onboarding-step h2 > button {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -2741,12 +2741,12 @@ fieldset {
   font: inherit;
   cursor: pointer;
 }
-.setup-step h2 > button:disabled {
+.onboarding-step h2 > button:disabled {
   cursor: default;
   color: #626977;
   opacity: 1;
 }
-.setup-step.is-current {
+.onboarding-step.is-current {
   background: #fff;
   margin-inline: -24px;
   padding-inline: 24px;
@@ -2754,7 +2754,7 @@ fieldset {
   border-radius: 10px;
   box-shadow: 0 3px 12px #18203a04;
 }
-.setup-step-number {
+.onboarding-step-number {
   width: 32px;
   height: 32px;
   flex-shrink: 0;
@@ -2765,17 +2765,17 @@ fieldset {
   place-items: center;
   background: #fff;
 }
-.is-current .setup-step-number {
+.is-current .onboarding-step-number {
   background: #4f46cf;
   border-color: #4f46cf;
   color: #fff;
 }
-.setup-step-number.is-done {
+.onboarding-step-number.is-done {
   color: #21764c;
   background: #f1f7f3;
   border-color: #d5e7db;
 }
-.setup-step-number svg {
+.onboarding-step-number svg {
   width: 17px;
 }
 .setup-chevron {
@@ -2784,10 +2784,10 @@ fieldset {
   margin-left: auto;
   flex-shrink: 0;
 }
-.setup-step button[aria-expanded="true"] .setup-chevron {
+.onboarding-step button[aria-expanded="true"] .setup-chevron {
   transform: rotate(180deg);
 }
-.setup-step-content {
+.onboarding-step-content {
   padding: 0 0 26px 48px;
 }
 .setup-form {
@@ -3198,24 +3198,24 @@ fieldset {
     width: calc(100% - 40px);
     padding-top: 32px;
   }
-  .setup-heading p {
+  .onboarding-heading p {
     font-size: 15px;
   }
   .setup-progress {
     margin: 24px 0;
   }
-  .setup-step h2 {
+  .onboarding-step h2 {
     font-size: 17px;
   }
-  .setup-step h2 > button {
+  .onboarding-step h2 > button {
     gap: 12px;
     padding-block: 19px;
   }
-  .setup-step.is-current {
+  .onboarding-step.is-current {
     margin-inline: -8px;
     padding-inline: 8px;
   }
-  .setup-step-content {
+  .onboarding-step-content {
     padding-left: 0;
     padding-inline: 4px;
   }
@@ -3334,4 +3334,20 @@ fieldset {
   max-height: 300px;
   overflow: auto;
   padding-right: 8px;
+}
+.app-shell.setup-shell {
+  display: block;
+}
+.app-shell.setup-shell .setup-topbar > a {
+  text-decoration: none;
+}
+
+.focused-type .button-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.focused-type .button-primary:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
 }

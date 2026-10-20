@@ -6,11 +6,9 @@ import type { Workspace } from "@avenlyo-app/shared";
 export function SetupShell({
   workspace,
   children,
-  returnLink = false,
 }: {
   workspace: Pick<Workspace, "name">;
   children: ReactNode;
-  returnLink?: boolean;
 }) {
   return (
     <div className="setup-shell focused-type">
@@ -29,11 +27,6 @@ export function SetupShell({
         </div>
       </header>
       <main id="main-content" className="setup-main" tabIndex={-1}>
-        {returnLink && (
-          <Link className="text-link setup-back" href="/onboarding">
-            ← Back to setup
-          </Link>
-        )}
         {children}
       </main>
     </div>

@@ -48,6 +48,7 @@ type Props = {
   role: string;
   preview?: boolean;
   activePath?: string;
+  setup?: boolean;
 };
 export function AppShell({
   children,
@@ -57,6 +58,7 @@ export function AppShell({
   role,
   preview = false,
   activePath,
+  setup = false,
 }: Props) {
   const pathname = usePathname();
   const current = activePath ?? pathname;
@@ -183,105 +185,143 @@ export function AppShell({
     </>
   );
   return (
-    <div className={`app-shell ${isInbox ? "is-inbox" : ""}`}>
+    <div
+      className={`app-shell ${isInbox ? "is-inbox" : ""} ${setup ? "setup-shell focused-type" : ""}`}
+    >
       <a href="#main-content" className="skip-link">
         Skip to content
       </a>
-      <aside className="application-rail" aria-label="Applications">
-        <Link
-          className="rail-brand"
-          href={screenHref("/app", preview)}
-          aria-label="Avenlyo Home"
-        >
-          <Brand compact />
-        </Link>
-        <nav aria-label="Application switcher">
-          {applications.map(({ href, label, icon: Icon }) => (
-            <Link
-              key={href}
-              href={screenHref(href, preview)}
-              className={`rail-link ${active(href) ? "is-active" : ""}`}
-              aria-label={`Open ${label}`}
-              aria-current={active(href) ? "page" : undefined}
-            >
-              <Icon aria-hidden="true" />
-              <span className="rail-tooltip">{label}</span>
-            </Link>
-          ))}
-        </nav>
-        <div className="rail-bottom">
-          {utilities.map(({ href, label, icon: Icon }) => (
-            <Link
-              key={href}
-              href={screenHref(href, preview)}
-              className={`rail-link ${active(href) ? "is-active" : ""}`}
-              aria-label={`Open ${label}`}
-            >
-              <Icon aria-hidden="true" />
-              <span className="rail-tooltip">{label}</span>
-            </Link>
-          ))}
-          <form action={preview ? undefined : signOut}>
-            <button
-              className="rail-link"
-              aria-label="Sign out"
-              disabled={preview}
-            >
-              <LogOut aria-hidden="true" />
-              <span className="rail-tooltip">Sign out</span>
-            </button>
-          </form>
+      {!setup && (
+        <aside className="application-rail" aria-label="Applications">
           <Link
-            href="/workspaces"
-            className="rail-profile"
-            aria-label="Choose workspace"
+            className="rail-brand"
+            href={screenHref("/app", preview)}
+            aria-label="Avenlyo Home"
           >
-            <Avatar name={email.split("@")[0] || "Team"} small />
+            <Brand compact />
           </Link>
-        </div>
-      </aside>
-      <aside className="sidebar desktop-sidebar">{secondary()}</aside>
-      <dialog
-        ref={dialog}
-        className="mobile-drawer"
-        aria-label="Navigation"
-        onClose={() => menu.current?.focus()}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) close();
-        }}
-      >
-        <div className="sidebar">
-          <button
-            className="icon-button drawer-close"
-            aria-label="Close navigation"
-            onClick={close}
-          >
-            <X aria-hidden="true" />
-          </button>
-          {secondary(true)}
-        </div>
-      </dialog>
+          <nav aria-label="Application switcher">
+            {applications.map(({ href, label, icon: Icon }) => (
+              <Link
+                key={href}
+                href={screenHref(href, preview)}
+                className={`rail-link ${active(href) ? "is-active" : ""}`}
+                aria-label={`Open ${label}`}
+                aria-current={active(href) ? "page" : undefined}
+              >
+                <Icon aria-hidden="true" />
+                <span className="rail-tooltip">{label}</span>
+              </Link>
+            ))}
+          </nav>
+          <div className="rail-bottom">
+            {utilities.map(({ href, label, icon: Icon }) => (
+              <Link
+                key={href}
+                href={screenHref(href, preview)}
+                className={`rail-link ${active(href) ? "is-active" : ""}`}
+                aria-label={`Open ${label}`}
+              >
+                <Icon aria-hidden="true" />
+                <span className="rail-tooltip">{label}</span>
+              </Link>
+            ))}
+            <form action={preview ? undefined : signOut}>
+              <button
+                className="rail-link"
+                aria-label="Sign out"
+                disabled={preview}
+              >
+                <LogOut aria-hidden="true" />
+                <span className="rail-tooltip">Sign out</span>
+              </button>
+            </form>
+            <Link
+              href="/workspaces"
+              className="rail-profile"
+              aria-label="Choose workspace"
+            >
+              <Avatar name={email.split("@")[0] || "Team"} small />
+            </Link>
+          </div>
+        </aside>
+      )}
+      {!setup && (
+        <aside className="sidebar desktop-sidebar">{secondary()}</aside>
+      )}
+      {!setup && (
+        <dialog
+          ref={dialog}
+          className="mobile-drawer"
+          aria-label="Navigation"
+          onClose={() => menu.current?.focus()}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) close();
+          }}
+        >
+          <div className="sidebar">
+            <button
+              className="icon-button drawer-close"
+              aria-label="Close navigation"
+              onClick={close}
+            >
+              <X aria-hidden="true" />
+            </button>
+            {secondary(true)}
+          </div>
+        </dialog>
+      )}
       <div className="app-workspace">
-        <header className="mobile-topbar">
-          <button
-            ref={menu}
-            className="icon-button"
-            onClick={() => dialog.current?.showModal()}
-            aria-label="Open navigation"
-          >
-            <Menu aria-hidden="true" />
-          </button>
-          <Brand compact />
-          <span>{workspace.name}</span>
-          {preview && <Badge>Preview</Badge>}
-        </header>
+        {setup ? (
+          <header className="setup-topbar">
+            <Link href="/onboarding" aria-label="Avenlyo setup">
+              <Brand />
+            </Link>
+            <div className="setup-account">
+              <Link href="/workspaces">{workspace.name}</Link>
+              <form action={signOut}>
+                <button className="button button-ghost">Sign out</button>
+              </form>
+            </div>
+          </header>
+        ) : (
+          <header className="mobile-topbar">
+            <button
+              ref={menu}
+              className="icon-button"
+              onClick={() => dialog.current?.showModal()}
+              aria-label="Open navigation"
+            >
+              <Menu aria-hidden="true" />
+            </button>
+            <Brand compact />
+            <span>{workspace.name}</span>
+            {preview && <Badge>Preview</Badge>}
+          </header>
+        )}
         {preview && (
           <div className="preview-mode">
             <PanelLeft aria-hidden="true" />
             Design preview<span>Fictional data · read only</span>
           </div>
         )}
-        <main id="main-content" className="main-content" tabIndex={-1}>
+        {/* Keep this main subtree mounted when activation reveals navigation so
+            existing forms retain their real success/error feedback. */}
+        <main
+          key="workspace-content"
+          id="main-content"
+          className={setup ? "setup-main" : "main-content"}
+          tabIndex={-1}
+        >
+          {setup && (
+            <Link
+              key="setup-return"
+              className="text-link setup-back"
+              href="/onboarding"
+            >
+              ← Back to setup
+            </Link>
+          )}
           {children}
         </main>
       </div>
