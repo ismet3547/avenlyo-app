@@ -5,13 +5,16 @@ import { ActionLink, Avatar } from "./ui";
 import { screenHref } from "@/lib/presentation";
 import {
   channelHasIssue,
-  channelIsActive,
+  homeChannelState,
   customerName,
   waitingLabel,
   type HomeSnapshot,
 } from "@/lib/home-model";
 
-export type OverviewModel = HomeSnapshot & { channels: ChannelConnection[] };
+export type OverviewModel = HomeSnapshot & {
+  channels: ChannelConnection[];
+  firstChannelActivatedAt: string | null;
+};
 export function Overview({
   data,
   preview = false,
@@ -22,7 +25,28 @@ export function Overview({
   const href = (path: string) => screenHref(path, preview);
   const now = Date.now();
   const alerts = data.channels.filter(channelHasIssue);
-  const online = data.channels.some(channelIsActive);
+  const channelState = homeChannelState(
+    data.channels,
+    data.firstChannelActivatedAt,
+  );
+  if (channelState === "ready")
+    return (
+      <div className="operational-home focused-type">
+        <header className="home-heading">
+          <div>
+            <h1>Your front office is ready</h1>
+            <p>
+              Connect a channel when you’re ready to start receiving customer
+              conversations.
+            </p>
+          </div>
+          <ActionLink href={href("/app/channels")}>
+            Connect channel <ArrowRight aria-hidden="true" />
+          </ActionLink>
+        </header>
+      </div>
+    );
+  const online = channelState === "live";
   return (
     <div className="operational-home focused-type">
       <header className="home-heading">

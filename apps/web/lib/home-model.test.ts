@@ -3,6 +3,7 @@ import type { ChannelConnection } from "@avenlyo-app/shared";
 import {
   channelHasIssue,
   channelIsActive,
+  homeChannelState,
   customerName,
   waitingLabel,
 } from "./home-model";
@@ -47,6 +48,39 @@ describe("real channel health", () => {
   it("does not alert for a channel that was never activated", () => {
     expect(channelHasIssue(channel)).toBe(false);
     expect(channelIsActive(channel)).toBe(false);
+    expect(homeChannelState([], null)).toBe("ready");
+    expect(homeChannelState([channel], null)).toBe("ready");
+  });
+  it("becomes live only after an inbound channel is actually active", () => {
+    expect(homeChannelState([{ ...channel, enabled: true }], null)).toBe(
+      "live",
+    );
+    expect(
+      homeChannelState(
+        [{ ...channel, enabled: true, approved_origins: [] }],
+        null,
+      ),
+    ).toBe("ready");
+    expect(
+      homeChannelState(
+        [
+          {
+            ...channel,
+            channel: "instagram",
+            enabled: true,
+            status: "connected",
+          },
+        ],
+        null,
+      ),
+    ).toBe("ready");
+  });
+  it("reports a formerly active channel offline even without customer traffic", () => {
+    expect(homeChannelState([channel], "2026-10-20T10:00:00Z")).toBe("offline");
+    expect(homeChannelState([], "2026-10-20T10:00:00Z")).toBe("offline");
+    expect(
+      homeChannelState([{ ...channel, enabled: true }], "2026-10-20T10:00:00Z"),
+    ).toBe("live");
   });
   it("reports recorded provider failure even when it disabled the connection", () => {
     expect(

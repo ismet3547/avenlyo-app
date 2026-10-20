@@ -31,7 +31,11 @@ export default async function Page({
           <Check aria-hidden="true" />
         </span>
         <h1>Your front office is ready.</h1>
-        <p>Avenlyo can now start handling customer conversations.</p>
+        <p>
+          {state.connected
+            ? "Avenlyo can now start handling customer conversations."
+            : "Connect a channel when you’re ready to receive customer conversations."}
+        </p>
         <Link className="button button-primary" href="/app">
           Go to Home <ArrowRight aria-hidden="true" />
         </Link>

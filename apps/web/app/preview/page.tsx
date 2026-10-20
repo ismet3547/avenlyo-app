@@ -311,6 +311,9 @@ export default async function PreviewPage({
         preview
         data={{
           channels,
+          firstChannelActivatedAt: channels.some((channel) => channel.enabled)
+            ? "2026-10-20T10:00:00Z"
+            : null,
           attentionCount: empty
             ? 0
             : items.filter((i) => i.aiMode === "paused").length,
@@ -329,16 +332,14 @@ export default async function PreviewPage({
                 })),
           recent: empty
             ? []
-            : items
-                .slice(0, 5)
-                .map((i) => ({
-                  id: i.id,
-                  name: i.customerRef,
-                  channel: i.channel,
-                  preview: i.preview,
-                  at: i.updatedAt,
-                  activity: "Customer asked",
-                })),
+            : items.slice(0, 5).map((i) => ({
+                id: i.id,
+                name: i.customerRef,
+                channel: i.channel,
+                preview: i.preview,
+                at: i.updatedAt,
+                activity: "Customer asked",
+              })),
         }}
       />
     );

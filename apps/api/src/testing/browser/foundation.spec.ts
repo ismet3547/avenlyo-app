@@ -75,9 +75,12 @@ test("signup, setup, published knowledge and isolated test conversations", async
     })
     .boundingBox();
   const setupDescription = await page
-    .getByText("Four steps, then Avenlyo can start helping your customers.", {
-      exact: true,
-    })
+    .getByText(
+      "Prepare your agent, then connect a channel when you’re ready.",
+      {
+        exact: true,
+      },
+    )
     .boundingBox();
   expect(setupDescription!.y).toBeGreaterThanOrEqual(
     setupTitle!.y + setupTitle!.height,

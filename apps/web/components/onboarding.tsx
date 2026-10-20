@@ -16,7 +16,11 @@ import {
   type ChannelConnection,
   type KnowledgeItem,
 } from "@avenlyo-app/shared";
-import { saveSetupAgent, activateSetupWebsite } from "@/app/onboarding/actions";
+import {
+  saveSetupAgent,
+  activateSetupWebsite,
+  skipSetupChannel,
+} from "@/app/onboarding/actions";
 import {
   importKnowledgeFile,
   importKnowledgeFromUrl,
@@ -47,23 +51,24 @@ export function SetupAccordion({
   children: ReactNode;
 }) {
   const router = useRouter();
-  const { done, count, next } = setupProgress(state);
+  const { done, next } = setupProgress(state);
+  const requiredCount = done.slice(0, 3).filter(Boolean).length;
   return (
     <>
       <header className="onboarding-heading">
         <h1>Let’s get your front office ready.</h1>
-        <p>Four steps, then Avenlyo can start helping your customers.</p>
+        <p>Prepare your agent, then connect a channel when you’re ready.</p>
       </header>
       <div className="setup-progress">
-        <strong>{count} of 4 complete</strong>
+        <strong>{requiredCount} of 3 required steps complete</strong>
         <div
           role="progressbar"
           aria-label="Front office setup"
-          aria-valuenow={count}
+          aria-valuenow={requiredCount}
           aria-valuemin={0}
-          aria-valuemax={4}
+          aria-valuemax={3}
         >
-          <span style={{ width: `${count * 25}%` }} />
+          <span style={{ width: `${(requiredCount / 3) * 100}%` }} />
         </div>
       </div>
       <div className="onboarding-steps">
@@ -87,7 +92,12 @@ export function SetupAccordion({
                 >
                   {done[index] ? <Check aria-hidden="true" /> : index + 1}
                 </span>
-                <span>{done[index] && active !== index ? success : title}</span>
+                <span>
+                  {done[index] && active !== index ? success : title}
+                  {key === "channel" && !done[index] && (
+                    <span className="setup-optional">Optional</span>
+                  )}
+                </span>
                 <ChevronDown className="setup-chevron" aria-hidden="true" />
               </button>
             </h2>
@@ -433,6 +443,10 @@ export function SetupChannel({
     activateSetupWebsite,
     initial,
   );
+  const [skipState, skipAction, skipping] = useActionState(
+    skipSetupChannel,
+    initial,
+  );
   const router = useRouter();
   return (
     <div className="setup-channel">
@@ -478,14 +492,14 @@ export function SetupChannel({
                 defaultValue={website?.approved_origins.join("\n")}
                 placeholder="https://yourbusiness.com"
                 required
-                disabled={!editable || pending}
+                disabled={!editable || pending || skipping}
               />
             </label>
             <p id="setup-origins-hint" className="setup-help">
               One exact origin per line, for example https://yourbusiness.com.
             </p>
             <Feedback state={state} />
-            <Button disabled={!editable || pending}>
+            <Button disabled={!editable || pending || skipping}>
               {pending
                 ? "Saving…"
                 : website
@@ -511,6 +525,13 @@ export function SetupChannel({
           </Button>
         </div>
       )}
+      <form className="setup-skip" action={skipAction}>
+        <Feedback state={skipState} />
+        <button className="text-link" disabled={pending || skipping}>
+          {skipping ? "Continuing…" : "Set up later"}{" "}
+          <span aria-hidden="true">→</span>
+        </button>
+      </form>
     </div>
   );
 }

@@ -43,5 +43,9 @@ export const overviewData = cache(async () => {
   ]);
   if (snapshot.error || channels.error)
     throw new Error("Home could not be loaded. Please try again.");
-  return { ...homeSchema.parse(snapshot.data), channels: channels.data };
+  return {
+    ...homeSchema.parse(snapshot.data),
+    channels: channels.data,
+    firstChannelActivatedAt: ctx.workspace.first_channel_activated_at,
+  };
 });

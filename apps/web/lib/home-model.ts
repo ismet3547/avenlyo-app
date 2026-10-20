@@ -32,6 +32,15 @@ export function channelHasIssue(channel: ChannelConnection) {
       Boolean(channel.verified_at || channel.last_activity_at))
   );
 }
+export function homeChannelState(
+  channels: ChannelConnection[],
+  firstChannelActivatedAt: string | null,
+) {
+  if (channels.some(channelIsActive)) return "live";
+  if (firstChannelActivatedAt || channels.some(channelHasIssue))
+    return "offline";
+  return "ready";
+}
 export function customerName(item: Pick<HomeConversation, "name" | "channel">) {
   return (
     item.name?.trim() ||

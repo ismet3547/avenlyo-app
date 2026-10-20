@@ -38,6 +38,26 @@ describe("authenticated Home routing", () => {
       attentionCount: 0,
       recent: [],
       channels: [],
+      firstChannelActivatedAt: "2026-10-20T10:00:00Z",
+    });
+    expect(await Page()).toBeDefined();
+    expect(redirect).not.toHaveBeenCalled();
+    expect(overviewData).toHaveBeenCalledOnce();
+  });
+  it("opens Home after skipping the optional channel without returning to onboarding", async () => {
+    vi.mocked(onboardingState).mockResolvedValue({
+      configured: true,
+      published: true,
+      tested: true,
+      connected: false,
+      completedAt: "2026-10-20T10:00:00Z",
+    });
+    vi.mocked(overviewData).mockResolvedValue({
+      attention: [],
+      attentionCount: 0,
+      recent: [],
+      channels: [],
+      firstChannelActivatedAt: null,
     });
     expect(await Page()).toBeDefined();
     expect(redirect).not.toHaveBeenCalled();

@@ -7,9 +7,13 @@ vi.mock("@/lib/product-data", () => ({ productContext: vi.fn() }));
 vi.mock("@/lib/onboarding", () => ({ onboardingState: vi.fn() }));
 vi.mock("@/components/app-shell", () => ({ AppShell: vi.fn() }));
 describe("activation preserves the shared form shell", () => {
-  it.each([null, "2026-10-20T10:00:00Z"])(
-    "retains the same shell component when completion changes to %s",
-    async (completedAt) => {
+  it.each([
+    { completedAt: null, connected: false },
+    { completedAt: "2026-10-20T10:00:00Z", connected: true },
+    { completedAt: "2026-10-20T10:00:00Z", connected: false },
+  ])(
+    "retains the shared shell for completion=$completedAt, connected=$connected",
+    async ({ completedAt, connected }) => {
       vi.mocked(productContext).mockResolvedValue({
         workspace: { id: "workspace", name: "Studio" },
         workspaces: [],
@@ -20,7 +24,7 @@ describe("activation preserves the shared form shell", () => {
         configured: true,
         published: true,
         tested: true,
-        connected: Boolean(completedAt),
+        connected,
         completedAt,
       });
       const element = await AppLayout({ children: "saved form" });

@@ -34,3 +34,20 @@ export async function activateSetupWebsite(
   revalidatePath("/app", "layout");
   redirect("/onboarding");
 }
+
+export async function skipSetupChannel(_state: FormState): Promise<FormState> {
+  void _state;
+  const ctx = await requireWorkspace();
+  const result = await ctx.supabase.rpc("complete_onboarding_without_channel", {
+    target_workspace_id: ctx.workspace.id,
+  });
+  if (result.error)
+    return {
+      status: "error",
+      message:
+        "Complete agent setup, publish knowledge and successfully test your agent before continuing. If you already have, try again.",
+    };
+  revalidatePath("/onboarding");
+  revalidatePath("/app", "layout");
+  redirect("/app");
+}

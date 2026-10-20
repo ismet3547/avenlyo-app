@@ -2840,6 +2840,26 @@ fieldset {
   display: grid;
   gap: 24px;
 }
+.setup-optional {
+  display: block;
+  margin-top: 3px;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 400;
+}
+.setup-skip {
+  margin-top: -12px;
+}
+.setup-skip .text-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.setup-skip .text-link:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
 .setup-methods {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
