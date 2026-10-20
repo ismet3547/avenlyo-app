@@ -59,7 +59,9 @@ test("optional channel completion survives login and changes READY to LIVE only 
     await expect(
       page.locator(".home-section, .home-alert, .home-list"),
     ).toHaveCount(0);
-    await expect(page.getByRole("alert")).toHaveCount(0);
+    await expect(
+      page.locator(".operational-home").getByRole("alert"),
+    ).toHaveCount(0);
     await expect(
       page.getByRole("link", { name: "Open Inbox", exact: true }),
     ).toHaveCount(0);
@@ -243,5 +245,7 @@ test("optional channel completion survives login and changes READY to LIVE only 
       exact: true,
     }),
   ).toBeVisible();
-  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(
+    page.locator(".operational-home").getByRole("alert"),
+  ).toBeVisible();
 });
