@@ -290,13 +290,6 @@ test("signup, setup, published knowledge and isolated test conversations", async
       .filter({ hasText: /Test conversation/ })
       .first(),
   ).toBeVisible();
-  const workspace = await admin
-    .from("workspaces")
-    .select("id")
-    .eq("name", "Northstar Studio")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
   const staff = createClient<Database>(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_PUBLISHABLE_KEY!,
@@ -305,6 +298,13 @@ test("signup, setup, published knowledge and isolated test conversations", async
   expect(
     (await staff.auth.signInWithPassword({ email, password })).error,
   ).toBeNull();
+  const workspace = await staff
+    .from("workspaces")
+    .select("id")
+    .eq("name", "Northstar Studio")
+    .single();
+  expect(workspace.error).toBeNull();
+  expect(workspace.data?.id).toBeDefined();
   expect(
     (
       await staff.rpc("configure_website_channel", {

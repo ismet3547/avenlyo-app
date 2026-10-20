@@ -3017,7 +3017,7 @@ fieldset {
   color: #443ab9;
   background: #f5f4fd;
 }
-.setup-channel code {
+.setup-channel .code-snippet {
   font-size: 13px;
   overflow-wrap: anywhere;
 }
@@ -3350,4 +3350,18 @@ fieldset {
 .focused-type .button-primary:hover {
   background: var(--primary-hover);
   border-color: var(--primary-hover);
+}
+.operational-home {
+  padding-top: 20px;
+}
+@media (max-width: 640px) {
+  .setup-contact > div {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 20px;
+  }
+}
+
+.onboarding-step:not(.is-current) h2 > button {
+  padding-block: 14px;
 }
