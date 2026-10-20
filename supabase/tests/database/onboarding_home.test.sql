@@ -70,6 +70,14 @@ select extensions.is((select external_customer_ref from public.conversations whe
 select extensions.is(public.home_snapshot(current_setting('test.setup_workspace')::uuid)->'attention'->0->>'preview','Please help with pricing.','Attention uses the customer request, not the last AI reply');
 select extensions.is(jsonb_array_length(public.home_snapshot(current_setting('test.setup_workspace')::uuid)->'recent'),5,'Recent is limited to five');
 select extensions.is((select count(distinct item->>'id')::integer from jsonb_array_elements(public.home_snapshot(current_setting('test.setup_workspace')::uuid)->'recent') item),5,'Recent represents each conversation only once');
+reset role;
+insert into public.message_deliveries(workspace_id,conversation_id,connection_id,message_id,status,created_at)
+ select c.workspace_id,c.id,c.channel_connection_id,m.id,'failed',now()-interval '1 hour'
+ from public.conversations c join public.messages m on m.conversation_id=c.id and m.workspace_id=c.workspace_id and m.role='assistant'
+ where c.workspace_id=current_setting('test.setup_workspace')::uuid and c.external_customer_ref='waiting-1';
+set local role authenticated;
+set local request.jwt.claims='{"sub":"ae111111-1111-4111-8111-111111111111","role":"authenticated"}';
+select extensions.is((select external_customer_ref from public.conversations where id=(public.home_snapshot(current_setting('test.setup_workspace')::uuid)->'attention'->0->>'id')::uuid),'waiting-1','An earlier delivery failure takes priority over a later handoff');
 set local request.jwt.claims='{"sub":"ae222222-2222-4222-8222-222222222222","role":"authenticated"}';
 select extensions.throws_ok($$select public.sync_onboarding(current_setting('test.setup_workspace')::uuid)$$,'42501',null,'Cross-workspace setup access denied');
 select extensions.throws_ok($$select public.home_snapshot(current_setting('test.setup_workspace')::uuid)$$,'42501',null,'Cross-workspace Home access denied');

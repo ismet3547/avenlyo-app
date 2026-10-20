@@ -30,7 +30,7 @@ declare attention jsonb; recent jsonb; total bigint;
 begin
   perform private.require_member(target_workspace_id,auth.uid());
   with waiting as materialized (
-    select c.*,coalesce(c.handoff_at,d.failed_at,c.last_customer_at,c.created_at) as waiting_since
+    select c.*,coalesce(least(c.handoff_at,d.failed_at),c.last_customer_at,c.created_at) as waiting_since
     from public.conversations c
     left join lateral (select min(created_at) as failed_at from public.message_deliveries
       where workspace_id=target_workspace_id and conversation_id=c.id and status in ('failed','unknown','blocked')) d on true
