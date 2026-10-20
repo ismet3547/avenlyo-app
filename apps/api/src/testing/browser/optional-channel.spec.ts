@@ -103,6 +103,12 @@ test("optional channel completion survives login and changes READY to LIVE only 
   await page.getByRole("button", { name: "Send message", exact: true }).click();
   await page.getByRole("link", { name: "Looks good, continue" }).click();
   await expect(page.getByText("Optional", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("3 of 3 required steps complete", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("progressbar", { name: "Front office setup" }),
+  ).toHaveAttribute("aria-valuenow", "3");
   const primary = page.getByRole("button", {
     name: "Prepare Website Chat",
     exact: true,
