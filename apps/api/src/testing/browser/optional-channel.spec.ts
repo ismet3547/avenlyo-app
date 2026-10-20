@@ -40,6 +40,7 @@ test("optional channel completion survives login and changes READY to LIVE only 
     await page.getByRole("button", { name: "Sign in", exact: true }).click();
   };
   const readyHome = async () => {
+    const home = page.locator(".operational-home");
     await expect(page).toHaveURL(/\/app$/);
     await expect(
       page.getByRole("heading", {
@@ -59,11 +60,9 @@ test("optional channel completion survives login and changes READY to LIVE only 
     await expect(
       page.locator(".home-section, .home-alert, .home-list"),
     ).toHaveCount(0);
+    await expect(home.getByRole("alert")).toHaveCount(0);
     await expect(
-      page.locator(".operational-home").getByRole("alert"),
-    ).toHaveCount(0);
-    await expect(
-      page.getByRole("link", { name: "Open Inbox", exact: true }),
+      home.getByRole("link", { name: "Open Inbox", exact: true }),
     ).toHaveCount(0);
   };
   await signIn();
@@ -209,7 +208,9 @@ test("optional channel completion survives login and changes READY to LIVE only 
     page.getByRole("heading", { name: "Recent", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "Open Inbox", exact: true }),
+    page
+      .locator(".operational-home")
+      .getByRole("link", { name: "Open Inbox", exact: true }),
   ).toBeVisible();
   const live = await readWorkspace();
   expect(live.data!.first_channel_activated_at).not.toBeNull();
