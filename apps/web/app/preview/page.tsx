@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, ChevronDown, Eye, Plus } from "lucide-react";
+import { ArrowRight, ChevronDown, Eye } from "lucide-react";
 import { defaultSettings } from "@avenlyo-app/shared";
 import { AppShell } from "@/components/app-shell";
 import { AgentForm } from "@/components/product-forms";
 import { InboxView, TestAgent } from "@/components/conversations";
+import { KnowledgeEditor } from "@/components/knowledge-editor";
+import "@/app/app/knowledge/knowledge.css";
 import { KnowledgeLibrary } from "@/components/knowledge-library";
 import { LeadsList } from "@/components/leads-list";
 import { Overview } from "@/components/overview";
@@ -84,68 +86,24 @@ export default async function PreviewPage({
         </div>
       </>
     );
-  } else if (screen === "/app/knowledge")
+  } else if (screen === "/app/knowledge") {
     content = (
-      <>
-        <PageHeader
-          title="Content"
-          description="Manage the content your AI agent uses to answer customers."
-          action={
-            <ActionLink href={href("/app/knowledge/new")}>
-              <Plus aria-hidden="true" />
-              Add knowledge
-            </ActionLink>
-          }
-        />
-        <KnowledgeLibrary
-          items={empty ? [] : knowledge}
-          collections={collections}
-          editable={false}
-          preview
-        />
-      </>
+      <KnowledgeLibrary
+        items={empty ? [] : knowledge}
+        collections={collections}
+        editable
+        preview
+      />
     );
-  else if (screen.startsWith("/app/knowledge/")) {
-    const item = knowledge.find((k) => screen.endsWith(k.id));
+  } else if (screen.startsWith("/app/knowledge/")) {
+    const item = knowledge.find((item) => screen.endsWith(item.id));
     content = (
-      <>
-        <Link
-          className="text-link"
-          href={href("/app/knowledge")}
-          style={{ marginBottom: 22 }}
-        >
-          <ArrowLeft aria-hidden="true" />
-          Back to knowledge
-        </Link>
-        <PageHeader
-          title={item ? "Edit knowledge" : "Add knowledge"}
-          description="One clear piece of information. Better answers for your customers."
-        />
-        <Panel title={item?.title || "Create a knowledge item"}>
-          <div className="form-section stack">
-            <label className="field">
-              <span className="field-label">Title</span>
-              <input
-                className="input"
-                disabled
-                defaultValue={item?.title}
-                placeholder="Give this item a clear, descriptive title"
-              />
-            </label>
-            <label className="field">
-              <span className="field-label">Content</span>
-              <textarea
-                className="textarea"
-                rows={8}
-                disabled
-                defaultValue={item?.content}
-                placeholder="Add the information your customers need…"
-              />
-            </label>
-            <Badge tone="accent">Read-only design preview</Badge>
-          </div>
-        </Panel>
-      </>
+      <KnowledgeEditor
+        item={item}
+        collections={collections}
+        editable={false}
+        preview
+      />
     );
   } else if (screen === "/app/leads")
     content = (
@@ -364,7 +322,11 @@ export default async function PreviewPage({
           {empty ? "Show sample data" : "Show empty state"}
         </Link>
       </div>
-      {content}
+      {screen.startsWith("/app/knowledge") ? (
+        <div className="knowledge-workspace">{content}</div>
+      ) : (
+        content
+      )}
     </AppShell>
   );
 }

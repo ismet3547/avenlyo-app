@@ -1,246 +1,322 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
-import { ArrowUpRight, BookOpen, FileText, Plus, Search } from "lucide-react";
+import { useActionState, useState } from "react";
+import {
+  ArrowRight,
+  MoreHorizontal,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 import {
   businessKnowledgeType,
   knowledgeLabels,
   type KnowledgeCollection,
   type KnowledgeItem,
 } from "@avenlyo-app/shared";
-import { ActionLink, Badge, EmptyState, Panel } from "./ui";
-import { KnowledgeActions } from "./product-forms";
-import { dateLabel, screenHref } from "@/lib/presentation";
+import { filterKnowledge, knowledgeUpdatedLabel } from "@/lib/knowledge-model";
+import { screenHref } from "@/lib/presentation";
+import { knowledgeEditorOperation } from "@/app/app/knowledge/actions";
+import type { FormState } from "@/app/auth/actions";
+import {
+  AddKnowledge,
+  KnowledgeBack,
+  KnowledgeCreationChoices,
+  KnowledgeDialog,
+  KnowledgeStatus,
+} from "./knowledge-primitives";
+function RestoreKnowledge({
+  item,
+  editable,
+}: {
+  item: KnowledgeItem;
+  editable: boolean;
+}) {
+  const [state, action, pending] = useActionState(knowledgeEditorOperation, {
+    status: "idle",
+    message: "",
+  } as FormState);
+  return (
+    <form action={action} className="knowledge-row-restore">
+      <input type="hidden" name="id" value={item.id} />
+      <button
+        className="text-link"
+        name="intent"
+        value="draft"
+        disabled={!editable || pending}
+      >
+        {pending ? "Restoring…" : "Restore"}
+      </button>
+      {state.status === "error" && <p role="alert">{state.message}</p>}
+    </form>
+  );
+}
 export function KnowledgeLibrary({
   items,
   collections,
   editable,
   initialCollection = "",
   preview = false,
+  archived = false,
+  now = Date.now(),
 }: {
   items: KnowledgeItem[];
   collections: KnowledgeCollection[];
   editable: boolean;
   initialCollection?: string;
   preview?: boolean;
+  archived?: boolean;
+  now?: number;
 }) {
   const [status, setStatus] = useState("all");
   const [query, setQuery] = useState("");
   const [collection, setCollection] = useState(initialCollection);
   const [type, setType] = useState("");
-  const filtered = items.filter(
-    (item) =>
-      (status === "all"
-        ? item.status !== "archived"
-        : item.status === status) &&
-      (!collection || item.collection_id === collection) &&
-      (!type || businessKnowledgeType(item.type) === type) &&
-      `${item.title} ${item.content} ${item.price_statement} ${item.currency}`
-        .toLowerCase()
-        .includes(query.toLowerCase()),
-  );
+  const [filterOpen, setFilterOpen] = useState(false);
+  const active = items.filter((item) => item.status !== "archived");
+  const zero = !archived && active.length === 0;
+  const filtered = filterKnowledge(items, {
+    archived,
+    status,
+    query,
+    type,
+    collection,
+  });
+  const filterCount = Number(Boolean(type)) + Number(Boolean(collection));
+  const clear = () => {
+    setQuery("");
+    setType("");
+    setCollection("");
+    setStatus("all");
+  };
   return (
-    <>
-      <div className="tabs" role="group" aria-label="Knowledge status">
-        {[
-          ["all", "All knowledge"],
-          ["published", "Published"],
-          ["draft", "Drafts"],
-          ["archived", "Archived"],
-        ].map(([value, label]) => (
-          <button
-            key={value}
-            type="button"
-            className={`tab ${status === value ? "is-active" : ""}`}
-            style={{
-              background: "none",
-              borderLeft: 0,
-              borderTop: 0,
-              borderRight: 0,
-            }}
-            id={`knowledge-tab-${value}`}
-            aria-controls="knowledge-results"
-            aria-pressed={status === value}
-            onClick={() => setStatus(value)}
-          >
-            {label}
-            <span className="tab-count">
-              {
-                items.filter((i) =>
-                  value === "all"
-                    ? i.status !== "archived"
-                    : i.status === value,
-                ).length
-              }
-            </span>
-          </button>
-        ))}
-      </div>
-      <div className="toolbar">
-        <label className="search-field">
-          <span className="sr-only">Search knowledge</span>
-          <Search aria-hidden="true" />
-          <input
-            className="input"
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search your knowledge…"
-          />
-        </label>
-        <label className="sr-only" htmlFor="knowledge-type-filter">
-          Knowledge type filter
-        </label>
-        <select
-          className="select"
-          id="knowledge-type-filter"
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-        >
-          <option value="">All types</option>
-          {Object.entries(knowledgeLabels).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-        <label className="sr-only" htmlFor="collection-filter">
-          Filter collection
-        </label>
-        <select
-          className="select push-right"
-          id="collection-filter"
-          value={collection}
-          onChange={(e) => setCollection(e.target.value)}
-        >
-          <option value="">All collections</option>
-          {collections.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <Panel>
-        <div
-          id="knowledge-results"
-          role="region"
-          aria-labelledby={`knowledge-tab-${status}`}
-        >
-          <div className="sr-only" role="status">
-            {filtered.length} knowledge items
-          </div>
-          {filtered.length ? (
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Status</th>
-                    <th>Last updated</th>
-                    <th>
-                      <span className="sr-only">Actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((item) => (
-                    <tr key={item.id}>
-                      <td>
-                        <Link
-                          className="item-title"
-                          href={screenHref(
-                            `/app/knowledge/${item.id}`,
-                            preview,
-                          )}
-                        >
-                          <span className="item-icon">
-                            <FileText aria-hidden="true" />
-                          </span>
-                          <span>{item.title}</span>
-                        </Link>
-                        <p className="item-subtitle">
-                          {item.type === "pricing"
-                            ? `${item.price_statement}${item.currency ? ` · ${item.currency}` : ""}`
-                            : collections.find(
-                                (c) => c.id === item.collection_id,
-                              )?.name || "No collection"}
-                        </p>
-                      </td>
-                      <td className="muted" data-mobile-label="Type">
-                        {knowledgeLabels[businessKnowledgeType(item.type)]}
-                      </td>
-                      <td>
-                        <Badge
-                          tone={
-                            item.status === "published"
-                              ? "success"
-                              : item.status === "draft"
-                                ? "warning"
-                                : "neutral"
-                          }
-                          dot
-                        >
-                          {item.status.charAt(0).toUpperCase() +
-                            item.status.slice(1)}
-                        </Badge>
-                      </td>
-                      <td className="muted" data-hide-mobile>
-                        {dateLabel(item.updated_at)}
-                      </td>
-                      <td>
-                        {preview ? (
-                          <Link
-                            className="text-link"
-                            href={screenHref(`/app/knowledge/${item.id}`, true)}
-                          >
-                            View
-                            <ArrowUpRight aria-hidden="true" />
-                          </Link>
-                        ) : (
-                          <KnowledgeActions item={item} editable={editable} />
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <EmptyState
-              icon="knowledge"
-              title={
-                items.length
-                  ? "No matching knowledge"
-                  : "A home for everything your business knows"
-              }
-              description={
-                items.length
-                  ? "Try another search, status or collection."
-                  : "Add services, policies and answers. Your agent uses only the items you publish."
-              }
-              action={
-                !items.length && (
-                  <ActionLink href={screenHref("/app/knowledge/new", preview)}>
-                    <Plus aria-hidden="true" />
-                    Add knowledge
-                  </ActionLink>
-                )
-              }
-            />
+    <div
+      className={`knowledge-library ${zero ? "is-zero" : "is-populated"} ${archived ? "is-archived" : ""}`}
+    >
+      {archived && <KnowledgeBack />}
+      <header className="knowledge-heading">
+        <div>
+          <h1>{archived ? "Archived knowledge" : "Knowledge"}</h1>
+          {!zero && (
+            <p>
+              {archived
+                ? "Archived information is unavailable to your agent. Restore it as a draft to review it again."
+                : "Information Avenlyo can use when answering customers."}
+            </p>
           )}
         </div>
-        <div className="list-footer">
-          <span>
-            {filtered.length} {filtered.length === 1 ? "item" : "items"}
-          </span>
-          <span className="section-note">
-            <BookOpen aria-hidden="true" />
-            Only published knowledge is used by your agent
-          </span>
+        {!archived && !zero && (
+          <div className="knowledge-heading-actions">
+            {editable && <AddKnowledge preview={preview} />}
+            <details className="knowledge-overflow">
+              <summary
+                className="knowledge-icon-button"
+                aria-label="Organize knowledge"
+              >
+                <MoreHorizontal aria-hidden="true" />
+              </summary>
+              <div>
+                <Link href={screenHref("/app/knowledge/archived", preview)}>
+                  View archived
+                </Link>
+                <Link href={screenHref("/app/knowledge/collections", preview)}>
+                  Manage collections
+                </Link>
+              </div>
+            </details>
+          </div>
+        )}
+      </header>
+      {zero ? (
+        <div className="knowledge-zero">
+          <p className="knowledge-zero-lead">
+            Give Avenlyo the information it needs
+            <br className="knowledge-desktop-break" /> to answer customers
+            accurately.
+          </p>
+          <div className="knowledge-zero-desktop">
+            <KnowledgeCreationChoices preview={preview} disabled={!editable} />
+          </div>
+          {editable && <AddKnowledge preview={preview} mobileOnly />}
+          <p className="knowledge-zero-support">
+            Add services, pricing, FAQs, policies or other business information.
+          </p>
+          {!editable && <p>Ask your workspace owner to add knowledge.</p>}
         </div>
-      </Panel>
-    </>
+      ) : (
+        <>
+          <div className="knowledge-search-row">
+            <label className="knowledge-search">
+              <Search aria-hidden="true" />
+              <span className="sr-only">
+                {archived ? "Search archived knowledge" : "Search knowledge"}
+              </span>
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={
+                  archived ? "Search archived knowledge" : "Search knowledge"
+                }
+              />
+            </label>
+            <button
+              type="button"
+              className="button button-secondary"
+              onClick={() => setFilterOpen(true)}
+            >
+              <SlidersHorizontal aria-hidden="true" />
+              Filter{filterCount > 0 ? ` · ${filterCount}` : ""}
+            </button>
+          </div>
+          {!archived && (
+            <div
+              className="knowledge-status-nav"
+              role="group"
+              aria-label="Knowledge status"
+            >
+              {[
+                ["all", "All"],
+                ["published", "Published"],
+                ["draft", "Drafts"],
+              ].map(([value, label]) => (
+                <button
+                  key={value}
+                  aria-pressed={status === value}
+                  onClick={() => setStatus(value)}
+                >
+                  {label}
+                  {value === "draft" &&
+                    active.some((i) => i.status === "draft") && (
+                      <span>
+                        {active.filter((i) => i.status === "draft").length}
+                      </span>
+                    )}
+                </button>
+              ))}
+            </div>
+          )}
+          {status === "published" && (
+            <p className="knowledge-published-help">
+              Published knowledge is available to your agent.
+            </p>
+          )}
+          <div role="status" className="sr-only">
+            {filtered.length} knowledge results
+          </div>
+          {filtered.length ? (
+            <ul className="knowledge-list">
+              {filtered.map((item) => (
+                <li key={item.id}>
+                  <Link
+                    className="knowledge-row"
+                    href={screenHref(`/app/knowledge/${item.id}`, preview)}
+                  >
+                    <div>
+                      <h2>{item.title}</h2>
+                      <p>
+                        {knowledgeLabels[businessKnowledgeType(item.type)]}
+                        <span aria-hidden="true"> · </span>
+                        <KnowledgeStatus status={item.status} />
+                      </p>
+                    </div>
+                    <time dateTime={item.updated_at}>
+                      {knowledgeUpdatedLabel(item.updated_at, now)}
+                    </time>
+                    <ArrowRight aria-hidden="true" />
+                  </Link>
+                  {archived && !preview && editable && (
+                    <RestoreKnowledge item={item} editable={editable} />
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="knowledge-no-results">
+              <h2>
+                {archived && !query && !filterCount
+                  ? "No archived knowledge"
+                  : "No results"}
+              </h2>
+              <p>
+                {archived && !query && !filterCount
+                  ? "Archived knowledge will appear here."
+                  : "Try another search or clear your filters."}
+              </p>
+              {(query || filterCount || status !== "all") && (
+                <button type="button" className="text-link" onClick={clear}>
+                  Clear filters
+                </button>
+              )}
+            </div>
+          )}
+          <KnowledgeDialog
+            open={filterOpen}
+            close={() => setFilterOpen(false)}
+            title="Filter knowledge"
+          >
+            <form
+              key={`${type}:${collection}:${filterOpen}`}
+              className="knowledge-filter-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const data = new FormData(e.currentTarget);
+                setType(String(data.get("type") ?? ""));
+                setCollection(String(data.get("collection") ?? ""));
+                setFilterOpen(false);
+              }}
+            >
+              <fieldset>
+                <legend>Type</legend>
+                <div className="knowledge-type-filters">
+                  {[["", "All"], ...Object.entries(knowledgeLabels)].map(
+                    ([value, label]) => (
+                      <label key={value}>
+                        <input
+                          type="radio"
+                          name="type"
+                          value={value}
+                          defaultChecked={type === value}
+                        />
+                        {label}
+                      </label>
+                    ),
+                  )}
+                </div>
+              </fieldset>
+              {collections.length > 0 && (
+                <label className="knowledge-field">
+                  <span>Collection</span>
+                  <select
+                    className="select"
+                    name="collection"
+                    defaultValue={collection}
+                  >
+                    <option value="">All collections</option>
+                    {collections.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              <div className="knowledge-dialog-actions">
+                <button
+                  type="button"
+                  className="button button-ghost"
+                  onClick={() => {
+                    clear();
+                    setFilterOpen(false);
+                  }}
+                >
+                  Clear filters
+                </button>
+                <button className="button button-primary">Apply filters</button>
+              </div>
+            </form>
+          </KnowledgeDialog>
+        </>
+      )}
+    </div>
   );
 }

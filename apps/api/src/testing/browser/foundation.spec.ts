@@ -200,34 +200,35 @@ test("signup, setup, published knowledge and isolated test conversations", async
   await expect(page.getByRole("status")).toContainText("Agent settings saved");
   await capture("agent-desktop");
   for (const faq of [false, true]) {
-    await page.goto("/app/knowledge/new");
-    await page
-      .getByLabel("Knowledge type", { exact: true })
-      .selectOption(faq ? "faq" : "custom_note");
+    await page.goto(`/app/knowledge/new?type=${faq ? "faq" : "custom_note"}`);
     await page
       .getByLabel(faq ? "Question" : "Title", { exact: true })
       .fill(faq ? "Do you work with small businesses?" : "Custom projects");
     await page
-      .getByLabel(faq ? "Answer" : "Content", { exact: true })
+      .getByLabel(faq ? "Answer" : "Note", { exact: true })
       .fill(
         faq
           ? "Yes. We work with small businesses on custom projects."
           : "We provide custom design and manufacturing services. Share your project scope to discuss suitable options.",
       );
     await page.getByRole("button", { name: "Save draft", exact: true }).click();
-    const row = page.getByRole("row").filter({
-      hasText: faq ? "Do you work with small businesses?" : "Custom projects",
-    });
-    await expect(row.getByText("Draft", { exact: true })).toBeVisible();
-    await row.getByRole("button", { name: "Publish", exact: true }).click();
-    await expect(row.getByRole("status")).toContainText("Published.");
+    await expect(page.getByText("Draft saved", { exact: true })).toBeVisible();
     await expect(
-      page.getByText(
-        "Draft saved. Publish it when you’re ready for your agent to use it.",
-        { exact: true },
-      ),
-    ).not.toBeVisible();
+      page
+        .locator(".knowledge-editor-title")
+        .getByText("Draft", { exact: true }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Publish", exact: true }).click();
+    await expect(
+      page
+        .locator(".knowledge-editor-title")
+        .getByText("Published", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Available to your agent.", { exact: true }),
+    ).toBeVisible();
   }
+  await page.goto("/app/knowledge");
   await capture("knowledge-desktop");
   await page.goto("/app/test-agent");
   await page
@@ -327,7 +328,7 @@ test("signup, setup, published knowledge and isolated test conversations", async
   const routes = [
     ["/app", "Your front office needs attention"],
     ["/app/agent", "Agent settings"],
-    ["/app/knowledge", "Content"],
+    ["/app/knowledge", "Knowledge"],
     ["/app/test-agent", "Test agent"],
     ["/app/leads", "Leads"],
     ["/app/channels", "Channels"],

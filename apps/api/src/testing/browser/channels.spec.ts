@@ -64,20 +64,20 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     );
   await page.getByRole("button", { name: "Save changes", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("Agent settings saved");
-  await page.goto("/app/knowledge/new");
-  await page
-    .getByLabel("Knowledge type", { exact: true })
-    .selectOption("custom_note");
+  await page.goto("/app/knowledge/new?type=custom_note");
   await page.getByLabel("Title", { exact: true }).fill("Logo design");
   await page
-    .getByLabel("Content", { exact: true })
+    .getByLabel("Note", { exact: true })
     .fill(
       "We provide logo design for small businesses. Share your design project scope to discuss suitable options.",
     );
   await page.getByRole("button", { name: "Save draft", exact: true }).click();
+  await expect(page.getByText("Draft saved", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Publish", exact: true }).click();
   await expect(
-    page.getByRole("status").filter({ hasText: "Published." }),
+    page
+      .locator(".knowledge-editor-title")
+      .getByText("Published", { exact: true }),
   ).toBeVisible();
   await page.goto("/app/test-agent");
   await page
@@ -436,7 +436,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     ["/app/inbox", "Inbox", "inbox-list"],
     [inboxUrl, "Alex", "inbox-conversation"],
     ["/app/agent", "Agent settings", "agent"],
-    ["/app/knowledge", "Content", "knowledge"],
+    ["/app/knowledge", "Knowledge", "knowledge"],
     ["/app/channels", "Channels", "channels"],
     ["/app/leads", "Leads", "leads"],
     [leadUrl!, "Alex", "lead"],

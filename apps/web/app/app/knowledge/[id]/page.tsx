@@ -1,16 +1,15 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
-import { ArrowLeft } from "lucide-react";
 import { productContext } from "@/lib/product-data";
-import { KnowledgeActions, KnowledgeForm } from "@/components/product-forms";
-import { PageHeader, Panel } from "@/components/ui";
+import { KnowledgeEditor } from "@/components/knowledge-editor";
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ notice?: string; source?: string }>;
 }) {
-  const { id } = await params;
+  const [{ id }, query] = await Promise.all([params, searchParams]);
   if (!z.uuid().safeParse(id).success) notFound();
   const ctx = await productContext();
   const [item, collections] = await Promise.all([
@@ -30,29 +29,13 @@ export default async function Page({
     throw new Error("Knowledge could not be loaded.");
   if (!item.data) notFound();
   return (
-    <>
-      <Link
-        href="/app/knowledge"
-        className="text-link"
-        style={{ marginBottom: 22 }}
-      >
-        <ArrowLeft aria-hidden="true" />
-        Back to knowledge
-      </Link>
-      <PageHeader
-        title="Edit knowledge"
-        description="Keep your knowledge accurate, useful and up to date."
-        action={
-          <KnowledgeActions item={item.data} editable={ctx.role === "owner"} />
-        }
-      />
-      <Panel>
-        <KnowledgeForm
-          item={item.data}
-          collections={collections.data}
-          editable={ctx.role === "owner"}
-        />
-      </Panel>
-    </>
+    <KnowledgeEditor
+      key={`${id}:${item.data.revision}`}
+      item={item.data}
+      collections={collections.data}
+      editable={ctx.role === "owner"}
+      notice={query.notice}
+      source={query.source?.slice(0, 253)}
+    />
   );
 }

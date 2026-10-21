@@ -1,0 +1,44 @@
+# Knowledge library review
+
+This change continues PR #6 on `codex/fresh-product-design`. Keep the PR draft and unmerged. Home and Onboarding retain their existing behavior.
+
+## What changed
+
+- The true zero state offers Add manually, Import webpage and Upload file, with no empty management controls. Mobile uses one Add knowledge action and a bottom sheet.
+- The populated library leads with knowledge titles, type, status and last update. Search and All / Published / Drafts support finding content. Type and collection filters live in a focused dialog; Archived and Manage collections are secondary maintenance links.
+- Manual creation first asks for one of the six existing types, then opens a focused editor with the appropriate labels and fields. Save draft remains in the editor with a compact confirmation. Publish is explicit and remains in the editor.
+- Type changes require review when text exists. Pricing statements/currency and service details are retained in the new type's visible text. A transition that exceeds the target field limit is blocked without truncation.
+- Unpublish, Archive and Delete have explicit consequence confirmations. Unsaved edits are protected on in-app links, sign-out forms, browser history and page exits. Native modal dialogs handle focus containment and Escape; add/filter actions return focus to their trigger.
+- Loading and retry states use safe copy. Known import failures provide useful guidance; unexpected network/database exceptions never return raw exception text.
+
+## Existing backend reused
+
+No migrations, schema changes, dependencies, API changes, runtime changes, RLS changes or channel changes are introduced. The UI uses the existing owner-authorized `save_business_knowledge`, `change_knowledge_status`, `delete_knowledge_item`, and `save_knowledge_collection` RPCs and the existing publication API. Reads retain workspace-scoped predicates and existing RLS.
+
+The existing intentional rule remains: editing Published content returns it to Draft and clears its embedding. The editor explains this next to Save changes. Only Published, embedded knowledge is usable by the agent. Unpublish retains the item as Draft; Archived content leaves the active library; Restore returns to Draft without publishing; Delete is permanent after confirmation.
+
+The optional Service pricing note shares the existing plain-text details field with Additional details. Their combined value remains subject to the existing 2,000-character limit. Pricing retains the existing optional currency field as a secondary disclosure.
+
+## Imports and collections
+
+Webpage import remains a single-page import through the existing URL validation, DNS/private-address and redirect checks, timeout, response-type and byte limits. No crawling is added. TXT, Markdown, CSV, JSON and HTML uploads retain the 1 MB limit and existing first-6,000-character extraction. Both imports create a Custom note Draft with no publication or embedding, and open that persisted item for review. Failed imports offer Add manually instead. Onboarding retains its existing save/import destinations.
+
+Collections remain flat and optional. Filtering and editor assignment use existing collections. The dedicated Collections screen supports creating and renaming through the existing RPC; counts include active items only. No sidebar, hierarchy, drag/drop or cascading publication is added.
+
+## Desktop and mobile
+
+Knowledge-only CSS sets a maximum 1,180px library width, readable 28–32px headings, 15–16px body/input/title text, and restrained 13–14px metadata. Rows use subtle dividers. The editor has a single comfortable content column. Mobile stacks row metadata and editor fields, keeps actions at least 44px high, and presents add/filter/confirmation dialogs as bottom sheets. Status is written in text as well as color. Shared shell styles and unrelated screens are unchanged.
+
+## Coverage and validation
+
+Unit regressions cover library hierarchy, true versus filtered zero states, archived maintenance, combined filtering, legacy Text normalization, service-field round trips, lossless type conversions, over-limit conversion rejection, editor navigation, explicit publication, stale-save rejection, all supported import types and size limits, redirect/private-address rejection, and safe import errors.
+
+The updated Knowledge browser flow preserves the six-type create/save/publish coverage, published edit behavior, search, status/type/collection filtering, collection create/rename, archive and safe deletion. It adds review-in-editor assertions, restore-to-Draft, unsaved navigation, pricing conversion, real file upload/review, private URL rejection, tenant isolation, dialog focus/Escape, and desktop/mobile captures at 1440/1280/1024/768/390 widths. Existing signup, optional-channel persistence, runtime, channel and handoff flows remain in the suite.
+
+Validation results will be recorded after the final draft-branch CI run. This local sandbox lacks the Supabase CLI/Docker stack and cannot start the browser fixture's IPC socket. The local production build uses the existing external memory-reporting workaround for the sandbox's missing `/proc`; no workaround is committed to the repository.
+
+## Local visual review
+
+Apply the already-existing local migrations, configure the repository's disposable Supabase stack, and start the API and web app as documented in the main README. Review `/app/knowledge` first in an empty workspace, then add a Service, Pricing and FAQ. Save and Publish each deliberately. Inspect mobile Add knowledge, filtering, imported Draft review, Published edits, Unpublish, archive/restore and cancelled deletion. Run `pnpm test:browser` with manual servers stopped so Playwright can own ports 3001 and 4001.
+
+Remaining limitations follow the current product: webpage import can be blocked by the remote website; no crawling, PDF/DOCX ingestion or AI classification is supplied. Import truncation and shared Service details limits are unchanged. Restoring an archived item always needs a separate explicit Publish before the agent can use it.
