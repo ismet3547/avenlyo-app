@@ -188,12 +188,24 @@ test("Knowledge library, six editors, explicit lifecycle, imports and tenant iso
     );
     await expect(page.getByText("Draft saved", { exact: true })).toBeVisible();
     await expect(editorStatus("Draft")).toBeVisible();
+    await expect(
+      page.getByRole("combobox", { name: "Type", exact: true }),
+    ).toHaveValue(type);
+    await expect(
+      page.getByRole("combobox", { name: "Collection", exact: true }),
+    ).toHaveValue(collection.data!.id);
     let persisted = await savedItem();
     itemIds.set(type, persisted.id);
     expect(persisted.status).toBe("draft");
     expect(persisted.embedding).toBeNull();
     expect(persisted.type).toBe(type);
     if (type === "service") {
+      await expect(
+        page.getByRole("textbox", { name: "Additional details", exact: true }),
+      ).toHaveValue("Delivery within five working days.");
+      await expect(
+        page.getByRole("textbox", { name: "Pricing note", exact: true }),
+      ).toHaveValue("Projects are quoted individually.");
       expect(persisted.runtime_content).toContain(
         "Delivery within five working days.",
       );
@@ -426,15 +438,13 @@ test("Knowledge library, six editors, explicit lifecycle, imports and tenant iso
 
   // Real file upload opens the persisted Draft for review; publication stays explicit.
   await page.goto("/app/knowledge/import?source=file");
-  await page
-    .getByLabel("Choose file", { exact: true })
-    .setInputFiles({
-      name: "business-facts.txt",
-      mimeType: "text/plain",
-      buffer: Buffer.from(
-        "Our business offers logo design and custom identity projects.",
-      ),
-    });
+  await page.getByLabel("Choose file", { exact: true }).setInputFiles({
+    name: "business-facts.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "Our business offers logo design and custom identity projects.",
+    ),
+  });
   await page.getByRole("button", { name: "Upload file", exact: true }).click();
   await expect(
     page.getByRole("heading", {
@@ -506,7 +516,12 @@ test("Knowledge library, six editors, explicit lifecycle, imports and tenant iso
   const inaccessible = await page.goto(`/app/knowledge/${foreignItem.data}`);
   // A streamed Next.js response can retain HTTP 200; access must still render
   // the not-found boundary and exclude the foreign item from HTML and UI.
-  await expect(page.getByRole("heading", { name: "This page has wandered off.", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: "This page has wandered off.",
+      exact: true,
+    }),
+  ).toBeVisible();
   expect(await inaccessible!.text()).not.toContain("Private tenant secret");
   await expect(
     page.getByText("Private tenant secret", { exact: true }),

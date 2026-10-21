@@ -322,7 +322,14 @@ export function KnowledgeEditor({
         </p>
       )}
       <form
-        action={saveAction}
+        action={(data) => {
+          // Route ordinary submit buttons through one form action so React
+          // retains their intent field when constructing FormData.
+          if (archived || (data.get("intent") === "publish" && item && !dirty))
+            operationAction(data);
+          else saveAction(data);
+        }}
+        onReset={(event) => event.preventDefault()}
         className="knowledge-editor-form"
         onSubmit={(event) => {
           if (archived) return;
@@ -533,7 +540,6 @@ export function KnowledgeEditor({
                 className="button button-primary"
                 name="intent"
                 value="draft"
-                formAction={operationAction}
                 disabled={!editable || busy}
               >
                 Restore as draft
@@ -557,7 +563,6 @@ export function KnowledgeEditor({
                     className="button button-primary"
                     name="intent"
                     value="publish"
-                    formAction={item && !dirty ? operationAction : undefined}
                     disabled={!editable || busy}
                   >
                     Publish

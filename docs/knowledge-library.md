@@ -31,14 +31,43 @@ Knowledge-only CSS sets a maximum 1,180px library width, readable 28–32px head
 
 ## Coverage and validation
 
-Unit regressions cover library hierarchy, true versus filtered zero states, archived maintenance, combined filtering, legacy Text normalization, service-field round trips, lossless type conversions, over-limit conversion rejection, editor navigation, explicit publication, stale-save rejection, all supported import types and size limits, redirect/private-address rejection, and safe import errors.
+Unit regressions cover library hierarchy, true versus filtered zero states, archived maintenance, combined filtering, legacy Text normalization, service-field round trips including multipart CRLF line endings, lossless type conversions, over-limit conversion rejection, editor navigation, explicit publication, stale-save rejection, all supported import types and size limits, redirect/private-address rejection, and safe import errors.
 
-The updated Knowledge browser flow preserves the six-type create/save/publish coverage, published edit behavior, search, status/type/collection filtering, collection create/rename, archive and safe deletion. It adds review-in-editor assertions, restore-to-Draft, unsaved navigation, pricing conversion, real file upload/review, private URL rejection, tenant isolation, dialog focus/Escape, and desktop/mobile captures at 1440/1280/1024/768/390 widths. Existing signup, optional-channel persistence, runtime, channel and handoff flows remain in the suite.
+The updated Knowledge browser flow preserves the six-type create/save/publish coverage, published edit behavior, search, status/type/collection filtering, collection create/rename, archive and safe deletion. It adds preservation of submit intent, selected type/collection and both Service sections after saving, review-in-editor assertions, restore-to-Draft, unsaved navigation, pricing conversion, real file upload/review, private URL rejection, tenant isolation, dialog focus/Escape, and desktop/mobile captures at 1440/1280/1024/768/390 widths. Existing signup, optional-channel persistence, runtime, channel and handoff flows remain in the suite.
 
-Validation results will be recorded after the final draft-branch CI run. This local sandbox lacks the Supabase CLI/Docker stack and cannot start the browser fixture's IPC socket. The local production build uses the existing external memory-reporting workaround for the sandbox's missing `/proc`; no workaround is committed to the repository.
+Local typecheck, lint/independence, 182 unit tests, production builds and API artifact smoke pass. Database isolation/security, migration upgrade, runtime and channel checks also pass in CI. The final browser acceptance results and captures are linked from the current PR checks. This local sandbox lacks the Supabase CLI/Docker stack and cannot start the browser fixture's IPC socket. The local production build uses the existing external memory-reporting workaround for the sandbox's missing `/proc`; no workaround is committed to the repository.
 
 ## Local visual review
 
 Apply the already-existing local migrations, configure the repository's disposable Supabase stack, and start the API and web app as documented in the main README. Review `/app/knowledge` first in an empty workspace, then add a Service, Pricing and FAQ. Save and Publish each deliberately. Inspect mobile Add knowledge, filtering, imported Draft review, Published edits, Unpublish, archive/restore and cancelled deletion. Run `pnpm test:browser` with manual servers stopped so Playwright can own ports 3001 and 4001.
 
 Remaining limitations follow the current product: webpage import can be blocked by the remote website; no crawling, PDF/DOCX ingestion or AI classification is supplied. Import truncation and shared Service details limits are unchanged. Restoring an archived item always needs a separate explicit Publish before the agent can use it.
+
+## Files changed
+
+- `apps/api/src/testing/browser/channels.spec.ts`
+- `apps/api/src/testing/browser/foundation.spec.ts`
+- `apps/api/src/testing/browser/knowledge.spec.ts`
+- `apps/web/app/app/knowledge/[id]/page.tsx`
+- `apps/web/app/app/knowledge/actions.test.ts`
+- `apps/web/app/app/knowledge/actions.ts`
+- `apps/web/app/app/knowledge/archived/page.tsx`
+- `apps/web/app/app/knowledge/collections/page.tsx`
+- `apps/web/app/app/knowledge/error.tsx`
+- `apps/web/app/app/knowledge/import/page.tsx`
+- `apps/web/app/app/knowledge/knowledge.css`
+- `apps/web/app/app/knowledge/layout.tsx`
+- `apps/web/app/app/knowledge/loading.tsx`
+- `apps/web/app/app/knowledge/new/page.tsx`
+- `apps/web/app/app/knowledge/page.tsx`
+- `apps/web/app/preview/page.tsx`
+- `apps/web/components/knowledge-collections.tsx`
+- `apps/web/components/knowledge-editor.tsx`
+- `apps/web/components/knowledge-import.tsx`
+- `apps/web/components/knowledge-library.test.ts`
+- `apps/web/components/knowledge-library.tsx`
+- `apps/web/components/knowledge-primitives.tsx`
+- `apps/web/lib/knowledge-data.ts`
+- `apps/web/lib/knowledge-model.test.ts`
+- `apps/web/lib/knowledge-model.ts`
+- `docs/knowledge-library.md`

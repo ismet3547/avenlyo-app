@@ -37,17 +37,22 @@ export function knowledgeFields(
 // Optional service sections share the existing plain-text details field.
 const pricingNoteSeparator = "\n\nPricing note:\n";
 export function splitServiceDetails(details: string) {
-  if (details.startsWith("Pricing note:\n"))
+  // Multipart form submissions may persist CRLF line endings. Read both
+  // representations without rewriting the stored field on an unchanged save.
+  const leading = details.match(/^Pricing note:\r?\n/);
+  if (leading)
     return {
       additional: "",
-      pricingNote: details.slice("Pricing note:\n".length),
+      pricingNote: details.slice(leading[0].length),
     };
-  const index = details.lastIndexOf(pricingNoteSeparator);
-  return index < 0
+  const separator = [...details.matchAll(/(?:\r?\n){2}Pricing note:\r?\n/g)].at(
+    -1,
+  );
+  return !separator
     ? { additional: details, pricingNote: "" }
     : {
-        additional: details.slice(0, index),
-        pricingNote: details.slice(index + pricingNoteSeparator.length),
+        additional: details.slice(0, separator.index),
+        pricingNote: details.slice(separator.index + separator[0].length),
       };
 }
 export function joinServiceDetails(additional: string, pricingNote: string) {

@@ -130,6 +130,20 @@ describe("safe editor type transitions", () => {
       type: "faq",
     });
   });
+  it("reads service sections with browser multipart line endings without changing the stored text", () => {
+    const details =
+      "Two revisions.\r\n\r\nPricing note:\r\nQuoted individually.";
+    const fields = knowledgeFields(item({ type: "service", details }));
+    expect(splitServiceDetails(fields.details)).toEqual({
+      additional: "Two revisions.",
+      pricingNote: "Quoted individually.",
+    });
+    expect(fields.details).toBe(details);
+    expect(splitServiceDetails("Pricing note:\r\nContact us.")).toEqual({
+      additional: "",
+      pricingNote: "Contact us.",
+    });
+  });
 });
 it("renders readable last-updated metadata", () => {
   const now = Date.parse("2026-10-20T10:00:00Z");
