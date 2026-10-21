@@ -480,6 +480,13 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
               .evaluate((node) => getComputedStyle(node).overflowY),
           ).toBe("visible");
       }
+      if (name === "knowledge") {
+        const main = await page.locator("#main-content").boundingBox();
+        const heading = await page
+          .getByRole("heading", { name: "Knowledge", exact: true })
+          .boundingBox();
+        expect(heading!.y - main!.y).toBeGreaterThanOrEqual(width <= 700 ? 20 : 24);
+      }
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= window.innerWidth + 1,

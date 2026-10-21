@@ -521,7 +521,7 @@ export function KnowledgeEditor({
             {state.message}
           </p>
         )}
-        {operationState.status === "error" && (
+        {operationState.status === "error" && !confirm && (
           <p role="alert" className="knowledge-error">
             {operationState.message}
           </p>
@@ -647,6 +647,11 @@ export function KnowledgeEditor({
         {dirty && <p>Your unsaved changes will be discarded.</p>}
         <form action={operationAction}>
           <input type="hidden" name="id" value={item?.id ?? ""} />
+          {operationState.status === "error" && (
+            <p role="alert" className="knowledge-error">
+              {operationState.message}
+            </p>
+          )}
           <div className="knowledge-dialog-actions">
             <button
               type="button"

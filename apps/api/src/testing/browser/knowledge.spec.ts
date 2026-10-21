@@ -398,6 +398,23 @@ test("Knowledge library, six editors, explicit lifecycle, imports and tenant iso
   expect((await savedItem()).id).toBe(itemIds.get("faq"));
   await page.getByLabel("More actions", { exact: true }).click();
   await page.getByRole("button", { name: "Delete", exact: true }).click();
+  const deletion = page.getByRole("dialog", {
+    name: "Delete this knowledge?",
+    exact: true,
+  });
+  // A forged action is rejected by the real server; feedback must remain
+  // visible inside the modal and the persisted item must remain intact.
+  await deletion.locator('input[name="id"]').evaluate((input) => {
+    (input as HTMLInputElement).value = "invalid-item-id";
+  });
+  await deletion.getByRole("button", { name: "Delete", exact: true }).click();
+  await expect(deletion.getByRole("alert")).toHaveText(
+    "Invalid knowledge action.",
+  );
+  expect((await savedItem()).id).toBe(itemIds.get("faq"));
+  await deletion.locator('input[name="id"]').evaluate((input, id) => {
+    (input as HTMLInputElement).value = id;
+  }, itemIds.get("faq")!);
   await page
     .getByRole("dialog")
     .getByRole("button", { name: "Delete", exact: true })
