@@ -18,6 +18,11 @@ export default async function Page() {
     .eq("channel", "test_agent")
     .order("updated_at", { ascending: false });
   if (result.error) throw new Error("Test history could not be loaded.");
+  const agents = await ctx.supabase
+    .from("agents")
+    .select("id,name")
+    .eq("workspace_id", ctx.workspace.id);
+  if (agents.error) throw new Error("Test agents could not be loaded.");
   return (
     <>
       <PageHeader
@@ -52,7 +57,11 @@ export default async function Page() {
                           : "Test mode"}
                       </Badge>
                     </div>
-                    <p>{dateLabel(c.created_at, true)} UTC</p>
+                    <p>
+                      {agents.data.find((a) => a.id === c.agent_id)?.name ??
+                        "Agent"}{" "}
+                      · {dateLabel(c.created_at, true)} UTC
+                    </p>
                   </div>
                   <ArrowUpRight className="muted" aria-hidden="true" />
                 </Link>

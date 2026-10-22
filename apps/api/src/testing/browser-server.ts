@@ -9,6 +9,9 @@ if (config.SUPABASE_URL !== "http://127.0.0.1:55321")
     "Browser fixtures require this repository’s disposable local stack.",
   );
 const provider: AgentProvider = {
+  detectLanguage: async (text) =>
+    /merhaba|hizmet|fiyat/i.test(text) ? "tr" : "en",
+  localize: async (text) => text,
   embed: async () => [1, ...Array(1535).fill(0)],
   respond: async (input) => {
     if (input.instructions.includes("Never hand customers to a human"))

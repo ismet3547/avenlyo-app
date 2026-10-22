@@ -1,5 +1,6 @@
 import { ChevronDown, Code2, ShieldCheck } from "lucide-react";
 import { websiteOriginSchema } from "@avenlyo-app/shared";
+import { ChannelAgentAssignment } from "@/components/channel-agent-assignment";
 import { productContext } from "@/lib/product-data";
 import { Badge, ChannelIcon, PageHeader, Panel } from "@/components/ui";
 import {
@@ -9,6 +10,13 @@ import {
 } from "@/components/product-forms";
 export default async function Page() {
   const ctx = await productContext();
+  const agents = await ctx.supabase
+    .from("agents")
+    .select("id,name")
+    .eq("workspace_id", ctx.workspace.id)
+    .is("archived_at", null)
+    .order("created_at");
+  if (agents.error) throw new Error("Agents could not be loaded.");
   const result = await ctx.supabase
     .from("channel_connections")
     .select("*")
@@ -66,7 +74,11 @@ export default async function Page() {
               </div>
             </dl>
           ) : null}
-          <WebsiteConfiguration channel={website} editable={editable} />
+          <WebsiteConfiguration
+            channel={website}
+            editable={editable}
+            agents={agents.data}
+          />
           {website && (
             <details className="disclosure">
               <summary>
@@ -114,6 +126,13 @@ export default async function Page() {
             Bring Instagram conversations into the same inbox. Help customers
             with your business knowledge and hand off to a person when needed.
           </p>
+          {instagram && (
+            <ChannelAgentAssignment
+              channel={instagram}
+              agents={agents.data}
+              editable={editable}
+            />
+          )}
           <dl className="channel-facts">
             <div>
               <dt>Account</dt>

@@ -29,6 +29,22 @@ export type SettingsRow = {
   setup_brief: string;
   updated_at: string;
 };
+export type Agent = SettingsRow & {
+  id: string;
+  name: string;
+  is_default: boolean;
+  primary_language: string;
+  additional_languages: string[];
+  language_policy: "configured" | "legacy_multilingual";
+  knowledge_mode: "all" | "selected";
+  created_at: string;
+  archived_at: string | null;
+};
+export type AgentKnowledgeItem = {
+  workspace_id: string;
+  agent_id: string;
+  knowledge_item_id: string;
+};
 export type KnowledgeItem = {
   id: string;
   workspace_id: string;
@@ -54,6 +70,7 @@ export type KnowledgeCollection = {
   updated_at: string;
 };
 export type Conversation = {
+  agent_id: string;
   id: string;
   workspace_id: string;
   channel: "test_agent" | "website_chat" | "instagram";
@@ -121,6 +138,7 @@ type Table<Row> = {
 };
 type RPC<Args, Returns> = { Args: Args; Returns: Returns };
 export type ChannelConnection = {
+  agent_id: string;
   id: string;
   public_id: string;
   workspace_id: string;
@@ -208,6 +226,8 @@ export type Database = {
       workspaces: Table<Workspace>;
       workspace_members: Table<Member>;
       agent_settings: Table<SettingsRow>;
+      agents: Table<Agent>;
+      agent_knowledge_items: Table<AgentKnowledgeItem>;
       knowledge_items: Table<KnowledgeItem>;
       knowledge_collections: Table<KnowledgeCollection>;
       conversations: Table<Conversation>;
@@ -382,6 +402,46 @@ export type Database = {
         { target_workspace_id: string; business_name: string },
         undefined
       >;
+      create_agent: RPC<
+        {
+          target_workspace_id: string;
+          agent_name: string;
+          role_brief: string;
+          primary_code: string;
+        },
+        string
+      >;
+      save_agent: RPC<
+        {
+          target_workspace_id: string;
+          target_agent_id: string;
+          agent_name: string;
+          settings: Json;
+        },
+        undefined
+      >;
+      set_agent_languages: RPC<
+        {
+          target_workspace_id: string;
+          target_agent_id: string;
+          primary_code: string;
+          additional_codes: string[];
+        },
+        undefined
+      >;
+      set_agent_knowledge_scope: RPC<
+        {
+          target_workspace_id: string;
+          target_agent_id: string;
+          scope_mode: string;
+          item_ids: string[];
+        },
+        undefined
+      >;
+      archive_agent: RPC<
+        { target_workspace_id: string; target_agent_id: string },
+        undefined
+      >;
       save_agent_settings: RPC<
         { target_workspace_id: string; settings: Json },
         undefined
@@ -432,6 +492,21 @@ export type Database = {
         { target_workspace_id: string; target_item_id: string },
         undefined
       >;
+      match_agent_knowledge: RPC<
+        {
+          target_workspace_id: string;
+          target_agent_id: string;
+          query_embedding: string;
+          match_limit?: number;
+        },
+        {
+          id: string;
+          title: string;
+          content: string;
+          revision: number;
+          similarity: number;
+        }[]
+      >;
       match_knowledge: RPC<
         {
           target_workspace_id: string;
@@ -455,6 +530,61 @@ export type Database = {
           item_embedding: string;
         },
         undefined
+      >;
+      inspect_channel_agent: RPC<
+        {
+          target_workspace_id: string;
+          target_channel: string;
+          target_agent_id: string | null;
+        },
+        string
+      >;
+      begin_agent_test_turn: RPC<
+        {
+          actor_id: string;
+          target_workspace_id: string;
+          target_conversation_id: string | null;
+          target_idempotency_key: string;
+          customer_content: string;
+          target_agent_id: string | null;
+        },
+        {
+          run_id: string;
+          conversation_id: string;
+          state: string;
+          existing: boolean;
+          response: Json | null;
+        }[]
+      >;
+      assign_channel_agent: RPC<
+        {
+          target_workspace_id: string;
+          target_connection_id: string;
+          target_agent_id: string;
+        },
+        undefined
+      >;
+      configure_website_channel_for_agent: RPC<
+        {
+          target_workspace_id: string;
+          channel_enabled: boolean;
+          origins: string[];
+          target_agent_id: string | null;
+        },
+        string
+      >;
+      provision_instagram_channel_for_agent: RPC<
+        {
+          target_workspace_id: string;
+          expected_workspace_name: string;
+          provider_account_id: string;
+          provider_username: string;
+          provider_token: string;
+          provider_version: string;
+          verified_app_id: string;
+          target_agent_id: string | null;
+        },
+        string
       >;
       begin_agent_turn: RPC<
         {

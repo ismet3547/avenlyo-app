@@ -153,14 +153,6 @@ export function AppShell({
           Home
           <ArrowUpRight className="nav-end-icon" aria-hidden="true" />
         </Link>
-        <Link
-          href={screenHref("/app/test-agent", preview)}
-          className="nav-link"
-          onClick={close}
-        >
-          <FlaskConical aria-hidden="true" />
-          Agent playground
-        </Link>
       </div>
       <div className="sidebar-bottom">
         {workspacePicker}

@@ -15,6 +15,7 @@ const channel: ChannelConnection = {
   id: "channel",
   public_id: "public",
   workspace_id: "workspace",
+  agent_id: "af666666-6666-4666-8666-666666666666",
   channel: "website_chat",
   enabled: true,
   status: "ready",

@@ -25,6 +25,15 @@ const args = [
   "--dry-run",
 ];
 describe("managed provisioning guard", () => {
+  it("accepts an explicit workspace Agent without weakening provider acknowledgements", () => {
+    const agent = "22222222-2222-4222-8222-222222222222";
+    expect(provisioningTarget([...args, "--agent", agent], config).agent).toBe(
+      agent,
+    );
+    expect(() =>
+      provisioningTarget([...args, "--agent", "invalid"], config),
+    ).toThrow("EXPLICIT_PROVISIONING_ARGUMENTS_REQUIRED");
+  });
   it("requires explicit project and workspace acknowledgements", () => {
     expect(provisioningTarget(args, config).target).toBe("local");
     expect(() => provisioningTarget([], config)).toThrow();

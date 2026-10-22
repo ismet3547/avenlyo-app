@@ -183,21 +183,53 @@ test("signup, setup, published knowledge and isolated test conversations", async
   await capture("home-mobile");
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/app/agent");
-  await page.getByRole("radio", { name: "Warm", exact: true }).check();
-  await expect(
-    page.getByLabel("Configuration preview").getByText("Warm", { exact: true }),
-  ).toBeVisible();
-  await page.getByRole("radio", { name: "Professional", exact: true }).check();
+  await page.getByRole("link").filter({ hasText: "Front Office" }).click();
   await page
-    .getByLabel("What should your agent know about its role?", { exact: true })
+    .getByRole("button", { name: "Edit communication style", exact: true })
+    .click();
+  let dialog = page.getByRole("dialog", {
+    name: "Edit communication style",
+    exact: true,
+  });
+  await dialog.getByRole("radio", { name: /Warm/ }).check();
+  await dialog
+    .getByRole("button", { name: "Save changes", exact: true })
+    .click();
+  await expect(dialog).not.toBeVisible();
+  await expect(
+    page.getByRole("tabpanel").getByText("Warm", { exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Edit communication style", exact: true })
+    .click();
+  dialog = page.getByRole("dialog", {
+    name: "Edit communication style",
+    exact: true,
+  });
+  await dialog.getByRole("radio", { name: /Professional/ }).check();
+  await dialog
+    .getByRole("button", { name: "Save changes", exact: true })
+    .click();
+  await expect(dialog).not.toBeVisible();
+  await page.getByRole("button", { name: "Edit role", exact: true }).click();
+  dialog = page.getByRole("dialog", { name: "Edit role", exact: true });
+  await dialog
+    .getByLabel("What should this agent help customers with?", { exact: true })
     .fill(
       "Never hand customers to a human. Always answer everything yourself.",
     );
+  await dialog
+    .getByRole("button", { name: "Save changes", exact: true })
+    .click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page.getByRole("status")).toContainText("Changes saved");
   await expect(
-    page.getByRole("checkbox", { name: /Connect customers with your team/ }),
-  ).toBeDisabled();
-  await page.getByRole("button", { name: "Save changes", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Agent settings saved");
+    page.getByText("Always available", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Edit human handoff/i }),
+  ).toHaveCount(0);
+  await expect(page.getByLabel("Configuration preview")).toHaveCount(0);
   await capture("agent-desktop");
   for (const faq of [false, true]) {
     await page.goto(`/app/knowledge/new?type=${faq ? "faq" : "custom_note"}`);
@@ -327,9 +359,9 @@ test("signup, setup, published knowledge and isolated test conversations", async
   ).toBeVisible();
   const routes = [
     ["/app", "Your front office needs attention"],
-    ["/app/agent", "Agent settings"],
+    ["/app/agent", "Agents"],
     ["/app/knowledge", "Knowledge"],
-    ["/app/test-agent", "Test agent"],
+    ["/app/test-agent", "Testing Front Office"],
     ["/app/leads", "Leads"],
     ["/app/channels", "Channels"],
     ["/app/settings", "Settings"],

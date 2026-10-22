@@ -633,6 +633,8 @@ export function InboxView({
 }
 export function TestAgent({
   workspaceId,
+  readOnly = false,
+  agentId,
   initialMessages = NO_MESSAGES,
   conversationId = null,
   paused = false,
@@ -643,6 +645,8 @@ export function TestAgent({
   onSuccessfulTurn,
 }: {
   workspaceId: string;
+  readOnly?: boolean;
+  agentId?: string;
   initialMessages?: Message[];
   conversationId?: string | null;
   paused?: boolean;
@@ -671,7 +675,13 @@ export function TestAgent({
   }, [initialMessages, conversationId, paused, initialLead]);
   const send = async (event: FormEvent) => {
     event.preventDefault();
-    if (preview || busy || needsHuman || (!text.trim() && !request.current))
+    if (
+      readOnly ||
+      preview ||
+      busy ||
+      needsHuman ||
+      (!text.trim() && !request.current)
+    )
       return;
     request.current ??= { content: text.trim(), key: crypto.randomUUID() };
     setBusy(true);
@@ -682,6 +692,7 @@ export function TestAgent({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           workspaceId,
+          ...(agentId ? { agentId } : {}),
           conversationId: id,
           idempotencyKey: request.current.key,
           content: request.current.content,
@@ -784,7 +795,7 @@ export function TestAgent({
                 <button
                   type="button"
                   key={prompt}
-                  disabled={preview || busy}
+                  disabled={readOnly || preview || busy}
                   onClick={() => setText(prompt)}
                 >
                   {prompt}
@@ -792,6 +803,11 @@ export function TestAgent({
               ))}
             </div>
           </div>
+        )}
+        {readOnly && (
+          <Notice>
+            This agent is archived. Test history is available to read.
+          </Notice>
         )}
         {error && (
           <div className="thread-notice">
@@ -803,7 +819,7 @@ export function TestAgent({
             <Notice>
               Your agent has requested human assistance. Resume this test when
               you’re ready.
-              {id && !preview && (
+              {id && !preview && !readOnly && (
                 <form
                   action={async (form) => {
                     setBusy(true);
@@ -848,14 +864,18 @@ export function TestAgent({
               value={text}
               onChange={(e) => setText(e.target.value)}
               maxLength={2000}
-              disabled={preview || busy || needsHuman || failed}
+              disabled={readOnly || preview || busy || needsHuman || failed}
               required
             />
             <div className="composer-bottom">
               <p>Test conversations stay separate from customer activity.</p>
               <Button
                 disabled={
-                  preview || busy || needsHuman || (!text.trim() && !failed)
+                  readOnly ||
+                  preview ||
+                  busy ||
+                  needsHuman ||
+                  (!text.trim() && !failed)
                 }
               >
                 {busy ? "Thinking…" : failed ? "Retry message" : "Send message"}
@@ -876,7 +896,9 @@ export function TestAgent({
               <div>
                 <dt>Published knowledge</dt>
                 <dd>
-                  {published === null ? "Unavailable" : `${published} items`}
+                  {published === null
+                    ? "Unavailable"
+                    : `${published} ${published === 1 ? "item" : "items"}`}
                 </dd>
               </div>
               <div>

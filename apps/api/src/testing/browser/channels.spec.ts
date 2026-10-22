@@ -55,15 +55,17 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     }),
   ).toBeVisible();
   await page.goto("/app/agent");
+  await page.getByRole("link").filter({ hasText: "Front Office" }).click();
+  await page.getByRole("button", { name: "Edit role", exact: true }).click();
   await page
-    .getByLabel("What should your agent know about its role?", {
+    .getByLabel("What should this agent help customers with?", {
       exact: true,
     })
     .fill(
       "Help small businesses understand our design services, identify useful inquiries and connect them with our team.",
     );
   await page.getByRole("button", { name: "Save changes", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Agent settings saved");
+  await expect(page.getByRole("status")).toContainText("Changes saved");
   await page.goto("/app/knowledge/new?type=custom_note");
   await page.getByLabel("Title", { exact: true }).fill("Logo design");
   await page
@@ -417,7 +419,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
   await drawer.getByRole("link", { name: "Agent", exact: true }).click();
   await expect(drawer).not.toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Agent settings", exact: true }),
+    page.getByRole("heading", { name: "Agents", exact: true }),
   ).toBeVisible();
   await expect(
     page
@@ -435,13 +437,13 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     ["/app", "Your front office is live", "home-active"],
     ["/app/inbox", "Inbox", "inbox-list"],
     [inboxUrl, "Alex", "inbox-conversation"],
-    ["/app/agent", "Agent settings", "agent"],
+    ["/app/agent", "Agents", "agent"],
     ["/app/knowledge", "Knowledge", "knowledge"],
     ["/app/channels", "Channels", "channels"],
     ["/app/leads", "Leads", "leads"],
     [leadUrl!, "Alex", "lead"],
     ["/app/conversations", "Test history", "conversations"],
-    ["/app/test-agent", "Test agent", "test-agent"],
+    ["/app/test-agent", "Testing Front Office", "test-agent"],
     ["/app/settings", "Settings", "settings"],
   ];
   for (const width of [1440, 1280, 1024, 768, 390]) {
@@ -491,12 +493,10 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
         expect(heading!.y - main!.y).toBeLessThanOrEqual(
           width <= 700 ? 22 : 40,
         );
-        const inset = await page
-          .locator("#main-content")
-          .evaluate((node) => ({
-            horizontal: parseFloat(getComputedStyle(node).paddingLeft),
-            bottom: parseFloat(getComputedStyle(node).paddingBottom),
-          }));
+        const inset = await page.locator("#main-content").evaluate((node) => ({
+          horizontal: parseFloat(getComputedStyle(node).paddingLeft),
+          bottom: parseFloat(getComputedStyle(node).paddingBottom),
+        }));
         expect(inset.horizontal).toBe(width <= 700 ? 18 : 32);
         expect(inset.bottom).toBe(width <= 700 ? 28 : 48);
       }

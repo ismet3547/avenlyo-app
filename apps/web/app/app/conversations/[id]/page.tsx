@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
+import { publishedAgentKnowledge } from "@/lib/agents";
 import { productContext } from "@/lib/product-data";
 import { PageHeader } from "@/components/ui";
 import { TestAgent } from "@/components/conversations";
@@ -20,6 +21,14 @@ export default async function Page({
   if (conversation.error) throw new Error("Conversation could not be loaded.");
   if (!conversation.data) notFound();
   if (conversation.data.channel !== "test_agent") redirect(`/app/inbox/${id}`);
+  const agent = await ctx.supabase
+    .from("agents")
+    .select("*")
+    .eq("workspace_id", ctx.workspace.id)
+    .eq("id", conversation.data.agent_id)
+    .single();
+  if (agent.error)
+    throw new Error("The conversation agent could not be loaded.");
   const [messages, lead, knowledge] = await Promise.all([
     ctx.supabase
       .from("messages")
@@ -34,28 +43,26 @@ export default async function Page({
       .eq("workspace_id", ctx.workspace.id)
       .eq("conversation_id", id)
       .maybeSingle(),
-    ctx.supabase
-      .from("knowledge_items")
-      .select("id", { count: "exact", head: true })
-      .eq("workspace_id", ctx.workspace.id)
-      .eq("status", "published"),
+    publishedAgentKnowledge(agent.data, ctx.supabase),
   ]);
   if (messages.error || lead.error)
     throw new Error("Test conversation could not be loaded.");
   return (
     <>
       <PageHeader
-        title="Pick up where you left off."
+        title={`Testing ${agent.data.name}`}
         description="Review the answers, ask another question and keep improving."
       />
       <TestAgent
         key={id}
         workspaceId={ctx.workspace.id}
+        agentId={conversation.data.agent_id}
+        readOnly={Boolean(agent.data.archived_at)}
         conversationId={id}
         initialMessages={messages.data}
         initialLead={lead.data}
         paused={conversation.data.ai_mode === "paused"}
-        published={knowledge.error ? null : (knowledge.count ?? 0)}
+        published={knowledge}
       />
     </>
   );

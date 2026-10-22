@@ -3,7 +3,8 @@ import Link from "next/link";
 import { ArrowRight, ChevronDown, Eye } from "lucide-react";
 import { defaultSettings } from "@avenlyo-app/shared";
 import { AppShell } from "@/components/app-shell";
-import { AgentForm } from "@/components/product-forms";
+import { AgentGeneral } from "@/components/agent-general";
+import "@/app/app/agent/agent.css";
 import { InboxView, TestAgent } from "@/components/conversations";
 import { KnowledgeEditor } from "@/components/knowledge-editor";
 import "@/app/app/knowledge/knowledge.css";
@@ -40,29 +41,30 @@ export default async function PreviewPage({
   let content;
   if (screen.startsWith("/app/agent"))
     content = (
-      <>
+      <div className="agent-workspace workspace-page-spacing">
         <PageHeader
-          title="Agent settings"
-          description="Configure your agent’s behavior, tone and instructions."
-          action={
-            <ActionLink secondary href={href("/app/test-agent")}>
-              Test your agent
-              <ArrowRight aria-hidden="true" />
-            </ActionLink>
-          }
+          title="Front Office"
+          description="Help customers understand our design services."
         />
-        <AgentForm
-          settings={{
+        <AgentGeneral
+          agent={{
             ...defaultSettings,
-            tone: "warm",
-            setup_brief:
-              "You are the welcoming first point of contact for Forma Studio. Help customers explore our design services, understand their goals and connect them with our team.",
+            id: "11111111-1111-4111-8111-111111111111",
+            workspace_id: workspaceId,
+            name: "Front Office",
+            is_default: true,
+            primary_language: "en",
+            additional_languages: ["tr"],
+            language_policy: "configured",
+            knowledge_mode: "all",
+            created_at: "",
+            updated_at: "",
+            archived_at: null,
+            setup_brief: "Help customers understand our design services.",
           }}
           editable={false}
-          published={5}
-          preview
         />
-      </>
+      </div>
     );
   else if (screen.startsWith("/app/inbox")) {
     const id = screen.split("/")[3];

@@ -1,5 +1,8 @@
 import {
   agentSettingsSchema,
+  fixedPauseReply,
+  languageSchema,
+  type Language,
   modelResponseSchema,
   type Channel,
   type Database,
@@ -45,8 +48,15 @@ type Context = {
   history: { role: "customer" | "assistant" | "human"; content: string }[];
   content: string;
   replyWindowOpen: boolean;
+  languages: { primary: Language; additional: Language[]; legacy: boolean };
 };
+const runtimeLanguages = z.object({
+  primary: languageSchema,
+  additional: z.array(languageSchema),
+  legacy: z.boolean(),
+});
 const channelContextSchema = z.object({
+  languages: runtimeLanguages,
   businessName: z.string().min(2).max(100),
   settings: z.unknown(),
   aiMode: z.enum(["active", "paused"]),
@@ -74,17 +84,19 @@ export class FrontOfficeRuntime {
     user: SupabaseClient<Database>,
     input: {
       workspaceId: string;
+      agentId?: string;
       conversationId: string | null;
       idempotencyKey: string;
       content: string;
     },
   ): Promise<TurnResult> {
-    const started = await this.service.rpc("begin_agent_turn", {
+    const started = await this.service.rpc("begin_agent_test_turn", {
       actor_id: actorId,
       target_workspace_id: input.workspaceId,
       target_conversation_id: input.conversationId,
       target_idempotency_key: input.idempotencyKey,
       customer_content: input.content,
+      target_agent_id: input.agentId ?? null,
     });
     if (started.error)
       throw new RuntimeError(
@@ -93,46 +105,62 @@ export class FrontOfficeRuntime {
       );
     const run = started.data?.[0];
     if (!run) throw new RuntimeError("TURN_UNAVAILABLE", 503);
+    let resolvedAgentId: string;
     return this.complete(
       run,
       async () => {
-        const [workspace, settings, conversation, messages] = await Promise.all(
-          [
-            user
-              .from("workspaces")
-              .select("name")
-              .eq("id", input.workspaceId)
-              .single(),
-            user
-              .from("agent_settings")
-              .select("tone,goals,contact_fields,human_handoff_enabled")
-              .eq("workspace_id", input.workspaceId)
-              .single(),
-            user
-              .from("conversations")
-              .select("ai_mode")
-              .eq("id", run.conversation_id)
-              .eq("workspace_id", input.workspaceId)
-              .single(),
-            user
-              .from("messages")
-              .select("role,content")
-              .eq("workspace_id", input.workspaceId)
-              .eq("conversation_id", run.conversation_id)
-              .order("created_at", { ascending: false })
-              .limit(24),
-          ],
-        );
+        const [workspace, conversation, messages] = await Promise.all([
+          user
+            .from("workspaces")
+            .select("name")
+            .eq("id", input.workspaceId)
+            .single(),
+          user
+            .from("conversations")
+            .select("ai_mode,agent_id")
+            .eq("id", run.conversation_id)
+            .eq("workspace_id", input.workspaceId)
+            .single(),
+          user
+            .from("messages")
+            .select("role,content")
+            .eq("workspace_id", input.workspaceId)
+            .eq("conversation_id", run.conversation_id)
+            .order("created_at", { ascending: false })
+            .limit(24),
+        ]);
         if (
           workspace.error ||
-          settings.error ||
           conversation.error ||
-          messages.error
+          messages.error ||
+          !conversation.data
         )
+          throw new RuntimeError("CONTEXT_UNAVAILABLE", 503);
+        resolvedAgentId = conversation.data.agent_id;
+        const settings = await user
+          .from("agents")
+          .select(
+            "tone,goals,contact_fields,human_handoff_enabled,primary_language,additional_languages,language_policy",
+          )
+          .eq("workspace_id", input.workspaceId)
+          .eq("id", resolvedAgentId)
+          .is("archived_at", null)
+          .single();
+        if (settings.error || !settings.data)
           throw new RuntimeError("CONTEXT_UNAVAILABLE", 503);
         return {
           businessName: workspace.data.name,
-          settings: settings.data,
+          settings: {
+            tone: settings.data.tone,
+            goals: settings.data.goals,
+            contact_fields: settings.data.contact_fields,
+            human_handoff_enabled: settings.data.human_handoff_enabled,
+          },
+          languages: runtimeLanguages.parse({
+            primary: settings.data.primary_language,
+            additional: settings.data.additional_languages,
+            legacy: settings.data.language_policy === "legacy_multilingual",
+          }),
           aiMode: conversation.data.ai_mode,
           channel: "test_agent",
           history: [...messages.data].reverse(),
@@ -141,7 +169,8 @@ export class FrontOfficeRuntime {
         };
       },
       async (embedding) => {
-        const matches = await user.rpc("match_knowledge", {
+        const matches = await user.rpc("match_agent_knowledge", {
+          target_agent_id: resolvedAgentId,
           target_workspace_id: input.workspaceId,
           query_embedding: JSON.stringify(embedding),
           match_limit: 5,
@@ -234,6 +263,20 @@ export class FrontOfficeRuntime {
         ...(context.settings as object),
         setup_brief: "",
       });
+      const detected = context.languages.legacy
+        ? null
+        : await this.provider.detectLanguage(context.content);
+      const responseLanguage: Language | null = context.languages.legacy
+        ? null
+        : detected &&
+            detected !== "other" &&
+            [
+              context.languages.primary,
+              ...context.languages.additional,
+            ].includes(detected)
+          ? detected
+          : context.languages.primary;
+      let fixedReply = true;
       const customerTurns = context.history
         .filter((m) => m.role === "customer")
         .map((m) => m.content);
@@ -287,9 +330,14 @@ export class FrontOfficeRuntime {
             title: m.title,
             revision: m.revision,
           }));
+          fixedReply = false;
           const model = modelResponseSchema.parse(
             await this.provider.respond({
-              instructions: instructions(settings, context.channel),
+              instructions:
+                instructions(settings, context.channel) +
+                (responseLanguage
+                  ? `\nReply in language code ${responseLanguage}. Use the same agent behavior in every language. Translate approved facts faithfully; never invent missing information.`
+                  : ""),
               businessName: context.businessName,
               knowledge: matches.map((m) => ({
                 id: m.id,
@@ -309,6 +357,16 @@ export class FrontOfficeRuntime {
         output,
         output.request_human,
       );
+      if (fixedReply && responseLanguage) {
+        output.reply =
+          context.aiMode === "paused" ||
+          !settings.goals.includes("answer_questions")
+            ? fixedPauseReply(
+                responseLanguage,
+                context.channel === "test_agent",
+              )
+            : await this.provider.localize(output.reply, responseLanguage);
+      }
       const safeReply = customerSafeReply(output.reply, Boolean(lead));
       output.reply =
         context.channel === "instagram"
