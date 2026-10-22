@@ -323,7 +323,9 @@ export default async function PreviewPage({
         </Link>
       </div>
       {screen.startsWith("/app/knowledge") ? (
-        <div className="knowledge-workspace">{content}</div>
+        <div className="knowledge-workspace workspace-page-spacing">
+          {content}
+        </div>
       ) : (
         content
       )}

@@ -1,12 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useActionState, useState } from "react";
-import {
-  ArrowRight,
-  MoreHorizontal,
-  Search,
-  SlidersHorizontal,
-} from "lucide-react";
+import { useActionState, useId, useRef, useState } from "react";
+import { ArrowRight, Search, SlidersHorizontal } from "lucide-react";
 import {
   businessKnowledgeType,
   knowledgeLabels,
@@ -21,7 +16,8 @@ import {
   AddKnowledge,
   KnowledgeBack,
   KnowledgeCreationChoices,
-  KnowledgeDialog,
+  KnowledgeOverflow,
+  KnowledgePopover,
   KnowledgeStatus,
 } from "./knowledge-primitives";
 function RestoreKnowledge({
@@ -72,6 +68,8 @@ export function KnowledgeLibrary({
   const [collection, setCollection] = useState(initialCollection);
   const [type, setType] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
+  const filterTrigger = useRef<HTMLButtonElement>(null);
+  const filterId = useId();
   const active = items.filter((item) => item.status !== "archived");
   const zero = !archived && active.length === 0;
   const filtered = filterKnowledge(items, {
@@ -107,22 +105,7 @@ export function KnowledgeLibrary({
         {!archived && !zero && (
           <div className="knowledge-heading-actions">
             {editable && <AddKnowledge preview={preview} />}
-            <details className="knowledge-overflow">
-              <summary
-                className="knowledge-icon-button"
-                aria-label="Organize knowledge"
-              >
-                <MoreHorizontal aria-hidden="true" />
-              </summary>
-              <div>
-                <Link href={screenHref("/app/knowledge/archived", preview)}>
-                  View archived
-                </Link>
-                <Link href={screenHref("/app/knowledge/collections", preview)}>
-                  Manage collections
-                </Link>
-              </div>
-            </details>
+            <KnowledgeOverflow preview={preview} />
           </div>
         )}
       </header>
@@ -160,9 +143,13 @@ export function KnowledgeLibrary({
               />
             </label>
             <button
+              ref={filterTrigger}
               type="button"
               className="button button-secondary"
-              onClick={() => setFilterOpen(true)}
+              popoverTarget={filterId}
+              aria-haspopup="dialog"
+              aria-expanded={filterOpen}
+              aria-controls={filterId}
             >
               <SlidersHorizontal aria-hidden="true" />
               Filter{filterCount > 0 ? ` · ${filterCount}` : ""}
@@ -249,9 +236,11 @@ export function KnowledgeLibrary({
               )}
             </div>
           )}
-          <KnowledgeDialog
+          <KnowledgePopover
+            id={filterId}
             open={filterOpen}
-            close={() => setFilterOpen(false)}
+            onOpenChange={setFilterOpen}
+            anchor={filterTrigger}
             title="Filter knowledge"
           >
             <form
@@ -309,12 +298,12 @@ export function KnowledgeLibrary({
                     setFilterOpen(false);
                   }}
                 >
-                  Clear filters
+                  Clear
                 </button>
                 <button className="button button-primary">Apply filters</button>
               </div>
             </form>
-          </KnowledgeDialog>
+          </KnowledgePopover>
         </>
       )}
     </div>

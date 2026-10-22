@@ -278,6 +278,144 @@ test("Knowledge library, six editors, explicit lifecycle, imports and tenant iso
   for (const width of [1440, 1280, 1024, 768, 390]) {
     await page.setViewportSize({ width, height: 1000 });
     await capture(`library-${width}`);
+    const add = page.getByRole("button", {
+      name: "Add knowledge",
+      exact: true,
+    });
+    await add.focus();
+    await add.press("Enter");
+    await expect(addDialog).toBeVisible();
+    const addBox = await addDialog.boundingBox();
+    expect(addBox).not.toBeNull();
+    if (width > 700) {
+      expect(addBox!.width).toBeGreaterThanOrEqual(480);
+      expect(addBox!.width).toBeLessThanOrEqual(520);
+      expect(Math.abs(addBox!.x + addBox!.width / 2 - width / 2)).toBeLessThan(
+        2,
+      );
+      expect(Math.abs(addBox!.y + addBox!.height / 2 - 500)).toBeLessThan(2);
+    } else {
+      expect(Math.abs(addBox!.y + addBox!.height - 1000)).toBeLessThan(2);
+      expect(addBox!.width).toBe(width);
+    }
+    const lastChoice = addDialog.getByRole("link", { name: /Upload file/ });
+    await lastChoice.focus();
+    await page.keyboard.press("Tab");
+    await expect(
+      addDialog.getByRole("button", { name: "Close dialog" }),
+    ).toBeFocused();
+    await page.keyboard.press("Shift+Tab");
+    await expect(lastChoice).toBeFocused();
+    await capture(`add-${width}`);
+    await page.keyboard.press("Escape");
+    await expect(addDialog).not.toBeVisible();
+    await expect(add).toBeFocused();
+
+    const filter = page.getByRole("button", { name: "Filter", exact: true });
+    const searchBox = await page
+      .getByRole("searchbox", { name: "Search knowledge", exact: true })
+      .locator("..")
+      .boundingBox();
+    const filterBox = await filter.boundingBox();
+    if (width > 700) {
+      expect(
+        Math.abs(filterBox!.x - searchBox!.x - searchBox!.width - 12),
+      ).toBeLessThan(2);
+    }
+    await filter.focus();
+    await filter.press("Enter");
+    const filterPanel = page.getByRole("dialog", {
+      name: "Filter knowledge",
+      exact: true,
+    });
+    await expect(filterPanel).toBeVisible();
+    await expect(filter).toHaveAttribute("aria-expanded", "true");
+    const panelBox = await filterPanel.boundingBox();
+    if (width > 700) {
+      expect(panelBox!.width).toBeGreaterThanOrEqual(320);
+      expect(panelBox!.width).toBeLessThanOrEqual(360);
+      expect(
+        Math.abs(
+          panelBox!.x + panelBox!.width - filterBox!.x - filterBox!.width,
+        ),
+      ).toBeLessThan(2);
+      expect(
+        Math.abs(panelBox!.y - filterBox!.y - filterBox!.height - 8),
+      ).toBeLessThan(2);
+    } else {
+      expect(Math.abs(panelBox!.y + panelBox!.height - 1000)).toBeLessThan(2);
+      expect(panelBox!.width).toBe(width);
+    }
+    const typeRows = await filterPanel
+      .locator(".knowledge-type-filters > label")
+      .evaluateAll((nodes) =>
+        nodes.map((node) => {
+          const box = node.getBoundingClientRect();
+          return { x: box.x, y: box.y, bottom: box.bottom };
+        }),
+      );
+    expect(typeRows).toHaveLength(7);
+    for (let index = 1; index < typeRows.length; index++) {
+      expect(typeRows[index].x).toBe(typeRows[0].x);
+      expect(typeRows[index].y).toBeGreaterThanOrEqual(
+        typeRows[index - 1].bottom,
+      );
+    }
+    await expect(
+      filterPanel.getByRole("button", { name: "Clear", exact: true }),
+    ).toBeVisible();
+    await capture(`filter-${width}`);
+    await filterPanel.getByRole("radio", { name: "All", exact: true }).focus();
+    await page.keyboard.press("ArrowDown");
+    await expect(
+      filterPanel.getByRole("radio", { name: "Service", exact: true }),
+    ).toBeChecked();
+    await page.keyboard.press("Escape");
+    await expect(filterPanel).not.toBeVisible();
+    await expect(filter).toBeFocused();
+    await expect(rows).toHaveCount(24);
+
+    const organize = page.getByRole("button", {
+      name: "Organize knowledge",
+      exact: true,
+    });
+    await organize.focus();
+    await organize.press("Enter");
+    const menu = page.getByRole("menu", {
+      name: "Organize knowledge",
+      exact: true,
+    });
+    await expect(menu).toBeVisible();
+    await expect(organize).toHaveAttribute("aria-expanded", "true");
+    const menuBox = await menu.boundingBox(),
+      organizeBox = await organize.boundingBox();
+    expect(menuBox!.width).toBeLessThanOrEqual(240);
+    expect(
+      Math.abs(
+        menuBox!.x + menuBox!.width - organizeBox!.x - organizeBox!.width,
+      ),
+    ).toBeLessThan(2);
+    expect(
+      Math.abs(menuBox!.y - organizeBox!.y - organizeBox!.height - 8),
+    ).toBeLessThan(2);
+    await expect(
+      menu.getByRole("menuitem", { name: "View archived", exact: true }),
+    ).toHaveAttribute("href", "/app/knowledge/archived");
+    await expect(
+      menu.getByRole("menuitem", { name: "Manage collections", exact: true }),
+    ).toHaveAttribute("href", "/app/knowledge/collections");
+    await page.keyboard.press("End");
+    await expect(
+      menu.getByRole("menuitem", { name: "Manage collections", exact: true }),
+    ).toBeFocused();
+    await page.keyboard.press("Home");
+    await expect(
+      menu.getByRole("menuitem", { name: "View archived", exact: true }),
+    ).toBeFocused();
+    await capture(`overflow-${width}`);
+    await page.keyboard.press("Escape");
+    await expect(menu).not.toBeVisible();
+    await expect(organize).toBeFocused();
   }
   await page
     .getByRole("button", { name: "Add knowledge", exact: true })
@@ -285,6 +423,19 @@ test("Knowledge library, six editors, explicit lifecycle, imports and tenant iso
   await expect(addDialog).toBeVisible();
   await page.keyboard.press("Escape");
   await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.getByRole("button", { name: "Filter", exact: true }).click();
+  await expect(
+    page.getByRole("dialog", { name: "Filter knowledge", exact: true }),
+  ).toBeVisible();
+  const search = page.getByRole("searchbox", {
+    name: "Search knowledge",
+    exact: true,
+  });
+  await search.click();
+  await expect(
+    page.getByRole("dialog", { name: "Filter knowledge", exact: true }),
+  ).not.toBeVisible();
+  await expect(search).toBeFocused();
   await page.getByRole("button", { name: "Published", exact: true }).click();
   await expect(rows).toHaveCount(5);
   await page.getByRole("button", { name: /^Drafts/ }).click();
@@ -429,7 +580,7 @@ test("Knowledge library, six editors, explicit lifecycle, imports and tenant iso
 
   await page.getByLabel("Organize knowledge", { exact: true }).click();
   await page
-    .getByRole("link", { name: "Manage collections", exact: true })
+    .getByRole("menuitem", { name: "Manage collections", exact: true })
     .click();
   await page
     .getByRole("button", { name: "Rename Services", exact: true })

@@ -458,6 +458,15 @@ strong {
   flex: 1;
   outline: none;
 }
+/* Opt-in spacing for full product pages; setup and other routes keep their layout. */
+.main-content:has(> .workspace-page-spacing) {
+  padding: 38px 32px 48px;
+}
+@media (max-width: 700px) {
+  .main-content:has(> .workspace-page-spacing) {
+    padding: 20px 18px 28px;
+  }
+}
 .mobile-topbar {
   display: none;
 }

@@ -485,7 +485,20 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
         const heading = await page
           .getByRole("heading", { name: "Knowledge", exact: true })
           .boundingBox();
-        expect(heading!.y - main!.y).toBeGreaterThanOrEqual(width <= 700 ? 20 : 24);
+        expect(heading!.y - main!.y).toBeGreaterThanOrEqual(
+          width <= 700 ? 20 : 36,
+        );
+        expect(heading!.y - main!.y).toBeLessThanOrEqual(
+          width <= 700 ? 22 : 40,
+        );
+        const inset = await page
+          .locator("#main-content")
+          .evaluate((node) => ({
+            horizontal: parseFloat(getComputedStyle(node).paddingLeft),
+            bottom: parseFloat(getComputedStyle(node).paddingBottom),
+          }));
+        expect(inset.horizontal).toBe(width <= 700 ? 18 : 32);
+        expect(inset.bottom).toBe(width <= 700 ? 28 : 48);
       }
       expect(
         await page.evaluate(

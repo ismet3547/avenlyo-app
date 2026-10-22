@@ -5,10 +5,10 @@ This change continues PR #6 on `codex/fresh-product-design`. Keep the PR draft a
 ## What changed
 
 - The true zero state offers Add manually, Import webpage and Upload file, with no empty management controls. Mobile uses one Add knowledge action and a bottom sheet.
-- The populated library leads with knowledge titles, type, status and last update. Search and All / Published / Drafts support finding content. Type and collection filters live in a focused dialog; Archived and Manage collections are secondary maintenance links.
+- The populated library leads with knowledge titles, type, status and last update. Search and All / Published / Drafts support finding content. Type and collection filters live in an anchored popover; Archived and Manage collections are secondary maintenance links.
 - Manual creation first asks for one of the six existing types, then opens a focused editor with the appropriate labels and fields. Save draft remains in the editor with a compact confirmation. Publish is explicit and remains in the editor.
 - Type changes require review when text exists. Pricing statements/currency and service details are retained in the new type's visible text. A transition that exceeds the target field limit is blocked without truncation.
-- Unpublish, Archive and Delete have explicit consequence confirmations. Unsaved edits are protected on in-app links, sign-out forms, browser history and page exits. Native modal dialogs handle focus containment and Escape; add/filter actions return focus to their trigger.
+- Unpublish, Archive and Delete have explicit consequence confirmations. Unsaved edits are protected on in-app links, sign-out forms, browser history and page exits. Native modal dialogs handle focus containment and Escape. Filter and library overflow use native auto popovers with outside-click dismissal and focus restoration.
 - Loading and retry states use safe copy. Known import failures provide useful guidance; unexpected network/database exceptions never return raw exception text.
 
 ## Existing backend reused
@@ -27,13 +27,13 @@ Collections remain flat and optional. Filtering and editor assignment use existi
 
 ## Desktop and mobile
 
-Knowledge-only CSS sets a maximum 1,180px library width, readable 28–32px headings, 15–16px body/input/title text, and restrained 13–14px metadata. Rows use subtle dividers. The editor has a single comfortable content column. Mobile stacks row metadata and editor fields, keeps actions at least 44px high, and presents add/filter/confirmation dialogs as bottom sheets. Status is written in text as well as color. Shared shell styles and unrelated screens are unchanged.
+Knowledge opts into shared workspace page spacing: 38px top, 32px horizontal and 48px bottom on desktop; 20px/18px/28px on mobile. Knowledge styles set a maximum 1,180px library width, readable 28–32px headings, 15–16px body/input/title text, and restrained 13–14px metadata. Rows use subtle dividers. The editor has a single comfortable content column. Mobile stacks row metadata and editor fields, keeps actions at least 44px high, and presents Add, Filter and confirmation surfaces as bottom sheets. Desktop Add/confirmation dialogs are explicitly centered, with a 500px Add dialog. Filter is a 340px anchored popover with a single-column type list; the 220px library overflow menu stays anchored on every screen size. Search and Filter share a bounded row with a 12px gap. Status is written in text as well as color. Shared shell styles and unrelated screens are unchanged.
 
 ## Coverage and validation
 
 Unit regressions cover library hierarchy, true versus filtered zero states, archived maintenance, combined filtering, legacy Text normalization, service-field round trips including multipart CRLF line endings, lossless type conversions, over-limit conversion rejection, editor navigation, explicit publication, stale-save rejection, all supported import types and size limits, redirect/private-address rejection, and safe import errors.
 
-The updated Knowledge browser flow preserves the six-type create/save/publish coverage, published edit behavior, search, status/type/collection filtering, collection create/rename, archive and safe deletion, including rejected actions that keep their error inside the open confirmation and leave the item intact. It adds preservation of submit intent, selected type/collection and both Service sections after saving, review-in-editor assertions, restore-to-Draft, unsaved navigation, pricing conversion, real file upload/review, private URL rejection, tenant isolation, dialog focus/Escape, and desktop/mobile captures at 1440/1280/1024/768/390 widths. Existing signup, optional-channel persistence, runtime, channel and handoff flows remain in the suite.
+The updated Knowledge browser flow preserves the six-type create/save/publish coverage, published edit behavior, search, status/type/collection filtering, collection create/rename, archive and safe deletion, including rejected actions that keep their error inside the open confirmation and leave the item intact. It adds preservation of submit intent, selected type/collection and both Service sections after saving, review-in-editor assertions, restore-to-Draft, unsaved navigation, pricing conversion, real file upload/review, private URL rejection, tenant isolation, dialog focus containment/Escape, popover/menu anchoring and keyboard dismissal, focus restoration, outside-click dismissal, and desktop/mobile captures at 1440/1280/1024/768/390 widths. Existing signup, optional-channel persistence, runtime, channel and handoff flows remain in the suite.
 
 Local typecheck, lint/independence, 182 unit tests, production builds and API artifact smoke pass. Database isolation/security, migration upgrade, runtime and channel checks also pass in CI. The final browser acceptance results and captures are linked from the current PR checks. This local sandbox lacks the Supabase CLI/Docker stack and cannot start the browser fixture's IPC socket. The local production build uses the existing external memory-reporting workaround for the sandbox's missing `/proc`; no workaround is committed to the repository.
 
@@ -71,3 +71,9 @@ Remaining limitations follow the current product: webpage import can be blocked 
 - `apps/web/lib/knowledge-model.test.ts`
 - `apps/web/lib/knowledge-model.ts`
 - `docs/knowledge-library.md`
+
+## Visual polish scope
+
+The follow-up polish changes spacing, typography and interaction surfaces only. Knowledge lifecycle, import routes and limits, backend contracts, Home, Onboarding, auth, RLS and channel behavior remain unchanged. The spacing utility is opt-in and is applied only to Knowledge. The existing workspace-picker layout is not repurposed.
+
+Browser checks retain every existing product assertion and add layout/accessibility checks at 1440, 1280, 1024, 768 and 390px: centered desktop Add, mobile sheets, adjacent Search/Filter, anchored single-column Filter, contextual overflow, keyboard focus containment for the modal, Escape and invoker focus restoration, radio arrow navigation, menu Home/End navigation, and no horizontal overflow. Production build precedes browser acceptance because Playwright uses `next start`.
