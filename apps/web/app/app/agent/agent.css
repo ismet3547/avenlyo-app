@@ -320,6 +320,7 @@
     inset: auto 0 0;
     margin: 0;
     width: 100%;
+    max-width: 100vw;
     max-height: 90dvh;
     border-radius: 18px 18px 0 0;
   }

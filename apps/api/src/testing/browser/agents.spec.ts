@@ -461,8 +461,12 @@ test("Agent V2 keeps settings, Knowledge, languages and conversation routing iso
     const box = (await dialog.boundingBox())!;
     expect(box.x).toBeGreaterThanOrEqual(0);
     expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
-    if (width > 700)
+    if (width > 700) {
       expect(Math.abs(box.x + box.width / 2 - width / 2)).toBeLessThan(3);
+    } else {
+      expect(Math.abs(box.width - width)).toBeLessThanOrEqual(1);
+      expect(Math.abs(box.y + box.height - 844)).toBeLessThanOrEqual(1);
+    }
     await capture(`create-${width}`);
     await page.keyboard.press("Escape");
   }
