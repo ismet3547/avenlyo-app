@@ -18,9 +18,12 @@ export function ChannelAgentAssignment({
   return (
     <form action={action} className="panel-body stack">
       <input type="hidden" name="connection_id" value={channel.id} />
-      <label className="field-label">
-        Agent
+      <div className="field">
+        <label className="field-label" htmlFor={`channel-agent-${channel.id}`}>
+          Agent
+        </label>
         <select
+          id={`channel-agent-${channel.id}`}
           className="input"
           name="agent_id"
           defaultValue={channel.agent_id}
@@ -32,7 +35,7 @@ export function ChannelAgentAssignment({
             </option>
           ))}
         </select>
-      </label>
+      </div>
       <p className="muted small">
         Assignment changes apply to new conversations.
       </p>

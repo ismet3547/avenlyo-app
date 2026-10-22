@@ -896,7 +896,9 @@ export function TestAgent({
               <div>
                 <dt>Published knowledge</dt>
                 <dd>
-                  {published === null ? "Unavailable" : `${published} items`}
+                  {published === null
+                    ? "Unavailable"
+                    : `${published} ${published === 1 ? "item" : "items"}`}
                 </dd>
               </div>
               <div>

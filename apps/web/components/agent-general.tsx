@@ -1,5 +1,5 @@
 "use client";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useId, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import type { Agent } from "@avenlyo-app/shared";
@@ -15,6 +15,7 @@ import { Button, Notice } from "./ui";
 import { WorkspaceDialog } from "./workspace-dialog";
 const initial: FormState = { status: "idle", message: "" };
 export function CreateAgent() {
+  const primaryId = useId();
   const [open, setOpen] = useState(false),
     [dirty, setDirty] = useState(false);
   const [state, action, pending] = useActionState(createAgent, initial);
@@ -58,9 +59,10 @@ export function CreateAgent() {
                 disabled={pending}
               />
             </label>
-            <label>
-              Primary language
+            <div className="agent-field">
+              <label htmlFor={primaryId}>Primary language</label>
               <select
+                id={primaryId}
                 className="input"
                 name="primary_language"
                 defaultValue="en"
@@ -72,7 +74,7 @@ export function CreateAgent() {
                   </option>
                 ))}
               </select>
-            </label>
+            </div>
             {state.status === "error" && <Notice error>{state.message}</Notice>}
           </div>
           <div className="agent-dialog-footer">

@@ -348,3 +348,23 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.agent-library-row > div:first-child {
+  min-width: 0;
+  flex: 1;
+}
+.agent-library-row h2,
+.agent-workspace .page-header h1,
+.agent-row-summary span,
+.agent-check span {
+  overflow-wrap: anywhere;
+}
+.agent-check span {
+  min-width: 0;
+}
+.agent-row-status {
+  flex-shrink: 0;
+}
+.agent-field {
+  display: grid;
+  gap: 8px;
+}

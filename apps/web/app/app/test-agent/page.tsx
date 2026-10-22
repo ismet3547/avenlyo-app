@@ -38,7 +38,7 @@ export default async function Page({
         }
       />
       {agents.data.length > 1 && (
-        <form method="get" className="row" style={{ marginBottom: 20 }}>
+        <form method="get" className="agent-test-picker">
           <label htmlFor="test-agent-choice">Agent</label>
           <select
             id="test-agent-choice"

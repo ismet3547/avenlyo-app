@@ -1,10 +1,11 @@
 "use client";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useId, useState } from "react";
 import { languages, type Agent, type Language } from "@avenlyo-app/shared";
 import { saveAgentLanguages } from "@/app/app/agent/actions";
 import { Button, Notice } from "./ui";
 import { WorkspaceDialog } from "./workspace-dialog";
 function LanguageEditor({ agent, close }: { agent: Agent; close: () => void }) {
+  const primaryId = useId();
   const [primary, setPrimary] = useState(agent.primary_language),
     [additional, setAdditional] = useState(agent.additional_languages),
     [query, setQuery] = useState("");
@@ -27,9 +28,10 @@ function LanguageEditor({ agent, close }: { agent: Agent; close: () => void }) {
       <form action={action}>
         <input type="hidden" name="agent_id" value={agent.id} />
         <div className="agent-dialog-body">
-          <label>
-            Primary language
+          <div className="agent-field">
+            <label htmlFor={primaryId}>Primary language</label>
             <select
+              id={primaryId}
               className="input"
               name="primary_language"
               value={primary}
@@ -45,7 +47,7 @@ function LanguageEditor({ agent, close }: { agent: Agent; close: () => void }) {
                 </option>
               ))}
             </select>
-          </label>
+          </div>
           <p>
             Reply in the customer’s language when supported. Otherwise, use the
             primary language.

@@ -3403,24 +3403,102 @@ fieldset {
   --type-label: 14px;
   --type-meta: 13px;
 }
-body {font-size:var(--type-body);}
-h1 {font-size:var(--type-page);}
-h2 {font-size:var(--type-section);}
-h3 {font-size:16px;}
-.page-header h1 {font-size:var(--type-page);}
-.page-header p,.panel-header p,.notice {font-size:var(--type-body);}
-.button,.nav-link,.workspace-picker select,.field-label,.field > label {font-size:var(--type-label);}
-.button {min-height:42px;}
-.input,.textarea,select.input {font-size:var(--type-body);min-height:44px;}
-.small,.field-hint,.field-count,.section-note,.nav-label,.rail-tooltip,
-.profile small,.badge,.message-meta,.message-source,.summary-list dt,
-.composer-bottom p,.item-subtitle,.form-footer p,.test-welcome p {font-size:var(--type-meta);}
-.field-hint,.field-count,.section-note,.item-subtitle,.profile small {color:var(--muted);}
-.panel-header h2,.form-section-heading h2 {font-size:18px;}
-.message-bubble,.detail-content,.conversation-copy p {font-size:var(--type-body);}
-.data-table {font-size:14px;}
-.data-table th,.data-table .item-title {font-size:var(--type-label);}
-@media(max-width:700px) {
-  h1,.page-header h1 {font-size:28px;}
-  .button,.nav-link {min-height:44px;}
+body {
+  font-size: var(--type-body);
+}
+h1 {
+  font-size: var(--type-page);
+}
+h2 {
+  font-size: var(--type-section);
+}
+h3 {
+  font-size: 16px;
+}
+.page-header h1 {
+  font-size: var(--type-page);
+}
+.page-header p,
+.panel-header p,
+.notice {
+  font-size: var(--type-body);
+}
+.button,
+.nav-link,
+.workspace-picker select,
+.field-label,
+.field > label {
+  font-size: var(--type-label);
+}
+.button {
+  min-height: 42px;
+}
+.input,
+.textarea,
+select.input {
+  font-size: var(--type-body);
+  min-height: 44px;
+}
+.small,
+.field-hint,
+.field-count,
+.section-note,
+.nav-label,
+.rail-tooltip,
+.profile small,
+.badge,
+.message-meta,
+.message-source,
+.summary-list dt,
+.composer-bottom p,
+.item-subtitle,
+.form-footer p,
+.test-welcome p {
+  font-size: var(--type-meta);
+}
+.field-hint,
+.field-count,
+.section-note,
+.item-subtitle,
+.profile small {
+  color: var(--muted);
+}
+.panel-header h2,
+.form-section-heading h2 {
+  font-size: 18px;
+}
+.message-bubble,
+.detail-content,
+.conversation-copy p {
+  font-size: var(--type-body);
+}
+.data-table {
+  font-size: 14px;
+}
+.data-table th,
+.data-table .item-title {
+  font-size: var(--type-label);
+}
+@media (max-width: 700px) {
+  h1,
+  .page-header h1 {
+    font-size: 28px;
+  }
+  .button,
+  .nav-link {
+    min-height: 44px;
+  }
+}
+.agent-test-picker {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  max-width: 100%;
+  margin-bottom: 20px;
+}
+.agent-test-picker select {
+  flex: 1 1 180px;
+  min-width: 0;
+  max-width: 400px;
 }

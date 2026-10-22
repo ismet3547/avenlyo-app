@@ -1,5 +1,5 @@
 "use client";
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useId, useState } from "react";
 import type {
   Agent,
   KnowledgeItem,
@@ -22,6 +22,7 @@ export function AgentKnowledge({
   selected: string[];
   editable: boolean;
 }) {
+  const collectionId = useId();
   const [mode, setMode] = useState(agent.knowledge_mode),
     [ids, setIds] = useState(selected),
     [open, setOpen] = useState(false);
@@ -175,9 +176,10 @@ export function AgentKnowledge({
             />
           </label>
           {collections.length > 0 && (
-            <label>
-              Collection
+            <div className="agent-field">
+              <label htmlFor={collectionId}>Collection</label>
               <select
+                id={collectionId}
                 className="input"
                 value={collection}
                 onChange={(e) => setCollection(e.target.value)}
@@ -189,7 +191,7 @@ export function AgentKnowledge({
                   </option>
                 ))}
               </select>
-            </label>
+            </div>
           )}
           <div className="agent-selection-tools">
             <Button

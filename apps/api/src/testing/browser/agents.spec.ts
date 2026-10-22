@@ -4,6 +4,8 @@ import { randomUUID } from "node:crypto";
 import { mkdir } from "node:fs/promises";
 import type { Database } from "@avenlyo-app/shared";
 
+test.use({actionTimeout:30000});
+
 test("Agent V2 keeps settings, Knowledge, languages and conversation routing isolated", async ({
   page,
 }, testInfo) => {
@@ -301,6 +303,9 @@ test("Agent V2 keeps settings, Knowledge, languages and conversation routing iso
   await page
     .getByLabel("Message your agent")
     .fill("Hangi hizmetleri sunuyorsunuz?");
+  await expect(
+    page.getByText("Published knowledge", { exact: true }).locator(".."),
+  ).toContainText("1 item");
   await page.getByRole("button", { name: "Send message", exact: true }).click();
   await expect(page.locator(".thread-messages .message")).toHaveCount(2);
   await expect(page.locator(".message-source")).toContainText(
