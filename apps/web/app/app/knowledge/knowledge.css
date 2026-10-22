@@ -784,36 +784,13 @@
   .knowledge-list > li {
     gap: 14px;
   }
-  .knowledge-library.is-populated:not(.is-archived) {
-    display: grid;
-    grid-template-columns: 1fr auto;
+  .knowledge-search-row > button {
+    flex-shrink: 0;
+    padding: 10px 12px;
   }
-  .knowledge-library.is-populated:not(.is-archived) > * {
-    grid-column: 1 / -1;
-  }
-  .knowledge-library.is-populated:not(.is-archived) .knowledge-search-row {
-    display: contents;
-  }
-  .knowledge-library.is-populated:not(.is-archived) .knowledge-search {
-    grid-column: 1 / -1;
-    max-width: none;
-  }
-  .knowledge-library.is-populated:not(.is-archived) .knowledge-status-nav {
-    grid-row: 3;
-    grid-column: 1;
+  .knowledge-status-nav {
     margin-top: 14px;
     gap: 21px;
-  }
-  .knowledge-library.is-populated:not(.is-archived)
-    .knowledge-search-row
-    > button {
-    grid-row: 3;
-    grid-column: 2;
-    align-self: end;
-    margin-top: 14px;
-    padding: 10px 9px;
-    border-color: transparent;
-    font-size: 14px;
   }
   .knowledge-search-row > button svg {
     width: 16px;

@@ -317,11 +317,9 @@ test("Knowledge library, six editors, explicit lifecycle, imports and tenant iso
       .locator("..")
       .boundingBox();
     const filterBox = await filter.boundingBox();
-    if (width > 700) {
-      expect(
-        Math.abs(filterBox!.x - searchBox!.x - searchBox!.width - 12),
-      ).toBeLessThan(2);
-    }
+    expect(
+      Math.abs(filterBox!.x - searchBox!.x - searchBox!.width - 12),
+    ).toBeLessThan(2);
     await filter.focus();
     await filter.press("Enter");
     const filterPanel = page.getByRole("dialog", {
