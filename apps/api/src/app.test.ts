@@ -50,6 +50,7 @@ function client(data: Record<string, unknown>, verified = true) {
       const query = {
         select: () => query,
         eq: () => query,
+        is: () => query,
         order: () => query,
         limit: () => query,
         single: async () => result,
@@ -74,7 +75,7 @@ async function setup(
   const user = client(
     {
       workspaces: { name: "Northstar Studio" },
-      agent_settings: {
+      agents: {
         tone: "professional",
         goals: [
           "answer_questions",
@@ -86,7 +87,10 @@ async function setup(
         contact_fields: ["name", "email"],
         human_handoff_enabled: true,
       },
-      conversations: { ai_mode: "active" },
+      conversations: {
+        ai_mode: "active",
+        agent_id: "af666666-6666-4666-8666-666666666666",
+      },
       messages: [{ role: "customer", content: "Hello" }],
       workspace_members: { role: options.knowledgeRole ?? "owner" },
       knowledge_items: {
@@ -108,7 +112,7 @@ async function setup(
   };
   const service = {
     rpc: vi.fn(async (name: string) =>
-      name === "begin_agent_turn"
+      name === "begin_agent_test_turn"
         ? options.denied
           ? { data: null, error: { code: "42501" } }
           : {
@@ -287,5 +291,39 @@ describe("API authorization and bounded ingress", () => {
     });
     expect(result.statusCode).toBe(400);
     expect(result.json()).toEqual({ code: "INVALID_REQUEST" });
+  });
+});
+
+describe("Agent-specific Test ingress", () => {
+  it("forwards explicit Agent selection only to the validated backend turn boundary", async () => {
+    const { app, service, user } = await setup();
+    const agentId = "af666666-6666-4666-8666-666666666666";
+    const result = await app.inject({
+      method: "POST",
+      url: "/v1/agent/turn",
+      headers: { authorization: `Bearer ${token}` },
+      payload: { ...body, agentId },
+    });
+    expect(result.statusCode).toBe(200);
+    expect(service.rpc).toHaveBeenCalledWith(
+      "begin_agent_test_turn",
+      expect.objectContaining({
+        actor_id: actor,
+        target_workspace_id: workspace,
+        target_agent_id: agentId,
+      }),
+    );
+    expect(user.from).toHaveBeenCalledWith("agents");
+    expect(user.from).not.toHaveBeenCalledWith("agent_settings");
+  });
+  it("rejects an unauthorized Agent at the server boundary", async () => {
+    const { app } = await setup({ denied: true });
+    const result = await app.inject({
+      method: "POST",
+      url: "/v1/agent/turn",
+      headers: { authorization: `Bearer ${token}` },
+      payload: { ...body, agentId: "af666666-6666-4666-8666-666666666666" },
+    });
+    expect(result.statusCode).toBe(403);
   });
 });

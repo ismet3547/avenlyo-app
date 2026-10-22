@@ -70,6 +70,7 @@ export type KnowledgeCollection = {
   updated_at: string;
 };
 export type Conversation = {
+  agent_id: string;
   id: string;
   workspace_id: string;
   channel: "test_agent" | "website_chat" | "instagram";
@@ -137,6 +138,7 @@ type Table<Row> = {
 };
 type RPC<Args, Returns> = { Args: Args; Returns: Returns };
 export type ChannelConnection = {
+  agent_id: string;
   id: string;
   public_id: string;
   workspace_id: string;
@@ -528,6 +530,61 @@ export type Database = {
           item_embedding: string;
         },
         undefined
+      >;
+      inspect_channel_agent: RPC<
+        {
+          target_workspace_id: string;
+          target_channel: string;
+          target_agent_id: string | null;
+        },
+        string
+      >;
+      begin_agent_test_turn: RPC<
+        {
+          actor_id: string;
+          target_workspace_id: string;
+          target_conversation_id: string | null;
+          target_idempotency_key: string;
+          customer_content: string;
+          target_agent_id: string | null;
+        },
+        {
+          run_id: string;
+          conversation_id: string;
+          state: string;
+          existing: boolean;
+          response: Json | null;
+        }[]
+      >;
+      assign_channel_agent: RPC<
+        {
+          target_workspace_id: string;
+          target_connection_id: string;
+          target_agent_id: string;
+        },
+        undefined
+      >;
+      configure_website_channel_for_agent: RPC<
+        {
+          target_workspace_id: string;
+          channel_enabled: boolean;
+          origins: string[];
+          target_agent_id: string | null;
+        },
+        string
+      >;
+      provision_instagram_channel_for_agent: RPC<
+        {
+          target_workspace_id: string;
+          expected_workspace_name: string;
+          provider_account_id: string;
+          provider_username: string;
+          provider_token: string;
+          provider_version: string;
+          verified_app_id: string;
+          target_agent_id: string | null;
+        },
+        string
       >;
       begin_agent_turn: RPC<
         {

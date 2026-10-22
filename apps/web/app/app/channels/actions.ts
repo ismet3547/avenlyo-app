@@ -1,4 +1,5 @@
 "use server";
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { websiteConfigurationSchema } from "@avenlyo-app/shared";
 import { requireWorkspace } from "@/lib/workspace";
@@ -21,7 +22,11 @@ export async function saveWebsiteChannel(
       message:
         "Add up to ten unique, exact HTTPS origins. HTTP localhost is allowed for a local demo.",
     };
-  const result = await ctx.supabase.rpc("configure_website_channel", {
+  const agentId = form.get("agent_id");
+  if (agentId && !z.uuid().safeParse(agentId).success)
+    return { status: "error", message: "Choose a valid agent." };
+  const result = await ctx.supabase.rpc("configure_website_channel_for_agent", {
+    target_agent_id: agentId ? String(agentId) : null,
     target_workspace_id: ctx.workspace.id,
     channel_enabled: parsed.data.enabled,
     origins: parsed.data.origins,
@@ -58,5 +63,38 @@ export async function disconnectInstagram(
     status: "success",
     message:
       "Instagram disconnected and the stored token removed. Revoke the app in Instagram to remove provider access.",
+  };
+}
+
+export async function assignChannelAgent(
+  _state: FormState,
+  form: FormData,
+): Promise<FormState> {
+  const ctx = await requireWorkspace();
+  const value = z
+    .object({ connection: z.uuid(), agent: z.uuid() })
+    .safeParse({
+      connection: form.get("connection_id"),
+      agent: form.get("agent_id"),
+    });
+  if (!value.success)
+    return { status: "error", message: "Choose an agent for this channel." };
+  const result = await ctx.supabase.rpc("assign_channel_agent", {
+    target_workspace_id: ctx.workspace.id,
+    target_connection_id: value.data.connection,
+    target_agent_id: value.data.agent,
+  });
+  if (result.error)
+    return {
+      status: "error",
+      message:
+        "Agent assignment could not be saved. Owner access and an available workspace agent are required.",
+    };
+  revalidatePath("/app/channels");
+  revalidatePath("/app/agent");
+  return {
+    status: "success",
+    message:
+      "Agent assigned. New conversations use this agent; existing conversations keep their agent.",
   };
 }

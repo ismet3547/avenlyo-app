@@ -16,7 +16,7 @@ export default async function Page() {
       />
       <div className="agent-library">
         {ctx.agents.map((agent) => {
-          const channels = ctx.channels.filter(() => agent.is_default); // Existing channel routing is migrated in the routing checkpoint.
+          const channels = ctx.channels.filter((c) => c.agent_id === agent.id);
           const status = agentStatus(channels);
           return (
             <Link

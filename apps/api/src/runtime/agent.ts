@@ -74,17 +74,19 @@ export class FrontOfficeRuntime {
     user: SupabaseClient<Database>,
     input: {
       workspaceId: string;
+      agentId?: string;
       conversationId: string | null;
       idempotencyKey: string;
       content: string;
     },
   ): Promise<TurnResult> {
-    const started = await this.service.rpc("begin_agent_turn", {
+    const started = await this.service.rpc("begin_agent_test_turn", {
       actor_id: actorId,
       target_workspace_id: input.workspaceId,
       target_conversation_id: input.conversationId,
       target_idempotency_key: input.idempotencyKey,
       customer_content: input.content,
+      target_agent_id: input.agentId ?? null,
     });
     if (started.error)
       throw new RuntimeError(
@@ -93,42 +95,46 @@ export class FrontOfficeRuntime {
       );
     const run = started.data?.[0];
     if (!run) throw new RuntimeError("TURN_UNAVAILABLE", 503);
+    let resolvedAgentId: string;
     return this.complete(
       run,
       async () => {
-        const [workspace, settings, conversation, messages] = await Promise.all(
-          [
-            user
-              .from("workspaces")
-              .select("name")
-              .eq("id", input.workspaceId)
-              .single(),
-            user
-              .from("agent_settings")
-              .select("tone,goals,contact_fields,human_handoff_enabled")
-              .eq("workspace_id", input.workspaceId)
-              .single(),
-            user
-              .from("conversations")
-              .select("ai_mode")
-              .eq("id", run.conversation_id)
-              .eq("workspace_id", input.workspaceId)
-              .single(),
-            user
-              .from("messages")
-              .select("role,content")
-              .eq("workspace_id", input.workspaceId)
-              .eq("conversation_id", run.conversation_id)
-              .order("created_at", { ascending: false })
-              .limit(24),
-          ],
-        );
+        const [workspace, conversation, messages] = await Promise.all([
+          user
+            .from("workspaces")
+            .select("name")
+            .eq("id", input.workspaceId)
+            .single(),
+          user
+            .from("conversations")
+            .select("ai_mode,agent_id")
+            .eq("id", run.conversation_id)
+            .eq("workspace_id", input.workspaceId)
+            .single(),
+          user
+            .from("messages")
+            .select("role,content")
+            .eq("workspace_id", input.workspaceId)
+            .eq("conversation_id", run.conversation_id)
+            .order("created_at", { ascending: false })
+            .limit(24),
+        ]);
         if (
           workspace.error ||
-          settings.error ||
           conversation.error ||
-          messages.error
+          messages.error ||
+          !conversation.data
         )
+          throw new RuntimeError("CONTEXT_UNAVAILABLE", 503);
+        resolvedAgentId = conversation.data.agent_id;
+        const settings = await user
+          .from("agents")
+          .select("tone,goals,contact_fields,human_handoff_enabled")
+          .eq("workspace_id", input.workspaceId)
+          .eq("id", resolvedAgentId)
+          .is("archived_at", null)
+          .single();
+        if (settings.error || !settings.data)
           throw new RuntimeError("CONTEXT_UNAVAILABLE", 503);
         return {
           businessName: workspace.data.name,
@@ -141,7 +147,8 @@ export class FrontOfficeRuntime {
         };
       },
       async (embedding) => {
-        const matches = await user.rpc("match_knowledge", {
+        const matches = await user.rpc("match_agent_knowledge", {
+          target_agent_id: resolvedAgentId,
           target_workspace_id: input.workspaceId,
           query_embedding: JSON.stringify(embedding),
           match_limit: 5,

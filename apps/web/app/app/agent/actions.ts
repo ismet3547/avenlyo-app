@@ -200,3 +200,27 @@ export async function saveAgentLanguages(
   revalidatePath("/app/agent");
   return { status: "success", message: "Languages saved." };
 }
+
+export async function archiveAgent(
+  _state: FormState,
+  form: FormData,
+): Promise<FormState> {
+  const ctx = await requireWorkspace(),
+    id = z.uuid().safeParse(form.get("agent_id"));
+  if (!id.success)
+    return { status: "error", message: "This agent is unavailable." };
+  const result = await ctx.supabase.rpc("archive_agent", {
+    target_workspace_id: ctx.workspace.id,
+    target_agent_id: id.data,
+  });
+  if (result.error)
+    return {
+      status: "error",
+      message:
+        result.error.code === "22023"
+          ? "Move this agent's channels to another agent before removing it."
+          : "This agent could not be archived. Please try again. Owner access is required.",
+    };
+  revalidatePath("/app/agent");
+  redirect("/app/agent");
+}

@@ -765,14 +765,39 @@ export function ImportForms({ editable }: { editable: boolean }) {
 export function WebsiteForm({
   channel,
   editable,
+  agents,
 }: {
   channel?: ChannelConnection;
   editable: boolean;
+  agents?: { id: string; name: string }[];
 }) {
   const [state, action, pending] = useActionState(saveWebsiteChannel, initial);
   return (
     <form action={action}>
       <div className="form-section">
+        {agents && agents.length > 0 && (
+          <Field label="Agent">
+            <select
+              className="input"
+              name="agent_id"
+              defaultValue={
+                channel?.agent_id ?? (agents.length === 1 ? agents[0].id : "")
+              }
+              disabled={!editable || pending}
+              required
+            >
+              <option value="" disabled>
+                Choose an agent
+              </option>
+              {agents.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+        )}
+
         <Field
           label="Approved websites"
           hint="One exact origin per line, for example https://yourbusiness.com."
@@ -816,9 +841,11 @@ export function WebsiteForm({
 export function WebsiteConfiguration({
   channel,
   editable,
+  agents,
 }: {
   channel?: ChannelConnection;
   editable: boolean;
+  agents?: { id: string; name: string }[];
 }) {
   const [open, setOpen] = useState(!channel?.enabled);
   return (
@@ -831,7 +858,7 @@ export function WebsiteConfiguration({
         Configure Website Chat
         <ChevronDown aria-hidden="true" />
       </summary>
-      <WebsiteForm channel={channel} editable={editable} />
+      <WebsiteForm channel={channel} editable={editable} agents={agents} />
     </details>
   );
 }

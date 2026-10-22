@@ -14,6 +14,7 @@ export function provisioningTarget(args: string[], config: Config) {
     allowPositionals: false,
     options: {
       workspace: { type: "string" },
+      agent: { type: "string" },
       target: { type: "string" },
       "confirm-production": { type: "string" },
       "confirm-workspace-name": { type: "string" },
@@ -26,6 +27,7 @@ export function provisioningTarget(args: string[], config: Config) {
   const values = z
     .object({
       workspace: z.uuid(),
+      agent: z.uuid().optional(),
       target: z.string().regex(/^(local|[a-z0-9]{20})$/),
       "confirm-workspace-name": z.string().min(2).max(100),
       account: z.string().regex(/^\d{3,32}$/),

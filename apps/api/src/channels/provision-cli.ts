@@ -39,6 +39,13 @@ try {
     inspected.data.workspaceName !== target["confirm-workspace-name"]
   )
     throw new ProvisionError("WORKSPACE_ACKNOWLEDGEMENT_MISMATCH");
+  const routing = await service.rpc("inspect_channel_agent", {
+    target_workspace_id: target.workspace,
+    target_channel: "instagram",
+    target_agent_id: target.agent ?? null,
+  });
+  if (routing.error || !routing.data)
+    throw new ProvisionError("EXPLICIT_WORKSPACE_AGENT_REQUIRED");
   const verified = await verifyManagedInstagram({
     accountId: target.account,
     username: target.username,
@@ -61,7 +68,8 @@ try {
       }),
     );
   } else {
-    const saved = await service.rpc("provision_instagram_channel", {
+    const saved = await service.rpc("provision_instagram_channel_for_agent", {
+      target_agent_id: routing.data,
       target_workspace_id: target.workspace,
       expected_workspace_name: target["confirm-workspace-name"],
       provider_account_id: verified.accountId,

@@ -129,6 +129,7 @@ export const turnSchema = z
   .object({
     workspaceId: z.uuid(),
     conversationId: z.uuid().nullable(),
+    agentId: z.uuid().optional(),
     idempotencyKey: z.uuid(),
     content: z.string().trim().min(1).max(2000),
   })

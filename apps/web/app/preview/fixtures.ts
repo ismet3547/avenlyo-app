@@ -168,6 +168,7 @@ export const channels: ChannelConnection[] = [
     id: uuid(400),
     public_id: uuid(401),
     workspace_id: workspaceId,
+    agent_id: "11111111-1111-4111-8111-111111111111",
     channel: "website_chat",
     enabled: true,
     status: "connected",
@@ -184,6 +185,7 @@ export const channels: ChannelConnection[] = [
     id: uuid(402),
     public_id: uuid(403),
     workspace_id: workspaceId,
+    agent_id: "11111111-1111-4111-8111-111111111111",
     channel: "instagram",
     enabled: false,
     status: "disconnected",
@@ -237,6 +239,7 @@ export function threadFor(id: string): InboxThread {
   }));
   return {
     conversation: {
+      agent_id: "af666666-6666-4666-8666-666666666666",
       id,
       workspace_id: workspaceId,
       channel: item.channel,

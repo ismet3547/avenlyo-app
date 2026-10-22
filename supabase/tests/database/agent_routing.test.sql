@@ -1,0 +1,56 @@
+begin;
+create extension if not exists pgtap with schema extensions;
+select extensions.no_plan();
+insert into auth.users(id,aud,role,email) values('af555555-5555-4555-8555-555555555555','authenticated','authenticated','routing-owner@example.test');
+set local role authenticated;
+set local request.jwt.claims='{"sub":"af555555-5555-4555-8555-555555555555","role":"authenticated"}';
+do $$ begin
+ perform set_config('test.rw',public.create_workspace('Routing Studio')::text,true);
+ perform set_config('test.ra',(select id::text from public.agents where workspace_id=current_setting('test.rw')::uuid and is_default),true);
+ perform set_config('test.rb',public.create_agent(current_setting('test.rw')::uuid,'Sales','Help customers with sales.','en')::text,true);
+end $$;
+select extensions.throws_ok($$select public.configure_website_channel(current_setting('test.rw')::uuid,true,array['https://routing.example'])$$,'22023',null,'Multiple Agents require a deliberate new channel assignment');
+do $$ begin
+ perform set_config('test.rc',public.configure_website_channel_for_agent(current_setting('test.rw')::uuid,true,array['https://routing.example'],current_setting('test.ra')::uuid)::text,true);
+ perform set_config('test.rpublic',(select public_id::text from public.channel_connections where id=current_setting('test.rc')::uuid),true);
+end $$;
+set local role service_role;
+set local request.jwt.claims='{"role":"service_role"}';
+select public.create_website_session(current_setting('test.rpublic')::uuid,'https://routing.example',repeat('a',64));
+reset role;
+do $$ begin perform set_config('test.rconv',(select id::text from public.conversations where channel_connection_id=current_setting('test.rc')::uuid),true); end $$;
+select extensions.is((select agent_id from public.conversations where id=current_setting('test.rconv')::uuid),current_setting('test.ra')::uuid,'New Website conversation persists Agent A');
+set local role authenticated;
+set local request.jwt.claims='{"sub":"af555555-5555-4555-8555-555555555555","role":"authenticated"}';
+select public.assign_channel_agent(current_setting('test.rw')::uuid,current_setting('test.rc')::uuid,current_setting('test.rb')::uuid);
+select extensions.is((select agent_id from public.conversations where id=current_setting('test.rconv')::uuid),current_setting('test.ra')::uuid,'Channel reassignment never switches existing conversations');
+select extensions.throws_ok($$select public.archive_agent(current_setting('test.rw')::uuid,current_setting('test.rb')::uuid)$$,'22023',null,'Assigned channel blocks Agent archival');
+set local role service_role;
+set local request.jwt.claims='{"role":"service_role"}';
+select public.create_website_session(current_setting('test.rpublic')::uuid,'https://routing.example',repeat('b',64));
+do $$ declare turn record; begin
+ select * into turn from public.begin_agent_test_turn('af555555-5555-4555-8555-555555555555',current_setting('test.rw')::uuid,null,gen_random_uuid(),'Hello',current_setting('test.rb')::uuid);
+ perform set_config('test.rtest',turn.conversation_id::text,true);
+ perform public.finish_agent_turn('af555555-5555-4555-8555-555555555555',turn.run_id,'Hi.','[]',false,null);
+end $$;
+reset role;
+select extensions.is((select count(*)::integer from public.conversations where workspace_id=current_setting('test.rw')::uuid and agent_id=current_setting('test.rb')::uuid),2,'New inbound and Test conversations persist Agent B');
+select extensions.throws_ok($$update public.conversations set agent_id=current_setting('test.rb')::uuid where id=current_setting('test.rconv')::uuid$$,'22023',null,'Conversation identity is immutable even for privileged writes');
+set local role service_role;
+set local request.jwt.claims='{"role":"service_role"}';
+select extensions.throws_ok($$select * from public.begin_agent_test_turn('af555555-5555-4555-8555-555555555555',current_setting('test.rw')::uuid,current_setting('test.rtest')::uuid,gen_random_uuid(),'Hello',current_setting('test.ra')::uuid)$$,'42501',null,'A test for B cannot silently run as A');
+set local role authenticated;
+set local request.jwt.claims='{"sub":"af555555-5555-4555-8555-555555555555","role":"authenticated"}';
+do $$ begin
+ perform set_config('test.rother',public.create_workspace('Other Routing Studio')::text,true);
+ perform set_config('test.rforeign',(select id::text from public.agents where workspace_id=current_setting('test.rother')::uuid and is_default),true);
+end $$;
+select extensions.throws_ok($$select public.assign_channel_agent(current_setting('test.rw')::uuid,current_setting('test.rc')::uuid,current_setting('test.rforeign')::uuid)$$,'42501',null,'Cross-workspace routing rejected for an owner of both');
+select public.assign_channel_agent(current_setting('test.rw')::uuid,current_setting('test.rc')::uuid,current_setting('test.ra')::uuid);
+select public.archive_agent(current_setting('test.rw')::uuid,current_setting('test.rb')::uuid);
+select extensions.is((select count(*)::integer from public.conversations where id=current_setting('test.rtest')::uuid),1,'Archival preserves Test history');
+set local role service_role;
+set local request.jwt.claims='{"role":"service_role"}';
+select extensions.throws_ok($$select * from public.begin_agent_test_turn('af555555-5555-4555-8555-555555555555',current_setting('test.rw')::uuid,current_setting('test.rtest')::uuid,gen_random_uuid(),'Hello',current_setting('test.rb')::uuid)$$,'42501',null,'Archived Agent cannot run new turns');
+select * from extensions.finish();
+rollback;

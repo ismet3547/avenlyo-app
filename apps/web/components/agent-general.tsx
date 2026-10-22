@@ -4,7 +4,11 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import type { Agent } from "@avenlyo-app/shared";
 import { languages } from "@avenlyo-app/shared";
-import { createAgent, saveAgentField } from "@/app/app/agent/actions";
+import {
+  createAgent,
+  saveAgentField,
+  archiveAgent,
+} from "@/app/app/agent/actions";
 import type { FormState } from "@/app/auth/actions";
 import { handlingLabels } from "@/lib/agent-model";
 import { Button, Notice } from "./ui";
@@ -342,6 +346,7 @@ export function AgentGeneral({
           </dd>
         </div>
       </dl>
+      {editable && !agent.is_default && <ArchiveAgent agent={agent} />}
       {field && (
         <EditAgent
           key={field}
@@ -351,5 +356,48 @@ export function AgentGeneral({
         />
       )}
     </section>
+  );
+}
+
+export function ArchiveAgent({ agent }: { agent: Agent }) {
+  const [open, setOpen] = useState(false),
+    [state, action, pending] = useActionState(archiveAgent, initial);
+  return (
+    <div className="agent-maintenance">
+      <button className="agent-edit-button" onClick={() => setOpen(true)}>
+        Archive agent
+      </button>
+      <WorkspaceDialog
+        open={open}
+        close={() => {
+          if (!pending) setOpen(false);
+        }}
+        title="Archive agent"
+      >
+        <form action={action}>
+          <input type="hidden" name="agent_id" value={agent.id} />
+          <div className="agent-dialog-body">
+            <p>
+              Archive {agent.name}? Conversation history will be preserved. Move
+              its channels to another agent first.
+            </p>
+            {state.status === "error" && <Notice error>{state.message}</Notice>}
+          </div>
+          <div className="agent-dialog-footer">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setOpen(false)}
+              disabled={pending}
+            >
+              Cancel
+            </Button>
+            <Button variant="danger" disabled={pending}>
+              Archive agent
+            </Button>
+          </div>
+        </form>
+      </WorkspaceDialog>
+    </div>
   );
 }
