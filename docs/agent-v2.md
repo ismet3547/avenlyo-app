@@ -159,7 +159,10 @@ the routing/policy contract, not live model translation quality.
 
 Shared readability tokens set 30px page titles, 19px section headings, 15px body,
 14px labels/navigation/buttons and 13px metadata, with 42–44px control rhythm.
-This changes typography, not page layouts or Home/onboarding behavior. Agent
+Legacy shared component and responsive text variants use the same tokens, with
+no shared text size below 13px. Channel supporting copy uses the body scale and
+muted captions use the shared contrast color. This changes typography, not page
+layouts or Home/onboarding behavior. Agent
 controls use visible focus and compact summaries; mobile dialogs become sheets.
 The duplicate Agent playground resource link was removed; Test Agent has one
 existing destination with agent selection.
@@ -175,6 +178,9 @@ existing destination with agent selection.
 | Language runtime, readability and acceptance coverage | `0dcb5e54415e0de0f48fb4b7b7cba1b33b3fb7cd` |
 | Canonical localized safety notices and routing regressions | `2d4610ae82fdd45ab99ca6831a31a649332be47c` |
 | Explicit select labels and responsive controls | `5019d4a41405c7746d31c50208a9e90491d1599a` |
+| Unsaved edits and complete review inventory | `de15207b2d916353f05543e7a0dc2950adc4e169` |
+| Explicit saved-role labels | `aa32817e53d51a7e49605d7dad8771008bbb856f` |
+| Pending-save feedback and persisted assignment synchronization | `7d90d5ccec6408b1c124c8e8f8fc03f4188f42ec` |
 
 ## Validation workflow
 
