@@ -146,10 +146,12 @@ function EditAgent({
   agent,
   field,
   close,
+  saved,
 }: {
   agent: Agent;
   field: Field;
   close: () => void;
+  saved: () => void;
 }) {
   const [state, action, pending] = useActionState(saveAgentField, initial),
     [dirty, setDirty] = useState(false);
@@ -158,8 +160,8 @@ function EditAgent({
       close();
   };
   useEffect(() => {
-    if (state.status === "success") close();
-  }, [state, close]);
+    if (state.status === "success") saved();
+  }, [state, saved]);
   return (
     <WorkspaceDialog
       open
@@ -287,6 +289,7 @@ export function AgentGeneral({
   editable: boolean;
 }) {
   const [field, setField] = useState<Field | null>(null);
+  const [notice, setNotice] = useState("");
   const rows: [Field, string][] = [
     ["name", agent.name],
     ["role", agent.setup_brief || "Describe how this agent helps customers."],
@@ -315,6 +318,7 @@ export function AgentGeneral({
       aria-labelledby="agent-tab-general"
     >
       <h2>General</h2>
+      {notice && <Notice>{notice}</Notice>}
       {!editable && (
         <p className="agent-muted">
           Only workspace owners can change this agent.
@@ -324,14 +328,19 @@ export function AgentGeneral({
         {rows.map(([key, summary]) => (
           <div key={key}>
             <dt>{titles[key]}</dt>
-            <dd>{summary}</dd>
+            <dd className={key === "role" ? "agent-role-summary" : undefined}>
+              {summary}
+            </dd>
             {editable &&
               (key !== "contacts" ||
                 agent.goals.includes("collect_contact")) && (
                 <button
                   className="agent-edit-button"
                   aria-label={`Edit ${titles[key].toLowerCase()}`}
-                  onClick={() => setField(key)}
+                  onClick={() => {
+                    setNotice("");
+                    setField(key);
+                  }}
                 >
                   Edit
                 </button>
@@ -353,6 +362,10 @@ export function AgentGeneral({
           agent={agent}
           field={field}
           close={() => setField(null)}
+          saved={() => {
+            setField(null);
+            setNotice("Changes saved.");
+          }}
         />
       )}
     </section>

@@ -29,7 +29,7 @@ export async function saveAgent(
       status: "error",
       message: "Settings could not be saved. Owner access is required.",
     };
-  revalidatePath("/app/agent");
+  revalidatePath("/app/agent", "layout");
   revalidatePath("/app");
   return { status: "success", message: "Agent settings saved." };
 }
@@ -64,7 +64,7 @@ export async function createAgent(
       message:
         "This agent could not be created. Please try again. Owner access is required.",
     };
-  revalidatePath("/app/agent");
+  revalidatePath("/app/agent", "layout");
   redirect(`/app/agent/${result.data}`);
 }
 export async function saveAgentField(
@@ -134,7 +134,7 @@ export async function saveAgentField(
       message:
         "Changes could not be saved. Please try again. Owner access is required.",
     };
-  revalidatePath("/app/agent");
+  revalidatePath("/app/agent", "layout");
   revalidatePath("/app");
   return { status: "success", message: "Changes saved." };
 }
@@ -167,7 +167,7 @@ export async function saveAgentScope(
       message:
         "Knowledge scope could not be saved. Please try again. Owner access is required.",
     };
-  revalidatePath("/app/agent");
+  revalidatePath("/app/agent", "layout");
   return { status: "success", message: "Knowledge scope saved." };
 }
 export async function saveAgentLanguages(
@@ -197,7 +197,7 @@ export async function saveAgentLanguages(
       message:
         "Languages could not be saved. Please try again. Owner access is required.",
     };
-  revalidatePath("/app/agent");
+  revalidatePath("/app/agent", "layout");
   return { status: "success", message: "Languages saved." };
 }
 
@@ -221,6 +221,6 @@ export async function archiveAgent(
           ? "Move this agent's channels to another agent before removing it."
           : "This agent could not be archived. Please try again. Owner access is required.",
     };
-  revalidatePath("/app/agent");
+  revalidatePath("/app/agent", "layout");
   redirect("/app/agent");
 }

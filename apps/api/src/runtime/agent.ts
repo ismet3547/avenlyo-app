@@ -1,5 +1,7 @@
 import {
   agentSettingsSchema,
+  languageSchema,
+  type Language,
   modelResponseSchema,
   type Channel,
   type Database,
@@ -45,8 +47,15 @@ type Context = {
   history: { role: "customer" | "assistant" | "human"; content: string }[];
   content: string;
   replyWindowOpen: boolean;
+  languages: { primary: Language; additional: Language[]; legacy: boolean };
 };
+const runtimeLanguages = z.object({
+  primary: languageSchema,
+  additional: z.array(languageSchema),
+  legacy: z.boolean(),
+});
 const channelContextSchema = z.object({
+  languages: runtimeLanguages,
   businessName: z.string().min(2).max(100),
   settings: z.unknown(),
   aiMode: z.enum(["active", "paused"]),
@@ -129,7 +138,9 @@ export class FrontOfficeRuntime {
         resolvedAgentId = conversation.data.agent_id;
         const settings = await user
           .from("agents")
-          .select("tone,goals,contact_fields,human_handoff_enabled")
+          .select(
+            "tone,goals,contact_fields,human_handoff_enabled,primary_language,additional_languages,language_policy",
+          )
           .eq("workspace_id", input.workspaceId)
           .eq("id", resolvedAgentId)
           .is("archived_at", null)
@@ -138,7 +149,17 @@ export class FrontOfficeRuntime {
           throw new RuntimeError("CONTEXT_UNAVAILABLE", 503);
         return {
           businessName: workspace.data.name,
-          settings: settings.data,
+          settings: {
+            tone: settings.data.tone,
+            goals: settings.data.goals,
+            contact_fields: settings.data.contact_fields,
+            human_handoff_enabled: settings.data.human_handoff_enabled,
+          },
+          languages: runtimeLanguages.parse({
+            primary: settings.data.primary_language,
+            additional: settings.data.additional_languages,
+            legacy: settings.data.language_policy === "legacy_multilingual",
+          }),
           aiMode: conversation.data.ai_mode,
           channel: "test_agent",
           history: [...messages.data].reverse(),
@@ -241,6 +262,20 @@ export class FrontOfficeRuntime {
         ...(context.settings as object),
         setup_brief: "",
       });
+      const detected = context.languages.legacy
+        ? null
+        : await this.provider.detectLanguage(context.content);
+      const responseLanguage: Language | null = context.languages.legacy
+        ? null
+        : detected &&
+            detected !== "other" &&
+            [
+              context.languages.primary,
+              ...context.languages.additional,
+            ].includes(detected)
+          ? detected
+          : context.languages.primary;
+      let fixedReply = true;
       const customerTurns = context.history
         .filter((m) => m.role === "customer")
         .map((m) => m.content);
@@ -294,9 +329,14 @@ export class FrontOfficeRuntime {
             title: m.title,
             revision: m.revision,
           }));
+          fixedReply = false;
           const model = modelResponseSchema.parse(
             await this.provider.respond({
-              instructions: instructions(settings, context.channel),
+              instructions:
+                instructions(settings, context.channel) +
+                (responseLanguage
+                  ? `\nReply in language code ${responseLanguage}. Use the same agent behavior in every language. Translate approved facts faithfully; never invent missing information.`
+                  : ""),
               businessName: context.businessName,
               knowledge: matches.map((m) => ({
                 id: m.id,
@@ -316,6 +356,11 @@ export class FrontOfficeRuntime {
         output,
         output.request_human,
       );
+      if (fixedReply && responseLanguage)
+        output.reply = await this.provider.localize(
+          output.reply,
+          responseLanguage,
+        );
       const safeReply = customerSafeReply(output.reply, Boolean(lead));
       output.reply =
         context.channel === "instagram"

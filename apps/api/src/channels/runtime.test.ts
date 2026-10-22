@@ -45,6 +45,7 @@ function setup(
       return {
         data: {
           businessName: "Northstar Studio",
+          languages: { primary: "en", additional: [], legacy: false },
           settings: defaultSettings,
           aiMode: options.paused ? "paused" : "active",
           channel: options.channel ?? "website_chat",
@@ -84,7 +85,12 @@ function setup(
   return {
     runtime: new FrontOfficeRuntime(
       { rpc } as unknown as SupabaseClient<Database>,
-      { respond, embed },
+      {
+        respond,
+        embed,
+        detectLanguage: async () => "en",
+        localize: async (text) => text,
+      },
     ),
     rpc,
     respond,

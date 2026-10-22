@@ -21,6 +21,9 @@ const config = configSchema.parse({
   SUPABASE_SERVICE_ROLE_KEY: "fictional-server-key",
 });
 const provider: AgentProvider = {
+  detectLanguage: async (text) =>
+    /merhaba|hizmet|fiyat/i.test(text) ? "tr" : "en",
+  localize: async (text) => text,
   embed: vi.fn(async () => [1, ...Array(1535).fill(0)]),
   respond: vi.fn(async () => ({
     reply: "We offer custom design.",
@@ -76,6 +79,9 @@ async function setup(
     {
       workspaces: { name: "Northstar Studio" },
       agents: {
+        primary_language: "en",
+        additional_languages: [],
+        language_policy: "configured",
         tone: "professional",
         goals: [
           "answer_questions",

@@ -38,6 +38,7 @@ export async function saveWebsiteChannel(
         "Could not save this channel. Workspace owner access and exact origins are required.",
     };
   revalidatePath("/app/channels");
+  revalidatePath("/app/agent", "layout");
   return {
     status: "success",
     message: parsed.data.enabled
@@ -59,6 +60,7 @@ export async function disconnectInstagram(
       message: "Could not disconnect. Workspace owner access is required.",
     };
   revalidatePath("/app/channels");
+  revalidatePath("/app/agent", "layout");
   return {
     status: "success",
     message:
@@ -71,12 +73,10 @@ export async function assignChannelAgent(
   form: FormData,
 ): Promise<FormState> {
   const ctx = await requireWorkspace();
-  const value = z
-    .object({ connection: z.uuid(), agent: z.uuid() })
-    .safeParse({
-      connection: form.get("connection_id"),
-      agent: form.get("agent_id"),
-    });
+  const value = z.object({ connection: z.uuid(), agent: z.uuid() }).safeParse({
+    connection: form.get("connection_id"),
+    agent: form.get("agent_id"),
+  });
   if (!value.success)
     return { status: "error", message: "Choose an agent for this channel." };
   const result = await ctx.supabase.rpc("assign_channel_agent", {
@@ -91,6 +91,7 @@ export async function assignChannelAgent(
         "Agent assignment could not be saved. Owner access and an available workspace agent are required.",
     };
   revalidatePath("/app/channels");
+  revalidatePath("/app/agent", "layout");
   revalidatePath("/app/agent");
   return {
     status: "success",

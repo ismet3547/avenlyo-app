@@ -97,6 +97,9 @@ async function account(label: string) {
   };
 }
 const provider: AgentProvider = {
+  detectLanguage: async (text) =>
+    /merhaba|hizmet|fiyat/i.test(text) ? "tr" : "en",
+  localize: async (text) => text,
   embed: async () => {
     embeddingCalls++;
     return [1, ...Array(1535).fill(0)];

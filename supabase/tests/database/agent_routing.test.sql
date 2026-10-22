@@ -7,8 +7,12 @@ set local request.jwt.claims='{"sub":"af555555-5555-4555-8555-555555555555","rol
 do $$ begin
  perform set_config('test.rw',public.create_workspace('Routing Studio')::text,true);
  perform set_config('test.ra',(select id::text from public.agents where workspace_id=current_setting('test.rw')::uuid and is_default),true);
+ perform public.save_agent_settings(current_setting('test.rw')::uuid,'{"tone":"warm","goals":["answer_questions","human_handoff"],"contact_fields":[],"human_handoff_enabled":true,"setup_brief":"Help with approved services."}');
+ perform set_config('test.rk',public.save_business_knowledge(current_setting('test.rw')::uuid,null,'custom_note','Scoped services','Approved services only.',null,'','','',null)::text,true);
+ perform set_config('test.rvec','['||'1,'||repeat('0,',1534)||'0]',true);
  perform set_config('test.rb',public.create_agent(current_setting('test.rw')::uuid,'Sales','Help customers with sales.','en')::text,true);
 end $$;
+select public.set_agent_knowledge_scope(current_setting('test.rw')::uuid,current_setting('test.rb')::uuid,'selected','{}');
 select extensions.throws_ok($$select public.configure_website_channel(current_setting('test.rw')::uuid,true,array['https://routing.example'])$$,'22023',null,'Multiple Agents require a deliberate new channel assignment');
 do $$ begin
  perform set_config('test.rc',public.configure_website_channel_for_agent(current_setting('test.rw')::uuid,true,array['https://routing.example'],current_setting('test.ra')::uuid)::text,true);
@@ -16,6 +20,7 @@ do $$ begin
 end $$;
 set local role service_role;
 set local request.jwt.claims='{"role":"service_role"}';
+select public.publish_knowledge_item('af555555-5555-4555-8555-555555555555',current_setting('test.rw')::uuid,current_setting('test.rk')::uuid,1,current_setting('test.rvec')::extensions.vector);
 select public.create_website_session(current_setting('test.rpublic')::uuid,'https://routing.example',repeat('a',64));
 reset role;
 do $$ begin perform set_config('test.rconv',(select id::text from public.conversations where channel_connection_id=current_setting('test.rc')::uuid),true); end $$;
@@ -28,6 +33,20 @@ select extensions.throws_ok($$select public.archive_agent(current_setting('test.
 set local role service_role;
 set local request.jwt.claims='{"role":"service_role"}';
 select public.create_website_session(current_setting('test.rpublic')::uuid,'https://routing.example',repeat('b',64));
+do $$ declare r record; begin
+ select * into r from public.begin_website_turn(current_setting('test.rpublic')::uuid,'https://routing.example',repeat('a',64),gen_random_uuid(),'What services?');
+ perform set_config('test.rlive_a',r.run_id::text,true);
+ select * into r from public.begin_website_turn(current_setting('test.rpublic')::uuid,'https://routing.example',repeat('b',64),gen_random_uuid(),'What services?');
+ perform set_config('test.rlive_b',r.run_id::text,true);
+end $$;
+select extensions.is(public.channel_runtime_context(current_setting('test.rlive_a')::uuid)->'settings'->>'tone','warm','Existing conversation loads Agent A settings after channel moves to B');
+select extensions.is(public.channel_runtime_context(current_setting('test.rlive_b')::uuid)->'settings'->>'tone','professional','New conversation loads Agent B settings');
+select extensions.is((select count(*)::integer from public.match_channel_knowledge(current_setting('test.rlive_a')::uuid,current_setting('test.rvec')::extensions.vector)),1,'Channel runtime respects original Agent A Knowledge scope');
+select extensions.is((select count(*)::integer from public.match_channel_knowledge(current_setting('test.rlive_b')::uuid,current_setting('test.rvec')::extensions.vector)),0,'Channel runtime respects narrowed Agent B scope');
+select extensions.throws_ok($$select public.finish_channel_turn(current_setting('test.rlive_b')::uuid,'Invalid authority.',jsonb_build_array(jsonb_build_object('id',current_setting('test.rk'),'title','Scoped services','revision',2)),false,null)$$,'40001',null,'Final commit rechecks Agent scope even for a Published same-workspace source');
+select public.fail_channel_turn(current_setting('test.rlive_a')::uuid);
+select public.fail_channel_turn(current_setting('test.rlive_b')::uuid);
+
 do $$ declare turn record; begin
  select * into turn from public.begin_agent_test_turn('af555555-5555-4555-8555-555555555555',current_setting('test.rw')::uuid,null,gen_random_uuid(),'Hello',current_setting('test.rb')::uuid);
  perform set_config('test.rtest',turn.conversation_id::text,true);

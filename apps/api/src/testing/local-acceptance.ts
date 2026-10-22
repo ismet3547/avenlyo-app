@@ -31,6 +31,9 @@ function check(condition: unknown, message: string) {
 }
 let modelCalls = 0;
 const provider: AgentProvider = {
+  detectLanguage: async (text) =>
+    /merhaba|hizmet|fiyat/i.test(text) ? "tr" : "en",
+  localize: async (text) => text,
   embed: async () => [1, ...Array(1535).fill(0)],
   respond: async (input) => {
     modelCalls++;
@@ -145,7 +148,10 @@ try {
     app.inject({
       method: "POST",
       url: path,
-      headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+      headers: {
+        authorization: `Bearer ${token}`,
+        "content-type": "application/json",
+      },
       payload: JSON.stringify(payload),
     });
   for (const id of [item.data, faq.data])
