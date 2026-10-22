@@ -357,6 +357,18 @@ test("Agent V2 keeps settings, Knowledge, languages and conversation routing iso
   await page.getByRole("checkbox", { name: "Enable Website Chat" }).check();
   await page.getByRole("button", { name: "Save channel", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("ready");
+  await expect
+    .poll(
+      async () =>
+        (
+          await owner
+            .from("channel_connections")
+            .select("agent_id")
+            .eq("workspace_id", wid)
+            .single()
+        ).data?.agent_id,
+    )
+    .toBe(aid);
   const channel = (
     await owner
       .from("channel_connections")
@@ -377,6 +389,21 @@ test("Agent V2 keeps settings, Knowledge, languages and conversation routing iso
   await page.getByLabel("Agent", { exact: true }).selectOption(bid);
   await page.getByRole("button", { name: "Save channel", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("ready");
+  await expect
+    .poll(
+      async () =>
+        (
+          await owner
+            .from("channel_connections")
+            .select("agent_id")
+            .eq("id", channel.id)
+            .single()
+        ).data?.agent_id,
+    )
+    .toBe(bid);
+  await expect(
+    page.getByRole("button", { name: "Save channel", exact: true }),
+  ).toBeEnabled();
   expect(
     (
       await admin.rpc("create_website_session", {

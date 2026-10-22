@@ -44,7 +44,8 @@ export function ChannelAgentAssignment({
           Save agent
         </Button>
       )}
-      {state.status !== "idle" && (
+      {pending && <Notice>Saving agent assignment…</Notice>}
+      {!pending && state.status !== "idle" && (
         <Notice error={state.status === "error"}>{state.message}</Notice>
       )}
     </form>

@@ -145,7 +145,8 @@ export function AgentKnowledge({
         <p className="agent-muted">
           Draft and archived items are never available to this agent.
         </p>
-        {state.status !== "idle" && (
+        {pending && <Notice>Saving knowledge scope…</Notice>}
+        {!pending && state.status !== "idle" && (
           <Notice error={state.status === "error"}>{state.message}</Notice>
         )}
         {editable && (

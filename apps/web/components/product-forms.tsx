@@ -583,7 +583,11 @@ export function WebsiteForm({
             <small>Your agent can respond on these approved websites.</small>
           </span>
         </label>
-        <Feedback state={state} />
+        {pending ? (
+          <Notice>Saving channel…</Notice>
+        ) : (
+          <Feedback state={state} />
+        )}
       </div>
       <div className="form-footer">
         <span className="section-note">
