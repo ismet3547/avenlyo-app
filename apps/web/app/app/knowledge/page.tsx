@@ -1,1 +1,16 @@
-import {SkeletonPage} from "@/components/skeleton-page";export default function Page(){return <SkeletonPage title="Knowledge" description="Knowledge UI removed. Knowledge schema, migrations and server actions remain preserved."/>}
+import { knowledgeData } from "@/lib/knowledge-data";
+import { KnowledgeLibrary } from "@/components/knowledge-library";
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ collection?: string }>;
+}) {
+  const [data, params] = await Promise.all([knowledgeData(), searchParams]);
+  return (
+    <KnowledgeLibrary
+      {...data}
+      initialCollection={params.collection}
+      now={Date.now()}
+    />
+  );
+}

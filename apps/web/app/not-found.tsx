@@ -1,1 +1,17 @@
-import Link from "next/link";export default function NotFound(){return <main className="skeleton-main"><section className="skeleton-page"><h1>404</h1><p>This route is unavailable.</p><p><Link href="/app">Back to app</Link></p></section></main>}
+import { ArrowLeft } from "lucide-react";
+import { ActionLink, Brand } from "@/components/ui";
+export default function NotFound() {
+  return (
+    <main className="standalone-state">
+      <Brand />
+      <h1>This page has wandered off.</h1>
+      <p>
+        The page may have moved, or you may need to switch workspaces to see it.
+      </p>
+      <ActionLink href="/app">
+        <ArrowLeft aria-hidden="true" />
+        Back to your workspace
+      </ActionLink>
+    </main>
+  );
+}

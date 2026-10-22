@@ -1,8 +1,20 @@
-import type {ReactNode} from "react";
-import Link from "next/link";
-import {requireWorkspace} from "@/lib/workspace";
-import {signOut} from "../auth/actions";
-import {switchWorkspace} from "../workspaces/actions";
-export const dynamic="force-dynamic";
-const nav=[["Home","/app"],["Inbox","/app/inbox"],["Leads","/app/leads"],["Agent","/app/agent"],["Knowledge","/app/knowledge"],["Channels","/app/channels"],["Test agent","/app/test-agent"],["Settings","/app/settings"]] as const;
-export default async function AppLayout({children}:{children:ReactNode}){const ctx=await requireWorkspace();return <div className="skeleton-shell"><aside className="skeleton-sidebar"><p className="skeleton-brand">Avenlyo</p><nav className="skeleton-nav" aria-label="Workspace">{nav.map(([label,href])=><Link href={href} key={href}>{label}</Link>)}</nav></aside><div className="skeleton-workspace"><header className="skeleton-topbar"><form action={switchWorkspace}><label htmlFor="workspace-select" className="sr-only">Workspace</label><select id="workspace-select" name="workspaceId" defaultValue={ctx.workspace.id}>{ctx.workspaces.map(w=><option value={w.id} key={w.id}>{w.name}</option>)}</select>{ctx.workspaces.length>1&&<button type="submit">Switch</button>}</form><div className="skeleton-topbar-actions"><Link href="/workspaces">Workspaces</Link><span>{ctx.role}</span><form action={signOut}><button type="submit">Sign out</button></form></div></header><main className="skeleton-main">{children}</main></div></div>}
+import type { ReactNode } from "react";
+import { AppShell } from "@/components/app-shell";
+import { productContext } from "@/lib/product-data";
+import { onboardingState } from "@/lib/onboarding";
+export const dynamic = "force-dynamic";
+export default async function AppLayout({ children }: { children: ReactNode }) {
+  const ctx = await productContext();
+  const state = await onboardingState();
+  return (
+    <AppShell
+      setup={!state.completedAt}
+      workspace={ctx.workspace}
+      workspaces={ctx.workspaces}
+      email={ctx.user.email ?? "Your team"}
+      role={ctx.role}
+    >
+      {children}
+    </AppShell>
+  );
+}

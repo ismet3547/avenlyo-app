@@ -1,1 +1,13 @@
-import type {ReactNode} from "react";export const dynamic="force-dynamic";export default function AuthLayout({children}:{children:ReactNode}){return <main className="skeleton-auth"><section className="skeleton-auth-card"><p className="skeleton-brand">Avenlyo</p>{children}</section></main>}
+import type { ReactNode } from "react";
+import { Brand } from "@/components/ui";
+export default function AuthLayout({ children }: { children: ReactNode }) {
+  return (
+    <div className="auth-shell">
+      <div className="auth-brand">
+        <Brand />
+      </div>
+      <main className="auth-form-side">{children}</main>
+      <footer className="auth-footer">Avenlyo · Customer workspace</footer>
+    </div>
+  );
+}

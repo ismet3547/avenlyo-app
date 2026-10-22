@@ -6,33 +6,31 @@ import {
   knowledgeTypes,
   knowledgeLabels,
   type Database,
+  type KnowledgeType,
 } from "@avenlyo-app/shared";
 
-test.use({actionTimeout: 15000});
-
-test("Knowledge is a structured, responsive, published-only business workspace", async ({
+test("Knowledge library, six editors, explicit lifecycle, imports and tenant isolation", async ({
   page,
 }, testInfo) => {
-  test.setTimeout(240000);
+  test.setTimeout(300000);
   expect(process.env.SUPABASE_URL).toBe("http://127.0.0.1:55321");
-  const admin = createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  );
-  const email = `knowledge-${randomUUID()}@example.test`;
-  const password = `Local-knowledge-${randomUUID()}!`;
-  const created = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  });
-  expect(created.error).toBeNull();
-  const user = createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  );
+  const client = (key: string) =>
+    createClient<Database>(process.env.SUPABASE_URL!, key, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+  const admin = client(process.env.SUPABASE_SERVICE_ROLE_KEY!);
+  const email = `knowledge-${randomUUID()}@example.test`,
+    password = `Local-knowledge-${randomUUID()}!`;
+  expect(
+    (
+      await admin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+      })
+    ).error,
+  ).toBeNull();
+  const user = client(process.env.SUPABASE_PUBLISHABLE_KEY!);
   expect(
     (await user.auth.signInWithPassword({ email, password })).error,
   ).toBeNull();
@@ -44,158 +42,214 @@ test("Knowledge is a structured, responsive, published-only business workspace",
   await mkdir(shots, { recursive: true });
   const capture = async (name: string) => {
     await page.evaluate(() => window.scrollTo(0, 0));
-    await expect
-      .poll(() =>
-        page.evaluate(
-          () => document.documentElement.scrollWidth <= window.innerWidth,
-        ),
-      )
-      .toBe(true);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth + 1,
+      ),
+    ).toBe(true);
     const path = `${shots}/${name}.png`;
     await page.screenshot({ path, fullPage: true });
     await testInfo.attach(name, { path, contentType: "image/png" });
   };
+  const rows = page.locator(".knowledge-list > li");
+  const editorStatus = (status: string) =>
+    page.locator(".knowledge-editor-title").getByText(status, { exact: true });
+  const savedItem = async () => {
+    const id = new URL(page.url()).pathname.split("/").at(-1)!;
+    const result = await user
+      .from("knowledge_items")
+      .select("*")
+      .eq("workspace_id", workspace.data!)
+      .eq("id", id)
+      .single();
+    expect(result.error).toBeNull();
+    return result.data!;
+  };
   await page.goto("/auth/sign-in");
-  await page.getByLabel("Email", { exact: true }).fill(email);
+  await page.getByLabel("Email address", { exact: true }).fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  await expect(page).toHaveURL(/\/app$/);
+  await expect(page).toHaveURL(/\/onboarding$/);
   await page.goto("/app/knowledge");
   await expect(
-    page.getByRole("heading", { name: "Teach Avenlyo about your business." }),
+    page.getByRole("heading", { name: "Knowledge", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("navigation", { name: "Knowledge status filters" }),
+    page.getByText(/Give Avenlyo the information it needs/),
+  ).toBeVisible();
+  for (const name of ["Add manually", "Import webpage", "Upload file"])
+    await expect(
+      page.getByRole("link", { name: new RegExp(name) }),
+    ).toBeVisible();
+  await expect(page.getByRole("searchbox")).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Filter", exact: true }),
   ).toHaveCount(0);
   await expect(
-    page.getByRole("link", { name: "Add knowledge", exact: true }),
-  ).toHaveCount(1);
-  await capture("desktop-1440-zero");
+    page.getByRole("group", { name: "Knowledge status" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByText("Manage collections", { exact: true }),
+  ).toHaveCount(0);
+  await capture("empty-desktop");
   await page.setViewportSize({ width: 390, height: 844 });
-  await capture("mobile-390-zero");
+  await capture("empty-mobile");
+  await page
+    .getByRole("button", { name: "Add knowledge", exact: true })
+    .click();
+  const addDialog = page.getByRole("dialog", {
+    name: "Add knowledge",
+    exact: true,
+  });
+  await expect(addDialog).toBeVisible();
+  for (const name of ["Add manually", "Import webpage", "Upload file"])
+    await expect(
+      addDialog.getByRole("link", { name: new RegExp(name) }),
+    ).toBeVisible();
+  await capture("add-sheet-mobile");
+  await page.keyboard.press("Escape");
+  await expect(addDialog).not.toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Add knowledge", exact: true }),
+  ).toBeFocused();
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.getByText("+ Create collection", { exact: true }).click();
-  await page.getByLabel("Collection name", { exact: true }).fill("Services");
-  await capture("desktop-1440-collection-create");
+
+  // Collections remain available in their dedicated maintenance area, even before first use.
+  await page.goto("/app/knowledge/collections");
   await page
     .getByRole("button", { name: "Create collection", exact: true })
     .click();
-  await expect(page.getByRole("status")).toContainText("Collection created");
+  await page.getByLabel("Collection name", { exact: true }).fill("Services");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Create collection", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Services", exact: true }),
+  ).toBeVisible();
   const collection = await user
     .from("knowledge_collections")
     .select("id")
     .eq("workspace_id", workspace.data!)
     .single();
   expect(collection.error).toBeNull();
-  await page.goto("/app/knowledge/new");
-  await expect(page.getByLabel("Service name", { exact: true })).toHaveCount(0);
-  await capture("desktop-1440-type-picker");
-  await page.setViewportSize({ width: 390, height: 844 });
-  await capture("mobile-390-type-picker");
-  await page.setViewportSize({ width: 1440, height: 1000 });
-  const titleLabels = {
-    service: "Service name",
-    pricing: "Pricing title",
-    faq: "Question",
-    policy: "Policy title",
-    business_info: "Title / category",
-    custom_note: "Title",
+  const labels: Record<KnowledgeType, [string, string]> = {
+    service: ["Service name", "Description"],
+    pricing: ["Pricing title", "Details"],
+    faq: ["Question", "Answer"],
+    policy: ["Policy name", "Policy"],
+    business_info: ["Topic", "Information"],
+    custom_note: ["Title", "Note"],
   };
-  const contentLabels = {
-    service: "Description",
-    pricing: "Details / conditions (optional)",
-    faq: "Answer",
-    policy: "Policy details",
-    business_info: "Information",
-    custom_note: "Content",
-  };
+  const itemIds = new Map<KnowledgeType, string>();
   for (const type of knowledgeTypes) {
     await page.goto("/app/knowledge/new");
-    const radio = page.getByRole("radio", {
-      name: knowledgeLabels[type],
-      exact: true,
-    });
-    await radio.focus();
-    await page.keyboard.press("Space");
+    await expect(
+      page.getByRole("heading", {
+        name: "What kind of information are you adding?",
+      }),
+    ).toBeVisible();
     await page
-      .getByLabel(titleLabels[type], { exact: true })
-      .fill(
-        type === "faq"
-          ? "Do you work with small businesses?"
-          : `${knowledgeLabels[type]} — Logo design`,
-      );
+      .getByRole("link", { name: new RegExp(`^${knowledgeLabels[type]}`) })
+      .click();
+    const title = `${knowledgeLabels[type]} — Logo design`;
+    await page.getByLabel(labels[type][0], { exact: true }).fill(title);
     await page
-      .getByLabel(contentLabels[type], { exact: true })
+      .getByLabel(labels[type][1], { exact: true })
       .fill(
         "We provide logo design for small businesses. Two revisions are included.",
       );
-    if (type === "service")
+    if (type === "service") {
       await page
-        .getByLabel("Details / limits (optional)", { exact: true })
+        .getByRole("textbox", { name: "Additional details", exact: true })
         .fill("Delivery within five working days.");
+      await page
+        .getByRole("textbox", { name: "Pricing note", exact: true })
+        .fill("Projects are quoted individually.");
+    }
     if (type === "pricing") {
       await page
-        .getByLabel("Price / pricing statement", { exact: true })
+        .getByLabel("Price statement", { exact: true })
         .fill("Starting at $50");
-      await page.getByLabel("Currency (optional)", { exact: true }).fill("USD");
+      await page.getByText("Currency (optional)", { exact: true }).click();
+      await page.getByLabel("Currency", { exact: true }).fill("USD");
     }
     await page
       .getByRole("combobox", { name: "Collection", exact: true })
       .selectOption(collection.data!.id);
-    await capture(`desktop-1440-add-${type}`);
-    if (type === "pricing" || type === "faq") {
-      await page.setViewportSize({ width: 390, height: 844 });
-      await capture(`mobile-390-${type}-editor`);
-      for (const width of [768, 1024, 1280]) {
-        await page.setViewportSize({ width, height: 1000 });
-        await capture(`responsive-${width}-${type}-editor`);
-      }
-      await page.setViewportSize({ width: 1440, height: 1000 });
+    for (const width of [1440, 1024, 390]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await capture(`editor-${type}-${width}`);
     }
+    await page.setViewportSize({ width: 1440, height: 1000 });
     await page.getByRole("button", { name: "Save draft", exact: true }).click();
-    await expect(page).toHaveURL(/\/app\/knowledge\?notice=draft-saved/);
-    const row = page
-      .getByRole("article")
-      .filter({
-        has: page.getByRole("heading", {
-          name:
-            type === "faq"
-              ? "Do you work with small businesses?"
-              : `${knowledgeLabels[type]} — Logo design`,
-          exact: true,
-        }),
-      });
-    await expect(row.getByText("Draft", { exact: true })).toBeVisible();
-    if (type === "service") await capture("desktop-1440-one-item");
-    await row.getByRole("button", { name: "Publish", exact: true }).click();
-    await expect(row.getByRole("status")).toContainText("Published.");
-    const persisted = await user
-      .from("knowledge_items")
-      .select("id,status,revision,runtime_content")
-      .eq("workspace_id", workspace.data!)
-      .eq("type", type)
-      .single();
-    expect(persisted.data?.status).toBe("published");
+    await expect(page).toHaveURL(
+      /\/app\/knowledge\/[a-f0-9-]{36}\?notice=saved$/,
+    );
+    await expect(page.getByText("Draft saved", { exact: true })).toBeVisible();
+    await expect(editorStatus("Draft")).toBeVisible();
+    await expect(
+      page.getByRole("combobox", { name: "Type", exact: true }),
+    ).toHaveValue(type);
+    await expect(
+      page.getByRole("combobox", { name: "Collection", exact: true }),
+    ).toHaveValue(collection.data!.id);
+    let persisted = await savedItem();
+    itemIds.set(type, persisted.id);
+    expect(persisted.status).toBe("draft");
+    expect(persisted.embedding).toBeNull();
+    expect(persisted.type).toBe(type);
+    if (type === "service") {
+      await expect(
+        page.getByRole("textbox", { name: "Additional details", exact: true }),
+      ).toHaveValue("Delivery within five working days.");
+      await expect(
+        page.getByRole("textbox", { name: "Pricing note", exact: true }),
+      ).toHaveValue("Projects are quoted individually.");
+      expect(persisted.runtime_content).toContain(
+        "Delivery within five working days.",
+      );
+      expect(persisted.runtime_content).toContain(
+        "Projects are quoted individually.",
+      );
+    }
+    await page.getByRole("button", { name: "Publish", exact: true }).click();
+    await expect(editorStatus("Published")).toBeVisible();
+    await expect(
+      page.getByText("Available to your agent.", { exact: true }),
+    ).toBeVisible();
+    persisted = await savedItem();
+    expect(persisted.status).toBe("published");
+    expect(persisted.embedding).not.toBeNull();
     if (type === "pricing") {
-      expect(persisted.data?.runtime_content).toContain(
+      expect(persisted.runtime_content).toContain(
         "Price: Starting at $50\nCurrency: USD",
       );
-      await row.getByRole("heading").getByRole("link").click();
       await page
-        .getByLabel("Price / pricing statement", { exact: true })
+        .getByLabel("Price statement", { exact: true })
         .fill("$50–$100");
-      await page
-        .getByRole("button", { name: "Save draft", exact: true })
-        .click();
       await expect(
-        page
-          .getByRole("article")
-          .filter({ hasText: "Pricing — Logo design" })
-          .getByText("Draft", { exact: true }),
+        page.getByText(
+          "Saving changes returns this item to Draft. Publish it again after review.",
+        ),
       ).toBeVisible();
+      await page
+        .getByRole("button", { name: "Save changes", exact: true })
+        .click();
+      await expect(editorStatus("Draft")).toBeVisible();
+      await expect(
+        page.getByLabel("Price statement", { exact: true }),
+      ).toHaveValue("$50–$100");
+      persisted = await savedItem();
+      expect(persisted.status).toBe("draft");
+      expect(persisted.embedding).toBeNull();
+    }
+    if (type === "service") {
+      await page.goto("/app/knowledge");
+      await expect(rows).toHaveCount(1);
+      await capture("one-item-library");
     }
   }
-  // More than twenty records validate density and long names without fixture-only UI paths.
   for (let i = 0; i < 18; i++)
     expect(
       (
@@ -214,55 +268,444 @@ test("Knowledge is a structured, responsive, published-only business workspace",
       ).error,
     ).toBeNull();
   await page.goto("/app/knowledge");
-  await expect(page.getByRole("article")).toHaveCount(24);
-  await capture("desktop-1440-populated");
-  for (const width of [1280, 1024, 768, 390]) {
-    await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 });
-    await capture(
-      width === 390 ? "mobile-390-populated" : `responsive-${width}-populated`,
-    );
-  }
-  const firstRow = page.getByRole("article").first();
-  await firstRow.getByText("More", {exact:true}).click();
-  await firstRow.getByText("Delete", {exact:true}).click();
-  await capture("mobile-390-actions");
-  await firstRow.getByText("More", {exact:true}).click();
-  await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.getByRole("link", { name: /^Published/ }).click();
-  await expect(page.getByRole("article")).toHaveCount(5);
-  await capture("desktop-1440-published");
-  await page
-    .getByLabel("Search knowledge", { exact: true })
-    .fill("No matching business facts");
-  await page.getByRole("button", { name: "Apply", exact: true }).click();
+  await expect(rows).toHaveCount(24);
+  await expect(page.getByRole("link", { name: /Import webpage/ })).toHaveCount(
+    0,
+  );
   await expect(
-    page.getByRole("heading", { name: "No knowledge matches these filters." }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Teach Avenlyo about your business." }),
+    page.getByRole("button", { name: "Restore", exact: true }),
   ).toHaveCount(0);
-  await capture("desktop-1440-filter-empty");
-  await page.getByRole("link", { name: "Clear filters", exact: true }).click();
-  await expect(page).toHaveURL(/\/app\/knowledge$/);
-  await expect(page.getByRole("article")).toHaveCount(24);
-  await page.getByLabel("Knowledge type filter").selectOption("pricing");
-  await page.getByRole("button", { name: "Apply", exact: true }).click();
-  await expect(page.getByRole("article")).toHaveCount(1);
-  await expect(page.getByRole("article")).toContainText("$50–$100");
-  await page.getByRole("article").getByText("More", { exact: true }).click();
-  await page.getByRole("button", { name: "Archive", exact: true }).click();
+  for (const width of [1440, 1280, 1024, 768, 390]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await capture(`library-${width}`);
+    const add = page.getByRole("button", {
+      name: "Add knowledge",
+      exact: true,
+    });
+    await add.focus();
+    await add.press("Enter");
+    await expect(addDialog).toBeVisible();
+    const addBox = await addDialog.boundingBox();
+    expect(addBox).not.toBeNull();
+    if (width > 700) {
+      expect(addBox!.width).toBeGreaterThanOrEqual(480);
+      expect(addBox!.width).toBeLessThanOrEqual(520);
+      expect(Math.abs(addBox!.x + addBox!.width / 2 - width / 2)).toBeLessThan(
+        2,
+      );
+      expect(Math.abs(addBox!.y + addBox!.height / 2 - 500)).toBeLessThan(2);
+    } else {
+      expect(Math.abs(addBox!.y + addBox!.height - 1000)).toBeLessThan(2);
+      expect(addBox!.width).toBe(width);
+    }
+    const lastChoice = addDialog.getByRole("link", { name: /Upload file/ });
+    await lastChoice.focus();
+    await page.keyboard.press("Tab");
+    await expect(
+      addDialog.getByRole("button", { name: "Close dialog" }),
+    ).toBeFocused();
+    await page.keyboard.press("Shift+Tab");
+    await expect(lastChoice).toBeFocused();
+    await capture(`add-${width}`);
+    await page.keyboard.press("Escape");
+    await expect(addDialog).not.toBeVisible();
+    await expect(add).toBeFocused();
+
+    const filter = page.getByRole("button", { name: "Filter", exact: true });
+    const searchBox = await page
+      .getByRole("searchbox", { name: "Search knowledge", exact: true })
+      .locator("..")
+      .boundingBox();
+    const filterBox = await filter.boundingBox();
+    expect(
+      Math.abs(filterBox!.x - searchBox!.x - searchBox!.width - 12),
+    ).toBeLessThan(2);
+    await filter.focus();
+    await filter.press("Enter");
+    const filterPanel = page.getByRole("dialog", {
+      name: "Filter knowledge",
+      exact: true,
+    });
+    await expect(filterPanel).toBeVisible();
+    await expect(filter).toHaveAttribute("aria-expanded", "true");
+    const panelBox = await filterPanel.boundingBox();
+    if (width > 700) {
+      expect(panelBox!.width).toBeGreaterThanOrEqual(320);
+      expect(panelBox!.width).toBeLessThanOrEqual(360);
+      expect(
+        Math.abs(
+          panelBox!.x + panelBox!.width - filterBox!.x - filterBox!.width,
+        ),
+      ).toBeLessThan(2);
+      expect(
+        Math.abs(panelBox!.y - filterBox!.y - filterBox!.height - 8),
+      ).toBeLessThan(2);
+    } else {
+      expect(Math.abs(panelBox!.y + panelBox!.height - 1000)).toBeLessThan(2);
+      expect(panelBox!.width).toBe(width);
+    }
+    const typeRows = await filterPanel
+      .locator(".knowledge-type-filters > label")
+      .evaluateAll((nodes) =>
+        nodes.map((node) => {
+          const box = node.getBoundingClientRect();
+          return { x: box.x, y: box.y, bottom: box.bottom };
+        }),
+      );
+    expect(typeRows).toHaveLength(7);
+    for (let index = 1; index < typeRows.length; index++) {
+      expect(typeRows[index].x).toBe(typeRows[0].x);
+      expect(typeRows[index].y).toBeGreaterThanOrEqual(
+        typeRows[index - 1].bottom,
+      );
+    }
+    await expect(
+      filterPanel.getByRole("button", { name: "Clear", exact: true }),
+    ).toBeVisible();
+    await capture(`filter-${width}`);
+    await filterPanel.getByRole("radio", { name: "All", exact: true }).focus();
+    await page.keyboard.press("ArrowDown");
+    await expect(
+      filterPanel.getByRole("radio", { name: "Service", exact: true }),
+    ).toBeChecked();
+    await page.keyboard.press("Escape");
+    await expect(filterPanel).not.toBeVisible();
+    await expect(filter).toBeFocused();
+    await expect(rows).toHaveCount(24);
+
+    const organize = page.getByRole("button", {
+      name: "Organize knowledge",
+      exact: true,
+    });
+    await organize.focus();
+    await organize.press("Enter");
+    const menu = page.getByRole("menu", {
+      name: "Organize knowledge",
+      exact: true,
+    });
+    await expect(menu).toBeVisible();
+    await expect(organize).toHaveAttribute("aria-expanded", "true");
+    const menuBox = await menu.boundingBox(),
+      organizeBox = await organize.boundingBox();
+    expect(menuBox!.width).toBeLessThanOrEqual(240);
+    expect(
+      Math.abs(
+        menuBox!.x + menuBox!.width - organizeBox!.x - organizeBox!.width,
+      ),
+    ).toBeLessThan(2);
+    expect(
+      Math.abs(menuBox!.y - organizeBox!.y - organizeBox!.height - 8),
+    ).toBeLessThan(2);
+    await expect(
+      menu.getByRole("menuitem", { name: "View archived", exact: true }),
+    ).toHaveAttribute("href", "/app/knowledge/archived");
+    await expect(
+      menu.getByRole("menuitem", { name: "Manage collections", exact: true }),
+    ).toHaveAttribute("href", "/app/knowledge/collections");
+    await page.keyboard.press("End");
+    await expect(
+      menu.getByRole("menuitem", { name: "Manage collections", exact: true }),
+    ).toBeFocused();
+    await page.keyboard.press("Home");
+    await expect(
+      menu.getByRole("menuitem", { name: "View archived", exact: true }),
+    ).toBeFocused();
+    await capture(`overflow-${width}`);
+    await page.keyboard.press("Escape");
+    await expect(menu).not.toBeVisible();
+    await expect(organize).toBeFocused();
+  }
+  await page
+    .getByRole("button", { name: "Add knowledge", exact: true })
+    .click();
+  await expect(addDialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.getByRole("button", { name: "Filter", exact: true }).click();
   await expect(
-    page.getByRole("article").getByText("Archived", { exact: true }),
+    page.getByRole("dialog", { name: "Filter knowledge", exact: true }),
   ).toBeVisible();
-  await page.goto(`/app/knowledge?collection=${collection.data!.id}`);
-  await page.getByText("Rename collection", { exact: true }).click();
+  const search = page.getByRole("searchbox", {
+    name: "Search knowledge",
+    exact: true,
+  });
+  await search.click();
+  await expect(
+    page.getByRole("dialog", { name: "Filter knowledge", exact: true }),
+  ).not.toBeVisible();
+  await expect(search).toBeFocused();
+  await page.getByRole("button", { name: "Published", exact: true }).click();
+  await expect(rows).toHaveCount(5);
+  await page.getByRole("button", { name: /^Drafts/ }).click();
+  await expect(rows).toHaveCount(19);
+  await page.getByRole("button", { name: "All", exact: true }).click();
+  await page
+    .getByRole("searchbox", { name: "Search knowledge", exact: true })
+    .fill("No matching business facts");
+  await expect(
+    page.getByRole("heading", { name: "No results", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/Give Avenlyo the information it needs/),
+  ).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Clear filters", exact: true })
+    .click();
+  await expect(rows).toHaveCount(24);
+  await page.getByRole("button", { name: "Filter", exact: true }).click();
+  await expect(
+    page.getByRole("dialog").getByText("Status", { exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole("radio", { name: "Pricing", exact: true }).check();
+  await page
+    .getByRole("button", { name: "Apply filters", exact: true })
+    .click();
+  await expect(rows).toHaveCount(1);
+  await expect(rows).toContainText("Pricing — Logo design");
+  await page
+    .getByRole("searchbox", { name: "Search knowledge", exact: true })
+    .fill("$50–$100");
+  await expect(rows).toHaveCount(1);
+  await page.getByRole("button", { name: "Filter · 1", exact: true }).click();
+  await page.getByRole("radio", { name: "All", exact: true }).check();
+  await page
+    .getByRole("combobox", { name: "Collection", exact: true })
+    .selectOption(collection.data!.id);
+  await page
+    .getByRole("button", { name: "Apply filters", exact: true })
+    .click();
+  await page
+    .getByRole("searchbox", { name: "Search knowledge", exact: true })
+    .fill("");
+  await expect(rows).toHaveCount(6);
+
+  // Unsaved navigation is guarded only after a real edit; Keep editing retains all text.
+  await page.goto(`/app/knowledge/${itemIds.get("pricing")}`);
+  await page
+    .getByLabel("Details", { exact: true })
+    .fill("Unsaved customer conditions.");
+  await page.locator(".knowledge-back").click();
+  await expect(
+    page.getByRole("dialog", { name: "You have unsaved changes." }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Keep editing", exact: true }).click();
+  await expect(page.getByLabel("Details", { exact: true })).toHaveValue(
+    "Unsaved customer conditions.",
+  );
+  await page.locator(".knowledge-back").click();
+  await page
+    .getByRole("button", { name: "Discard changes", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/app\/knowledge$/);
+  await page.goto(`/app/knowledge/${itemIds.get("pricing")}`);
+  await expect(page.getByLabel("Details", { exact: true })).not.toHaveValue(
+    "Unsaved customer conditions.",
+  );
+  await page.getByLabel("Type", { exact: true }).selectOption("custom_note");
+  await expect(
+    page.getByRole("dialog", { name: "Change knowledge type?" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Change type", exact: true }).click();
+  await expect(page.getByLabel("Note", { exact: true })).toHaveValue(
+    /\$50–\$100/,
+  );
+  await page.getByRole("button", { name: "Save draft", exact: true }).click();
+  await expect(page.getByText("Draft saved", { exact: true })).toBeVisible();
+  expect((await savedItem()).content).toContain("Currency: USD");
+
+  // Lifecycle actions preserve their existing server security and explicit confirmation.
+  await page.goto(`/app/knowledge/${itemIds.get("faq")}`);
+  await page.getByRole("button", { name: "Unpublish", exact: true }).click();
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
+  await expect(editorStatus("Published")).toBeVisible();
+  await page.getByRole("button", { name: "Unpublish", exact: true }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Unpublish", exact: true })
+    .click();
+  await expect(editorStatus("Draft")).toBeVisible();
+  expect((await savedItem()).embedding).toBeNull();
+  await page.getByLabel("More actions", { exact: true }).click();
+  await page.getByRole("button", { name: "Archive", exact: true }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Archive", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/app\/knowledge\/archived$/);
+  await expect(rows).toHaveCount(1);
+  await expect(rows).toContainText("Archived");
+  await expect(
+    page.getByRole("button", { name: "Publish", exact: true }),
+  ).toHaveCount(0);
+  await capture("archived-desktop");
+  await page.getByRole("button", { name: "Restore", exact: true }).click();
+  await expect(editorStatus("Draft")).toBeVisible();
+  expect((await savedItem()).embedding).toBeNull();
+  await page.getByLabel("More actions", { exact: true }).click();
+  await page.getByRole("button", { name: "Delete", exact: true }).click();
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
+  expect((await savedItem()).id).toBe(itemIds.get("faq"));
+  await page.getByLabel("More actions", { exact: true }).click();
+  await page.getByRole("button", { name: "Delete", exact: true }).click();
+  const deletion = page.getByRole("dialog", {
+    name: "Delete this knowledge?",
+    exact: true,
+  });
+  // A forged action is rejected by the real server; feedback must remain
+  // visible inside the modal and the persisted item must remain intact.
+  await deletion.locator('input[name="id"]').evaluate((input) => {
+    (input as HTMLInputElement).value = "invalid-item-id";
+  });
+  await deletion.getByRole("button", { name: "Delete", exact: true }).click();
+  await expect(deletion.getByRole("alert")).toHaveText(
+    "Invalid knowledge action.",
+  );
+  expect((await savedItem()).id).toBe(itemIds.get("faq"));
+  await deletion.locator('input[name="id"]').evaluate((input, id) => {
+    (input as HTMLInputElement).value = id;
+  }, itemIds.get("faq")!);
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Delete", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/app\/knowledge$/);
+  const deleted = await user
+    .from("knowledge_items")
+    .select("id")
+    .eq("id", itemIds.get("faq")!);
+  expect(deleted.error).toBeNull();
+  expect(deleted.data).toEqual([]);
+
+  await page
+    .getByRole("button", { name: "Organize knowledge", exact: true })
+    .click();
+  await page
+    .getByRole("menuitem", { name: "Manage collections", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Rename Services", exact: true })
+    .click();
   await page
     .getByLabel("Collection name", { exact: true })
-    .last()
     .fill("Design services");
   await page.getByRole("button", { name: "Save name", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Collection renamed");
   await expect(
     page.getByRole("heading", { name: "Design services", exact: true }),
   ).toBeVisible();
+  expect(
+    (
+      await user
+        .from("knowledge_collections")
+        .select("name")
+        .eq("id", collection.data!.id)
+        .single()
+    ).data?.name,
+  ).toBe("Design services");
+  await page.goto(`/app/knowledge?collection=${collection.data!.id}`);
+  await expect(rows).toHaveCount(5);
+
+  // Real file upload opens the persisted Draft for review; publication stays explicit.
+  await page.goto("/app/knowledge/import?source=file");
+  await page.getByLabel("Choose file", { exact: true }).setInputFiles({
+    name: "business-facts.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "Our business offers logo design and custom identity projects.",
+    ),
+  });
+  await page.getByRole("button", { name: "Upload file", exact: true }).click();
+  await expect(
+    page.getByRole("heading", {
+      name: "Review imported knowledge",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("File imported as draft", { exact: true }),
+  ).toBeVisible();
+  await expect(editorStatus("Draft")).toBeVisible();
+  let imported = await savedItem();
+  expect(imported.type).toBe("custom_note");
+  expect(imported.embedding).toBeNull();
+  expect(imported.status).toBe("draft");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await capture("import-review-mobile");
+  await page.getByRole("button", { name: "Publish", exact: true }).click();
+  await expect(editorStatus("Published")).toBeVisible();
+  imported = await savedItem();
+  expect(imported.status).toBe("published");
+  expect(imported.embedding).not.toBeNull();
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/app/knowledge/import?source=webpage");
+  await page
+    .getByLabel("Website URL", { exact: true })
+    .fill("http://localhost/private");
+  await page.getByRole("button", { name: "Import", exact: true }).click();
+  await expect(
+    page.locator(".knowledge-import-form").getByRole("alert"),
+  ).toHaveText("Local or private network addresses cannot be imported.");
+  await expect(
+    page.getByRole("link", { name: "Add manually instead", exact: true }),
+  ).toBeVisible();
+  await capture("webpage-import-error");
+
+  const foreignEmail = `foreign-${randomUUID()}@example.test`;
+  expect(
+    (
+      await admin.auth.admin.createUser({
+        email: foreignEmail,
+        password,
+        email_confirm: true,
+      })
+    ).error,
+  ).toBeNull();
+  const foreign = client(process.env.SUPABASE_PUBLISHABLE_KEY!);
+  expect(
+    (await foreign.auth.signInWithPassword({ email: foreignEmail, password }))
+      .error,
+  ).toBeNull();
+  const foreignWorkspace = await foreign.rpc("create_workspace", {
+    business_name: "Separate private workspace",
+  });
+  expect(foreignWorkspace.error).toBeNull();
+  const foreignItem = await foreign.rpc("save_business_knowledge", {
+    target_workspace_id: foreignWorkspace.data!,
+    target_item_id: null,
+    item_type: "custom_note",
+    item_title: "Private tenant secret",
+    item_content: "Private details never visible to other tenants.",
+    expected_revision: null,
+    item_price_statement: "",
+    item_currency: "",
+    item_details: "",
+    item_collection_id: null,
+  });
+  expect(foreignItem.error).toBeNull();
+  const inaccessible = await page.goto(`/app/knowledge/${foreignItem.data}`);
+  // A streamed Next.js response can retain HTTP 200; access must still render
+  // the not-found boundary and exclude the foreign item from HTML and UI.
+  await expect(
+    page.getByRole("heading", {
+      name: "This page has wandered off.",
+      exact: true,
+    }),
+  ).toBeVisible();
+  expect(await inaccessible!.text()).not.toContain("Private tenant secret");
+  await expect(
+    page.getByText("Private tenant secret", { exact: true }),
+  ).toHaveCount(0);
+  expect(
+    (
+      await user
+        .from("knowledge_items")
+        .select("id")
+        .eq("id", foreignItem.data!)
+    ).data,
+  ).toEqual([]);
+  const denied = await user.rpc("change_knowledge_status", {
+    target_workspace_id: foreignWorkspace.data!,
+    target_item_id: foreignItem.data!,
+    target_status: "draft",
+  });
+  expect(denied.error).not.toBeNull();
 });

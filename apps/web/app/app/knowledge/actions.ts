@@ -57,9 +57,29 @@ export async function saveKnowledge(
       message:
         "Could not save this item. Check owner access or reload if someone edited it.",
     };
+  revalidatePath("/onboarding");
   revalidatePath("/app/knowledge");
   revalidatePath("/app");
-  redirect("/app/knowledge?notice=draft-saved");
+  if (form.get("return_to") === "editor") {
+    if (form.get("intent") === "publish") {
+      const publish = new FormData();
+      publish.set("id", result.data);
+      publish.set("intent", "publish");
+      const published = await knowledgeOperation(
+        { status: "idle", message: "" },
+        publish,
+      );
+      redirect(
+        `/app/knowledge/${result.data}?notice=${published.status === "success" ? "published" : "publish-failed"}`,
+      );
+    }
+    redirect(`/app/knowledge/${result.data}?notice=saved`);
+  }
+  redirect(
+    form.get("onboarding") === "true"
+      ? `/onboarding?step=knowledge&item=${result.data}`
+      : "/app/knowledge?notice=draft-saved",
+  );
 }
 export async function knowledgeOperation(
   _state: FormState,
@@ -103,6 +123,7 @@ export async function knowledgeOperation(
         message: "Action failed. Only owners can change knowledge.",
       };
   }
+  revalidatePath("/onboarding");
   revalidatePath("/app/knowledge");
   revalidatePath("/app");
   return {
@@ -155,23 +176,60 @@ export async function saveCollection(
   };
 }
 
+// Focused editor navigation reuses the existing lifecycle boundary unchanged.
+export async function knowledgeEditorOperation(
+  state: FormState,
+  form: FormData,
+): Promise<FormState> {
+  const result = await knowledgeOperation(state, form);
+  if (result.status !== "success")
+    return form.get("intent") === "publish"
+      ? {
+          status: "error",
+          message:
+            "We couldn’t publish this knowledge right now. Please try again.",
+        }
+      : result;
+  const id = z.uuid().parse(form.get("id"));
+  const intent = form.get("intent");
+  if (intent === "delete") redirect("/app/knowledge");
+  if (intent === "archived") redirect("/app/knowledge/archived");
+  redirect(
+    `/app/knowledge/${id}?notice=${intent === "publish" ? "published" : "draft"}`,
+  );
+}
+
+class KnowledgeImportError extends Error {}
 
 const MAX_IMPORT_BYTES = 1_000_000;
 const MAX_KNOWLEDGE_CHARS = 6000;
-const supportedFileExtensions = new Set(["txt", "md", "markdown", "csv", "json", "html", "htm"]);
+const supportedFileExtensions = new Set([
+  "txt",
+  "md",
+  "markdown",
+  "csv",
+  "json",
+  "html",
+  "htm",
+]);
 
 function normalizeImportUrl(value: FormDataEntryValue | null) {
   const raw = String(value ?? "").trim();
-  const candidate = /^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : `https://${raw}`;
+  const candidate = /^[a-z][a-z0-9+.-]*:\/\//i.test(raw)
+    ? raw
+    : `https://${raw}`;
   const parsed = z.url().safeParse(candidate);
-  if (!parsed.success) throw new Error("Enter a valid public website URL.");
+  if (!parsed.success)
+    throw new KnowledgeImportError("Enter a valid public website URL.");
   const url = new URL(parsed.data);
   if (!["http:", "https:"].includes(url.protocol))
-    throw new Error("Only http and https URLs can be imported.");
+    throw new KnowledgeImportError("Only http and https URLs can be imported.");
   if (url.username || url.password)
-    throw new Error("URLs containing credentials cannot be imported.");
+    throw new KnowledgeImportError(
+      "URLs containing credentials cannot be imported.",
+    );
   if (url.port && !["80", "443"].includes(url.port))
-    throw new Error("Only standard web ports can be imported.");
+    throw new KnowledgeImportError("Only standard web ports can be imported.");
   url.hash = "";
   return url;
 }
@@ -216,10 +274,15 @@ async function assertPublicUrl(url: URL) {
     hostname.endsWith(".internal") ||
     isIP(hostname)
   )
-    throw new Error("Local or private network addresses cannot be imported.");
+    throw new KnowledgeImportError(
+      "Local or private network addresses cannot be imported.",
+    );
   const records = await lookup(hostname, { all: true, verbatim: true });
-  if (!records.length || records.some((record) => blockedAddress(record.address)))
-    throw new Error("This address cannot be imported.");
+  if (
+    !records.length ||
+    records.some((record) => blockedAddress(record.address))
+  )
+    throw new KnowledgeImportError("This address cannot be imported.");
 }
 
 async function readLimitedText(response: Response) {
@@ -234,7 +297,9 @@ async function readLimitedText(response: Response) {
     bytes += value.byteLength;
     if (bytes > MAX_IMPORT_BYTES) {
       await reader.cancel();
-      throw new Error("That page is too large to import. Use a more specific page.");
+      throw new KnowledgeImportError(
+        "That page is too large to import. Use a more specific page.",
+      );
     }
     text += decoder.decode(value, { stream: true });
   }
@@ -259,14 +324,22 @@ function decodeHtml(value: string) {
 function htmlToKnowledge(html: string) {
   const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
   const title = titleMatch
-    ? decodeHtml(titleMatch[1].replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim()
+    ? decodeHtml(titleMatch[1].replace(/<[^>]+>/g, " "))
+        .replace(/\s+/g, " ")
+        .trim()
     : "";
   const text = decodeHtml(
     html
       .replace(/<!--[\s\S]*?-->/g, " ")
-      .replace(/<(script|style|noscript|svg|template)[^>]*>[\s\S]*?<\/\1>/gi, " ")
+      .replace(
+        /<(script|style|noscript|svg|template)[^>]*>[\s\S]*?<\/\1>/gi,
+        " ",
+      )
       .replace(/<br\s*\/?\s*>/gi, "\n")
-      .replace(/<\/(p|div|section|article|li|h[1-6]|tr|main|header|footer)>/gi, "\n")
+      .replace(
+        /<\/(p|div|section|article|li|h[1-6]|tr|main|header|footer)>/gi,
+        "\n",
+      )
       .replace(/<li[^>]*>/gi, "• ")
       .replace(/<[^>]+>/g, " "),
   )
@@ -281,7 +354,8 @@ function htmlToKnowledge(html: string) {
 
 function trimImportedContent(value: string) {
   const cleaned = value.split(String.fromCharCode(0)).join("").trim();
-  if (cleaned.length < 3) throw new Error("No useful readable text was found.");
+  if (cleaned.length < 3)
+    throw new KnowledgeImportError("No useful readable text was found.");
   return cleaned.slice(0, MAX_KNOWLEDGE_CHARS);
 }
 
@@ -300,7 +374,9 @@ async function saveImportedDraft(
     collection_id: null,
   });
   if (!parsed.success)
-    throw new Error(parsed.error.issues[0]?.message ?? "Imported content is invalid.");
+    throw new KnowledgeImportError(
+      parsed.error.issues[0]?.message ?? "Imported content is invalid.",
+    );
   const result = await ctx.supabase.rpc("save_business_knowledge", {
     target_workspace_id: ctx.workspace.id,
     target_item_id: null,
@@ -313,7 +389,9 @@ async function saveImportedDraft(
     item_details: "",
     item_collection_id: null,
   });
-  if (result.error) throw new Error("The imported draft could not be saved.");
+  if (result.error)
+    throw new KnowledgeImportError("The imported draft could not be saved.");
+  return result.data;
 }
 
 export async function importKnowledgeFromUrl(
@@ -322,7 +400,12 @@ export async function importKnowledgeFromUrl(
 ): Promise<FormState> {
   const ctx = await requireWorkspace();
   if (ctx.role !== "owner")
-    return { status: "error", message: "Only workspace owners can import knowledge." };
+    return {
+      status: "error",
+      message: "Only workspace owners can import knowledge.",
+    };
+  let importedId: string;
+  let importedHost: string;
   try {
     let url = normalizeImportUrl(form.get("url"));
     let response: Response | undefined;
@@ -332,7 +415,8 @@ export async function importKnowledgeFromUrl(
         redirect: "manual",
         signal: AbortSignal.timeout(10_000),
         headers: {
-          accept: "text/html,application/xhtml+xml,application/xml;q=0.9,text/plain;q=0.8,*/*;q=0.5",
+          accept:
+            "text/html,application/xhtml+xml,application/xml;q=0.9,text/plain;q=0.8,*/*;q=0.5",
           "accept-language": "en-US,en;q=0.9",
           "cache-control": "no-cache",
           pragma: "no-cache",
@@ -347,39 +431,63 @@ export async function importKnowledgeFromUrl(
       });
       if ([301, 302, 303, 307, 308].includes(response.status)) {
         const location = response.headers.get("location");
-        if (!location) throw new Error("The website returned an invalid redirect.");
+        if (!location)
+          throw new KnowledgeImportError(
+            "The website returned an invalid redirect.",
+          );
         url = new URL(location, url);
         continue;
       }
       break;
     }
     if (!response || [301, 302, 303, 307, 308].includes(response.status))
-      throw new Error("The website redirected too many times.");
+      throw new KnowledgeImportError("The website redirected too many times.");
     if (!response.ok) {
       if (response.status === 403)
-        throw new Error(
-          "This website blocks automated page access (HTTP 403). Try a more specific public page, or upload an exported file instead.",
-        );
-      throw new Error(`The website returned HTTP ${response.status}.`);
+        throw new KnowledgeImportError("The website blocked automated access.");
+      throw new KnowledgeImportError(
+        "We couldn’t import this webpage. Try another public page or add it manually.",
+      );
     }
-    const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
-    if (!contentType.includes("text/html") && !contentType.includes("text/plain"))
-      throw new Error("This URL is not a readable HTML or text page.");
+    const contentType =
+      response.headers.get("content-type")?.toLowerCase() ?? "";
+    if (
+      !contentType.includes("text/html") &&
+      !contentType.includes("text/plain")
+    )
+      throw new KnowledgeImportError(
+        "This URL is not a readable HTML or text page.",
+      );
     const raw = await readLimitedText(response);
     const extracted = contentType.includes("text/html")
       ? htmlToKnowledge(raw)
       : { title: "", text: raw };
     const fallbackTitle = `${url.hostname}${url.pathname === "/" ? "" : url.pathname}`;
-    await saveImportedDraft(ctx, extracted.title || fallbackTitle, extracted.text);
+    importedId = await saveImportedDraft(
+      ctx,
+      extracted.title || fallbackTitle,
+      extracted.text,
+    );
+    importedHost = url.hostname;
   } catch (error) {
     return {
       status: "error",
-      message: error instanceof Error ? error.message : "The webpage could not be imported.",
+      message:
+        error instanceof KnowledgeImportError
+          ? error.message
+          : "We couldn’t import this webpage. Please try again or add it manually.",
     };
   }
+  revalidatePath("/onboarding");
   revalidatePath("/app/knowledge");
   revalidatePath("/app");
-  redirect("/app/knowledge?notice=imported");
+  redirect(
+    form.get("onboarding") === "true"
+      ? `/onboarding?step=knowledge&item=${importedId}`
+      : form.get("return_to") === "editor"
+        ? `/app/knowledge/${importedId}?notice=webpage-imported&source=${encodeURIComponent(importedHost)}`
+        : "/app/knowledge?notice=imported",
+  );
 }
 
 export async function importKnowledgeFile(
@@ -388,7 +496,10 @@ export async function importKnowledgeFile(
 ): Promise<FormState> {
   const ctx = await requireWorkspace();
   if (ctx.role !== "owner")
-    return { status: "error", message: "Only workspace owners can import knowledge." };
+    return {
+      status: "error",
+      message: "Only workspace owners can import knowledge.",
+    };
   const entry = form.get("file");
   if (!(entry instanceof File) || !entry.size)
     return { status: "error", message: "Choose a file to import." };
@@ -396,14 +507,21 @@ export async function importKnowledgeFile(
     return { status: "error", message: "Files must be 1 MB or smaller." };
   const extension = entry.name.split(".").pop()?.toLowerCase() ?? "";
   if (!supportedFileExtensions.has(extension))
-    return { status: "error", message: "Use TXT, Markdown, CSV, JSON or HTML files for now." };
+    return {
+      status: "error",
+      message: "Use TXT, Markdown, CSV, JSON or HTML files for now.",
+    };
+  let importedId: string;
   try {
     const raw = await entry.text();
     const extracted = ["html", "htm"].includes(extension)
       ? htmlToKnowledge(raw)
       : { title: "", text: raw };
-    const filenameTitle = entry.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim();
-    await saveImportedDraft(
+    const filenameTitle = entry.name
+      .replace(/\.[^.]+$/, "")
+      .replace(/[-_]+/g, " ")
+      .trim();
+    importedId = await saveImportedDraft(
       ctx,
       extracted.title || filenameTitle || "Imported file",
       extracted.text,
@@ -411,10 +529,20 @@ export async function importKnowledgeFile(
   } catch (error) {
     return {
       status: "error",
-      message: error instanceof Error ? error.message : "The file could not be imported.",
+      message:
+        error instanceof KnowledgeImportError
+          ? error.message
+          : "We couldn’t import this file. Please try again or add it manually.",
     };
   }
+  revalidatePath("/onboarding");
   revalidatePath("/app/knowledge");
   revalidatePath("/app");
-  redirect("/app/knowledge?notice=imported");
+  redirect(
+    form.get("onboarding") === "true"
+      ? `/onboarding?step=knowledge&item=${importedId}`
+      : form.get("return_to") === "editor"
+        ? `/app/knowledge/${importedId}?notice=file-imported`
+        : "/app/knowledge?notice=imported",
+  );
 }
