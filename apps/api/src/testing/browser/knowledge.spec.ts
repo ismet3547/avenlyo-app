@@ -576,7 +576,9 @@ test("Knowledge library, six editors, explicit lifecycle, imports and tenant iso
   expect(deleted.error).toBeNull();
   expect(deleted.data).toEqual([]);
 
-  await page.getByLabel("Organize knowledge", { exact: true }).click();
+  await page
+    .getByRole("button", { name: "Organize knowledge", exact: true })
+    .click();
   await page
     .getByRole("menuitem", { name: "Manage collections", exact: true })
     .click();
