@@ -1,5 +1,5 @@
 import { agentData } from "@/lib/agents";
-import { agentLanguageSummary } from "@/lib/agent-model";
+import { AgentLanguages } from "@/components/agent-languages";
 export default async function Page({
   params,
 }: {
@@ -8,14 +8,9 @@ export default async function Page({
   const { id } = await params,
     ctx = await agentData(id);
   return (
-    <section
-      className="agent-section"
-      role="tabpanel"
-      id="agent-panel"
-      aria-labelledby="agent-tab-languages"
-    >
-      <h2>Languages</h2>
-      <p>{agentLanguageSummary(ctx.agent)}</p>
-    </section>
+    <AgentLanguages
+      agent={ctx.agent}
+      editable={ctx.role === "owner" && !ctx.agent.archived_at}
+    />
   );
 }

@@ -138,3 +138,65 @@ export async function saveAgentField(
   revalidatePath("/app");
   return { status: "success", message: "Changes saved." };
 }
+
+import { agentScopeSchema, agentLanguagesSchema } from "@avenlyo-app/shared";
+export async function saveAgentScope(
+  _state: FormState,
+  form: FormData,
+): Promise<FormState> {
+  const ctx = await requireWorkspace(),
+    id = z.uuid().safeParse(form.get("agent_id"));
+  const value = agentScopeSchema.safeParse({
+    mode: form.get("mode"),
+    item_ids: form.getAll("item_ids"),
+  });
+  if (!id.success || !value.success)
+    return {
+      status: "error",
+      message: "Check the knowledge selection. Choose up to 500 items.",
+    };
+  const result = await ctx.supabase.rpc("set_agent_knowledge_scope", {
+    target_workspace_id: ctx.workspace.id,
+    target_agent_id: id.data,
+    scope_mode: value.data.mode,
+    item_ids: value.data.item_ids,
+  });
+  if (result.error)
+    return {
+      status: "error",
+      message:
+        "Knowledge scope could not be saved. Please try again. Owner access is required.",
+    };
+  revalidatePath("/app/agent");
+  return { status: "success", message: "Knowledge scope saved." };
+}
+export async function saveAgentLanguages(
+  _state: FormState,
+  form: FormData,
+): Promise<FormState> {
+  const ctx = await requireWorkspace(),
+    id = z.uuid().safeParse(form.get("agent_id"));
+  const value = agentLanguagesSchema.safeParse({
+    primary_language: form.get("primary_language"),
+    additional_languages: form.getAll("additional_languages"),
+  });
+  if (!id.success || !value.success)
+    return {
+      status: "error",
+      message: "Choose a primary language and unique additional languages.",
+    };
+  const result = await ctx.supabase.rpc("set_agent_languages", {
+    target_workspace_id: ctx.workspace.id,
+    target_agent_id: id.data,
+    primary_code: value.data.primary_language,
+    additional_codes: value.data.additional_languages,
+  });
+  if (result.error)
+    return {
+      status: "error",
+      message:
+        "Languages could not be saved. Please try again. Owner access is required.",
+    };
+  revalidatePath("/app/agent");
+  return { status: "success", message: "Languages saved." };
+}

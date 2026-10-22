@@ -30,11 +30,21 @@ export type SettingsRow = {
   updated_at: string;
 };
 export type Agent = SettingsRow & {
-  id: string; name: string; is_default: boolean; primary_language: string;
-  additional_languages: string[]; language_policy: "configured" | "legacy_multilingual";
-  knowledge_mode: "all" | "selected"; created_at: string; archived_at: string | null;
+  id: string;
+  name: string;
+  is_default: boolean;
+  primary_language: string;
+  additional_languages: string[];
+  language_policy: "configured" | "legacy_multilingual";
+  knowledge_mode: "all" | "selected";
+  created_at: string;
+  archived_at: string | null;
 };
-export type AgentKnowledgeItem = { workspace_id: string; agent_id: string; knowledge_item_id: string };
+export type AgentKnowledgeItem = {
+  workspace_id: string;
+  agent_id: string;
+  knowledge_item_id: string;
+};
 export type KnowledgeItem = {
   id: string;
   workspace_id: string;
@@ -390,11 +400,46 @@ export type Database = {
         { target_workspace_id: string; business_name: string },
         undefined
       >;
-      create_agent: RPC<{target_workspace_id: string; agent_name: string; role_brief: string; primary_code: string}, string>;
-      save_agent: RPC<{target_workspace_id: string; target_agent_id: string; agent_name: string; settings: Json}, undefined>;
-      set_agent_languages: RPC<{target_workspace_id: string; target_agent_id: string; primary_code: string; additional_codes: string[]}, undefined>;
-      set_agent_knowledge_scope: RPC<{target_workspace_id: string; target_agent_id: string; scope_mode: string; item_ids: string[]}, undefined>;
-      archive_agent: RPC<{target_workspace_id: string; target_agent_id: string}, undefined>;
+      create_agent: RPC<
+        {
+          target_workspace_id: string;
+          agent_name: string;
+          role_brief: string;
+          primary_code: string;
+        },
+        string
+      >;
+      save_agent: RPC<
+        {
+          target_workspace_id: string;
+          target_agent_id: string;
+          agent_name: string;
+          settings: Json;
+        },
+        undefined
+      >;
+      set_agent_languages: RPC<
+        {
+          target_workspace_id: string;
+          target_agent_id: string;
+          primary_code: string;
+          additional_codes: string[];
+        },
+        undefined
+      >;
+      set_agent_knowledge_scope: RPC<
+        {
+          target_workspace_id: string;
+          target_agent_id: string;
+          scope_mode: string;
+          item_ids: string[];
+        },
+        undefined
+      >;
+      archive_agent: RPC<
+        { target_workspace_id: string; target_agent_id: string },
+        undefined
+      >;
       save_agent_settings: RPC<
         { target_workspace_id: string; settings: Json },
         undefined
@@ -444,6 +489,21 @@ export type Database = {
       delete_knowledge_item: RPC<
         { target_workspace_id: string; target_item_id: string },
         undefined
+      >;
+      match_agent_knowledge: RPC<
+        {
+          target_workspace_id: string;
+          target_agent_id: string;
+          query_embedding: string;
+          match_limit?: number;
+        },
+        {
+          id: string;
+          title: string;
+          content: string;
+          revision: number;
+          similarity: number;
+        }[]
       >;
       match_knowledge: RPC<
         {
