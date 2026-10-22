@@ -16,7 +16,8 @@ import { useAgentLeaveGuard, canChangeAgentTab } from "./use-agent-leave-guard";
 import { WorkspaceDialog } from "./workspace-dialog";
 const initial: FormState = { status: "idle", message: "" };
 export function CreateAgent() {
-  const primaryId = useId();
+  const primaryId = useId(),
+    briefId = useId();
   const [open, setOpen] = useState(false),
     [dirty, setDirty] = useState(false);
   const [state, action, pending] = useActionState(createAgent, initial);
@@ -48,9 +49,10 @@ export function CreateAgent() {
                 disabled={pending}
               />
             </label>
-            <label>
-              What should this agent help with?
+            <div className="agent-field">
+              <label htmlFor={briefId}>What should this agent help with?</label>
               <textarea
+                id={briefId}
                 className="textarea"
                 name="setup_brief"
                 rows={3}
@@ -60,7 +62,7 @@ export function CreateAgent() {
                 placeholder="Qualify new customer inquiries and collect contact details."
                 disabled={pending}
               />
-            </label>
+            </div>
             <div className="agent-field">
               <label htmlFor={primaryId}>Primary language</label>
               <select
@@ -158,6 +160,7 @@ function EditAgent({
   close: () => void;
   saved: () => void;
 }) {
+  const roleId = useId();
   const [state, action, pending] = useActionState(saveAgentField, initial),
     [dirty, setDirty] = useState(false);
   useAgentLeaveGuard(dirty && !pending);
@@ -194,9 +197,12 @@ function EditAgent({
           )}
           {field === "role" && (
             <>
-              <label>
-                What should this agent help customers with?
+              <div className="agent-field">
+                <label htmlFor={roleId}>
+                  What should this agent help customers with?
+                </label>
                 <textarea
+                  id={roleId}
                   className="textarea"
                   name="setup_brief"
                   rows={4}
@@ -204,7 +210,7 @@ function EditAgent({
                   maxLength={1500}
                   disabled={pending}
                 />
-              </label>
+              </div>
               <p>
                 Describe what customers usually need help with and when your
                 team should get involved.
