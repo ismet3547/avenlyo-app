@@ -7,6 +7,7 @@ import type {
 } from "@avenlyo-app/shared";
 import { saveAgentScope } from "@/app/app/agent/actions";
 import { Button, Notice } from "./ui";
+import { useAgentLeaveGuard } from "./use-agent-leave-guard";
 import { WorkspaceDialog } from "./workspace-dialog";
 type Item = Pick<KnowledgeItem, "id" | "title" | "status" | "collection_id">;
 export function AgentKnowledge({
@@ -39,14 +40,7 @@ export function AgentKnowledge({
   const dirty =
     mode !== agent.knowledge_mode ||
     [...ids].sort().join() !== [...selected].sort().join();
-  useEffect(() => {
-    if (!dirty) return;
-    const handler = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-    };
-    window.addEventListener("beforeunload", handler);
-    return () => window.removeEventListener("beforeunload", handler);
-  }, [dirty]);
+  useAgentLeaveGuard(dirty && !pending);
   const visible = useMemo(
     () =>
       items.filter(

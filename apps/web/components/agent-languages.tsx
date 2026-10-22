@@ -3,6 +3,7 @@ import { useActionState, useEffect, useId, useState } from "react";
 import { languages, type Agent, type Language } from "@avenlyo-app/shared";
 import { saveAgentLanguages } from "@/app/app/agent/actions";
 import { Button, Notice } from "./ui";
+import { useAgentLeaveGuard } from "./use-agent-leave-guard";
 import { WorkspaceDialog } from "./workspace-dialog";
 function LanguageEditor({ agent, close }: { agent: Agent; close: () => void }) {
   const primaryId = useId();
@@ -16,6 +17,7 @@ function LanguageEditor({ agent, close }: { agent: Agent; close: () => void }) {
   const dirty =
     primary !== agent.primary_language ||
     additional.join() !== agent.additional_languages.join();
+  useAgentLeaveGuard(dirty && !pending);
   const attemptClose = () => {
     if (!pending && (!dirty || window.confirm("Discard your unsaved changes?")))
       close();

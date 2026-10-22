@@ -12,6 +12,7 @@ import {
 import type { FormState } from "@/app/auth/actions";
 import { handlingLabels } from "@/lib/agent-model";
 import { Button, Notice } from "./ui";
+import { useAgentLeaveGuard, canChangeAgentTab } from "./use-agent-leave-guard";
 import { WorkspaceDialog } from "./workspace-dialog";
 const initial: FormState = { status: "idle", message: "" };
 export function CreateAgent() {
@@ -19,6 +20,7 @@ export function CreateAgent() {
   const [open, setOpen] = useState(false),
     [dirty, setDirty] = useState(false);
   const [state, action, pending] = useActionState(createAgent, initial);
+  useAgentLeaveGuard(open && dirty && !pending);
   const close = () => {
     if (
       !pending &&
@@ -123,6 +125,7 @@ export function AgentTabs({ id }: { id: string }) {
             if (e.key === "End") next = 2;
             if (next !== undefined) {
               e.preventDefault();
+              if (!canChangeAgentTab()) return;
               document
                 .getElementById(`agent-tab-${tabs[next][1].toLowerCase()}`)
                 ?.focus();
@@ -157,6 +160,7 @@ function EditAgent({
 }) {
   const [state, action, pending] = useActionState(saveAgentField, initial),
     [dirty, setDirty] = useState(false);
+  useAgentLeaveGuard(dirty && !pending);
   const attemptClose = () => {
     if (!pending && (!dirty || window.confirm("Discard your unsaved changes?")))
       close();

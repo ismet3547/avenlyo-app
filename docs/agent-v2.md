@@ -173,6 +173,8 @@ existing destination with agent selection.
 | Knowledge scope and Languages | `c4faef9b48c32078373821b6af4b57af8bcdf618` |
 | Channels, conversations and Test Agent | `1d2228276593bd819ba954da80d276959f2e0028` |
 | Language runtime, readability and acceptance coverage | `0dcb5e54415e0de0f48fb4b7b7cba1b33b3fb7cd` |
+| Canonical localized safety notices and routing regressions | `2d4610ae82fdd45ab99ca6831a31a649332be47c` |
+| Explicit select labels and responsive controls | `5019d4a41405c7746d31c50208a9e90491d1599a` |
 
 ## Validation workflow
 
@@ -185,4 +187,104 @@ Application checks, all database isolation/security tests, channel acceptance,
 API smoke and the production build remain required. Production build precedes
 Playwright; the new Agents flow runs alongside all four existing flows.
 
-Final results and the file inventory are recorded after the final CI/visual review.
+Local verification has passed typecheck, lint/independence, 212 unit tests, the
+production build and focused standalone PostgreSQL Agent suites. Standalone SQL
+uses a Vault fixture and is supplementary to real Supabase CI. Local Playwright
+cannot start because the sandbox denies its fixture IPC pipe; full Playwright
+runs against real disposable Supabase in CI. Local Next builds use an external
+scratch-only memory-reporting workaround; the repository build command and CI
+build require no workaround. Final run results and current HEAD are reported in
+the draft PR and handover.
+
+The new browser flow covers creation, focused General edits, immutable handoff,
+contact configuration, unsaved-edit cancellation and tab navigation, selected
+Knowledge, language changes, Agent-specific Test history, READY/LIVE, deliberate
+channel assignment, persistent old/new conversation identity, archival rejection
+and history preservation. It captures library, General, Knowledge, Languages and
+Create Agent at 1440, 1280, 1024, 768 and 390px. The four original flows retain
+their behavioral assertions; selectors only change where the Agent form/route
+or Agent-specific test heading legitimately changed.
+
+## Local review
+
+Fetch and switch to `codex/agent-v2`. Apply `supabase migration up --local` to an
+existing local workspace before starting the new app. Keep its existing data for
+review of the backfill. Run `pnpm build` before `pnpm test:browser`; Playwright owns
+the production-server ports. Normal interactive review uses `pnpm dev:web` and
+`pnpm dev:api` after the local migrations.
+
+Review the migrated Front Office settings and old test history, create a second
+Agent, give it a narrower Knowledge selection and different languages, then test
+both. Assign Website Chat to the first Agent, start a visitor conversation,
+reassign to the second and start a fresh visitor session. Confirm old ownership
+is retained and new ownership changes. Agent archival must reject assigned
+channels, preserve history after reassignment, and leave onboarding/Home intact.
+
+## Changed files
+
+
+- `.github/workflows/ci.yml`
+- `apps/api/src/app.test.ts`
+- `apps/api/src/channels/provision-cli.ts`
+- `apps/api/src/channels/provision.test.ts`
+- `apps/api/src/channels/provision.ts`
+- `apps/api/src/channels/runtime.test.ts`
+- `apps/api/src/runtime/agent.ts`
+- `apps/api/src/runtime/languages.test.ts`
+- `apps/api/src/runtime/provider.ts`
+- `apps/api/src/testing/browser-server.ts`
+- `apps/api/src/testing/browser/agents.spec.ts`
+- `apps/api/src/testing/browser/channels.spec.ts`
+- `apps/api/src/testing/browser/foundation.spec.ts`
+- `apps/api/src/testing/channels-acceptance.ts`
+- `apps/api/src/testing/local-acceptance.ts`
+- `apps/web/app/app/agent/[id]/knowledge/page.tsx`
+- `apps/web/app/app/agent/[id]/languages/page.tsx`
+- `apps/web/app/app/agent/[id]/layout.tsx`
+- `apps/web/app/app/agent/[id]/page.tsx`
+- `apps/web/app/app/agent/actions.test.ts`
+- `apps/web/app/app/agent/actions.ts`
+- `apps/web/app/app/agent/agent.css`
+- `apps/web/app/app/agent/layout.tsx`
+- `apps/web/app/app/agent/page.tsx`
+- `apps/web/app/app/channels/actions.ts`
+- `apps/web/app/app/channels/page.tsx`
+- `apps/web/app/app/conversations/[id]/page.tsx`
+- `apps/web/app/app/conversations/page.tsx`
+- `apps/web/app/app/test-agent/page.tsx`
+- `apps/web/app/globals.css`
+- `apps/web/app/preview/fixtures.ts`
+- `apps/web/app/preview/page.tsx`
+- `apps/web/components/agent-general.test.ts`
+- `apps/web/components/agent-general.tsx`
+- `apps/web/components/agent-knowledge.tsx`
+- `apps/web/components/agent-languages.tsx`
+- `apps/web/components/app-shell.tsx`
+- `apps/web/components/channel-agent-assignment.tsx`
+- `apps/web/components/conversations.tsx`
+- `apps/web/components/overview.test.ts`
+- `apps/web/components/product-forms.tsx`
+- `apps/web/components/use-agent-leave-guard.ts`
+- `apps/web/components/workspace-dialog.tsx`
+- `apps/web/lib/agent-model.test.ts`
+- `apps/web/lib/agent-model.ts`
+- `apps/web/lib/agents.ts`
+- `apps/web/lib/home-model.test.ts`
+- `docs/agent-v2.md`
+- `packages/shared/src/agents.test.ts`
+- `packages/shared/src/agents.ts`
+- `packages/shared/src/database.ts`
+- `packages/shared/src/fixed-replies.ts`
+- `packages/shared/src/index.ts`
+- `packages/shared/src/schemas.ts`
+- `scripts/test-agent-upgrade.mjs`
+- `scripts/test-foundation-baseline.mjs`
+- `supabase/migrations/20261022162803_agent_v2_foundation.sql`
+- `supabase/migrations/20261022163746_agent_v2_knowledge_scope.sql`
+- `supabase/migrations/20261022164338_agent_v2_routing.sql`
+- `supabase/migrations/20261022165703_agent_v2_channel_scope_validation.sql`
+- `supabase/migrations/20261022170109_agent_v2_policy_languages.sql`
+- `supabase/tests/database/agent_knowledge.test.sql`
+- `supabase/tests/database/agent_policy_languages.test.sql`
+- `supabase/tests/database/agent_routing.test.sql`
+- `supabase/tests/database/agents_security.test.sql`

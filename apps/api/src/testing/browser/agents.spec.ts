@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir } from "node:fs/promises";
 import type { Database } from "@avenlyo-app/shared";
 
-test.use({actionTimeout:30000});
+test.use({ actionTimeout: 30000 });
 
 test("Agent V2 keeps settings, Knowledge, languages and conversation routing isolated", async ({
   page,
@@ -230,6 +230,16 @@ test("Agent V2 keeps settings, Knowledge, languages and conversation routing iso
   ).toBeVisible();
   await page.getByRole("tab", { name: "Knowledge", exact: true }).click();
   await page.getByRole("radio", { name: /Selected knowledge/ }).check();
+  page.once("dialog", (d) => d.dismiss());
+  await page.getByRole("tab", { name: "Languages", exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/app/agent/${bid}/knowledge$`));
+  await expect(
+    page.getByRole("radio", { name: /Selected knowledge/ }),
+  ).toBeChecked();
+  await page.getByRole("tab", { name: "Knowledge", exact: true }).focus();
+  page.once("dialog", (d) => d.dismiss());
+  await page.keyboard.press("ArrowRight");
+  await expect(page).toHaveURL(new RegExp(`/app/agent/${bid}/knowledge$`));
   await page
     .getByRole("button", { name: "Manage selection", exact: true })
     .click();
