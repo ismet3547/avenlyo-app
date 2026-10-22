@@ -54,6 +54,29 @@ export function KnowledgeDialog({
       aria-labelledby={titleId}
       onCancel={close}
       onClose={close}
+      onKeyDown={(event) => {
+        if (event.key !== "Tab") return;
+        const controls = Array.from(
+          event.currentTarget.querySelectorAll<HTMLElement>(
+            "a[href], button, input, select, textarea, [tabindex]",
+          ),
+        ).filter(
+          (control) =>
+            control.tabIndex >= 0 &&
+            !control.matches(":disabled") &&
+            control.getClientRects().length > 0,
+        );
+        const first = controls[0],
+          last = controls[controls.length - 1];
+        const boundary = event.shiftKey ? first : last;
+        if (
+          document.activeElement === boundary ||
+          document.activeElement === event.currentTarget
+        ) {
+          event.preventDefault();
+          (event.shiftKey ? last : first)?.focus();
+        }
+      }}
       onClick={(e) => {
         if (e.target === e.currentTarget) close();
       }}
