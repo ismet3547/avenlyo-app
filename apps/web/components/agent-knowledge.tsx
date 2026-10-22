@@ -118,7 +118,9 @@ export function AgentKnowledge({
         {mode === "selected" && (
           <div style={{ marginBlock: 20 }}>
             <p>
-              {collectionCount} collections · {ids.length} items selected
+              {collectionCount}{" "}
+              {collectionCount === 1 ? "collection" : "collections"} ·{" "}
+              {ids.length} {ids.length === 1 ? "item" : "items"} selected
             </p>
             {unavailable > 0 && (
               <Notice>

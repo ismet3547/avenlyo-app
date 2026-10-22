@@ -9,29 +9,23 @@ import {
 } from "react";
 import {
   ArrowRight,
-  BookOpen,
   Check,
   ChevronDown,
   Copy,
   FileUp,
   Globe2,
-  Save,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react";
 import {
   businessKnowledgeType,
-  contactFields,
   knowledgeLabels,
   knowledgeTypes,
-  type AgentSettings,
   type ChannelConnection,
   type KnowledgeCollection,
   type KnowledgeItem,
 } from "@avenlyo-app/shared";
 import { signIn, signUp, type FormState } from "@/app/auth/actions";
 import { createWorkspace } from "@/app/workspaces/actions";
-import { saveAgent } from "@/app/app/agent/actions";
 import { renameBusiness } from "@/app/app/settings/actions";
 import {
   importKnowledgeFile,
@@ -44,7 +38,7 @@ import {
   disconnectInstagram,
   saveWebsiteChannel,
 } from "@/app/app/channels/actions";
-import { Badge, Button, Notice, Panel } from "./ui";
+import { Button, Notice, Panel } from "./ui";
 const initial: FormState = { message: "", status: "idle" };
 function Feedback({ state }: { state: FormState }) {
   return state.status === "idle" ? null : (
@@ -153,241 +147,6 @@ export function WorkspaceForm() {
           <ArrowRight aria-hidden="true" />
         </Button>
       </div>
-    </form>
-  );
-}
-const goalCopy = [
-  [
-    "answer_questions",
-    "Answer questions",
-    "Help customers with your published business knowledge.",
-  ],
-  [
-    "identify_interest",
-    "Understand customer needs",
-    "Find out what customers are looking for.",
-  ],
-  [
-    "qualify_inquiries",
-    "Qualify inquiries",
-    "Identify useful opportunities for your team.",
-  ],
-  [
-    "collect_contact",
-    "Collect contact details",
-    "Ask for the details your team needs to follow up.",
-  ],
-] as const;
-export function AgentForm({
-  settings,
-  editable,
-  published = 0,
-  preview = false,
-}: {
-  settings: AgentSettings;
-  editable: boolean;
-  published?: number | null;
-  preview?: boolean;
-}) {
-  const [state, action, pending] = useActionState(saveAgent, initial);
-  const [tone, setTone] = useState(settings.tone);
-  const [brief, setBrief] = useState(settings.setup_brief);
-  const [collect, setCollect] = useState(
-    settings.goals.includes("collect_contact"),
-  );
-  return (
-    <form
-      action={preview ? undefined : action}
-      className="form-layout"
-      onSubmit={preview ? (e) => e.preventDefault() : undefined}
-    >
-      <Panel>
-        <fieldset disabled={!editable || preview || pending}>
-          <div className="form-section">
-            <div className="form-section-heading">
-              <h2>Give your agent direction</h2>
-              <p>
-                A few clear instructions help your agent represent your
-                business.
-              </p>
-            </div>
-            <Field
-              label="What should your agent know about its role?"
-              hint="Use published Knowledge for factual details, prices and policies."
-            >
-              <textarea
-                className="textarea"
-                name="setup_brief"
-                rows={5}
-                placeholder="You are our welcoming first point of contact. Help customers understand our services and connect them with the right person…"
-                value={brief}
-                onChange={(e) => setBrief(e.target.value)}
-                maxLength={1500}
-              />
-            </Field>
-            <p className="field-count">{brief.length} / 1,500</p>
-          </div>
-          <div className="form-section">
-            <div className="form-section-heading">
-              <h2>How should it sound?</h2>
-              <p>Choose the communication style that fits your business.</p>
-            </div>
-            <fieldset>
-              <legend className="sr-only">Communication style</legend>
-              <div className="choice-grid">
-                {(
-                  [
-                    ["professional", "Professional", "Polished and confident."],
-                    ["warm", "Warm", "Friendly and approachable."],
-                    ["concise", "Concise", "Clear and to the point."],
-                  ] as const
-                ).map(([value, title, description]) => (
-                  <label className="radio-choice" key={value}>
-                    <input
-                      type="radio"
-                      aria-label={title}
-                      name="tone"
-                      value={value}
-                      checked={tone === value}
-                      onChange={() => setTone(value)}
-                    />
-                    <span>
-                      <strong>{title}</strong>
-                      <small>{description}</small>
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-          </div>
-          <div className="form-section">
-            <div className="form-section-heading">
-              <h2>What can it help with?</h2>
-              <p>Keep your agent focused on the tasks that matter.</p>
-            </div>
-            {goalCopy.map(([value, title, description]) => (
-              <label key={value} className="check-row">
-                <input
-                  type="checkbox"
-                  name="goals"
-                  value={value}
-                  defaultChecked={settings.goals.includes(value)}
-                  onChange={
-                    value === "collect_contact"
-                      ? (e) => setCollect(e.target.checked)
-                      : undefined
-                  }
-                />
-                <span>
-                  <strong>{title}</strong>
-                  <small>{description}</small>
-                </span>
-              </label>
-            ))}
-            <label className="check-row">
-              <input type="checkbox" checked disabled />
-              <span>
-                <strong>Connect customers with your team</strong>
-                <small>Human assistance is always available.</small>
-              </span>
-            </label>
-          </div>
-          <div className="form-section">
-            <div className="form-section-heading">
-              <h2>Contact details</h2>
-              <p>Choose what to collect when a customer is interested.</p>
-            </div>
-            <div className="check-grid">
-              {contactFields.map((field) => (
-                <label className="check-row" key={field}>
-                  <input
-                    type="checkbox"
-                    name="contact_fields"
-                    value={field}
-                    defaultChecked={settings.contact_fields.includes(field)}
-                    disabled={!collect}
-                  />
-                  <span>
-                    <strong>
-                      {field.charAt(0).toUpperCase() + field.slice(1)}
-                    </strong>
-                  </span>
-                </label>
-              ))}
-            </div>
-            {!collect && (
-              <p className="field-hint">
-                Enable contact collection above to select these details.
-              </p>
-            )}
-          </div>
-        </fieldset>
-        {state.status !== "idle" && (
-          <div className="form-feedback">
-            <Feedback state={state} />
-          </div>
-        )}
-        <div className="form-footer">
-          <p>
-            {preview
-              ? "Design preview · changes are disabled"
-              : editable
-                ? "Your changes apply after saving."
-                : "Only the workspace owner can edit these settings."}
-          </p>
-          <Button disabled={!editable || preview || pending}>
-            <Save aria-hidden="true" />
-            {pending ? "Saving…" : "Save changes"}
-          </Button>
-        </div>
-      </Panel>
-      <aside className="form-aside" aria-label="Configuration preview">
-        <Panel>
-          <div className="configuration-header">
-            <span className="avatar">
-              <Sparkles aria-hidden="true" />
-            </span>
-            <h3>Your AI front office</h3>
-            <p>Configuration preview</p>
-          </div>
-          <dl className="summary-list">
-            <div>
-              <dt>Communication</dt>
-              <dd>{tone.charAt(0).toUpperCase() + tone.slice(1)}</dd>
-            </div>
-            <div>
-              <dt>Knowledge</dt>
-              <dd>
-                {published === null
-                  ? "Unavailable"
-                  : `${published} published items`}
-              </dd>
-            </div>
-            <div>
-              <dt>Human assistance</dt>
-              <dd>
-                <Badge tone="success">Always available</Badge>
-              </dd>
-            </div>
-            <div>
-              <dt>Contact collection</dt>
-              <dd>{collect ? "Enabled" : "Disabled"}</dd>
-            </div>
-          </dl>
-        </Panel>
-        <Panel className="help-copy">
-          <BookOpen aria-hidden="true" />
-          <h3>Good answers start with good knowledge.</h3>
-          <p>
-            Add your services, prices and frequently asked questions so your
-            agent has the right context.
-          </p>
-          <Link className="text-link" href="/app/knowledge">
-            Manage knowledge
-            <ArrowRight aria-hidden="true" />
-          </Link>
-        </Panel>
-      </aside>
     </form>
   );
 }

@@ -36,3 +36,31 @@ export const agentsData = cache(async () => {
     throw new Error("Agents could not be loaded. Please try again.");
   return { ...ctx, agents: agents.data, channels: channels.data };
 });
+
+import type { Agent, Database } from "@avenlyo-app/shared";
+import type { SupabaseClient } from "@supabase/supabase-js";
+export async function publishedAgentKnowledge(
+  agent: Agent,
+  supabase: SupabaseClient<Database>,
+) {
+  let query = supabase
+    .from("knowledge_items")
+    .select("id", { count: "exact", head: true })
+    .eq("workspace_id", agent.workspace_id)
+    .eq("status", "published");
+  if (agent.knowledge_mode === "selected") {
+    const bindings = await supabase
+      .from("agent_knowledge_items")
+      .select("knowledge_item_id")
+      .eq("workspace_id", agent.workspace_id)
+      .eq("agent_id", agent.id);
+    if (bindings.error) return null;
+    if (!bindings.data.length) return 0;
+    query = query.in(
+      "id",
+      bindings.data.map((b) => b.knowledge_item_id),
+    );
+  }
+  const result = await query;
+  return result.error ? null : (result.count ?? 0);
+}

@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
+import { publishedAgentKnowledge } from "@/lib/agents";
 import { productContext } from "@/lib/product-data";
 import { PageHeader } from "@/components/ui";
 import { TestAgent } from "@/components/conversations";
@@ -22,7 +23,7 @@ export default async function Page({
   if (conversation.data.channel !== "test_agent") redirect(`/app/inbox/${id}`);
   const agent = await ctx.supabase
     .from("agents")
-    .select("id,name,archived_at")
+    .select("*")
     .eq("workspace_id", ctx.workspace.id)
     .eq("id", conversation.data.agent_id)
     .single();
@@ -42,11 +43,7 @@ export default async function Page({
       .eq("workspace_id", ctx.workspace.id)
       .eq("conversation_id", id)
       .maybeSingle(),
-    ctx.supabase
-      .from("knowledge_items")
-      .select("id", { count: "exact", head: true })
-      .eq("workspace_id", ctx.workspace.id)
-      .eq("status", "published"),
+    publishedAgentKnowledge(agent.data, ctx.supabase),
   ]);
   if (messages.error || lead.error)
     throw new Error("Test conversation could not be loaded.");
@@ -65,7 +62,7 @@ export default async function Page({
         initialMessages={messages.data}
         initialLead={lead.data}
         paused={conversation.data.ai_mode === "paused"}
-        published={knowledge.error ? null : (knowledge.count ?? 0)}
+        published={knowledge}
       />
     </>
   );

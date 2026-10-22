@@ -46,6 +46,35 @@ select extensions.is((select count(*)::integer from public.match_channel_knowled
 select extensions.throws_ok($$select public.finish_channel_turn(current_setting('test.rlive_b')::uuid,'Invalid authority.',jsonb_build_array(jsonb_build_object('id',current_setting('test.rk'),'title','Scoped services','revision',2)),false,null)$$,'40001',null,'Final commit rechecks Agent scope even for a Published same-workspace source');
 select public.fail_channel_turn(current_setting('test.rlive_a')::uuid);
 select public.fail_channel_turn(current_setting('test.rlive_b')::uuid);
+do $$ begin
+ perform set_config('test.rig',public.provision_instagram_channel_for_agent(current_setting('test.rw')::uuid,'Routing Studio','17841499900555555','routing_fixture','fictional-routing-token-no-live-provider','v26.0','123456789',current_setting('test.rb')::uuid)::text,true);
+ perform public.accept_instagram_event('17841499900555555','987001111','routing-first','Hello',repeat('c',64),now());
+end $$;
+do $$ declare r record; begin
+ select * into r from public.claim_instagram_event();
+ perform set_config('test.rigconv',r.conversation_id::text,true);
+ perform public.fail_channel_turn(r.run_id);
+end $$;
+reset role;
+select extensions.is((select agent_id from public.conversations where id=current_setting('test.rigconv')::uuid),current_setting('test.rb')::uuid,'Instagram persists its assigned Agent');
+select extensions.is((select count(*)::integer from public.channel_connections where workspace_id=current_setting('test.rw')::uuid and agent_id=current_setting('test.rb')::uuid),2,'One Agent can serve Website Chat and Instagram');
+set local role authenticated;
+set local request.jwt.claims='{"sub":"af555555-5555-4555-8555-555555555555","role":"authenticated"}';
+select public.assign_channel_agent(current_setting('test.rw')::uuid,current_setting('test.rig')::uuid,current_setting('test.ra')::uuid);
+set local role service_role;
+set local request.jwt.claims='{"role":"service_role"}';
+select public.accept_instagram_event('17841499900555555','987001112','routing-second','Hello',repeat('d',64),now());
+do $$ declare r record; begin
+ select * into r from public.claim_instagram_event();
+ perform set_config('test.rignew',r.conversation_id::text,true);
+ perform public.fail_channel_turn(r.run_id);
+end $$;
+reset role;
+select extensions.is((select agent_id from public.conversations where id=current_setting('test.rigconv')::uuid),current_setting('test.rb')::uuid,'Existing Instagram conversation retains B after reassignment');
+select extensions.is((select agent_id from public.conversations where id=current_setting('test.rignew')::uuid),current_setting('test.ra')::uuid,'New Instagram customer uses the reassigned Agent A');
+set local role service_role;
+set local request.jwt.claims='{"role":"service_role"}';
+
 
 do $$ declare turn record; begin
  select * into turn from public.begin_agent_test_turn('af555555-5555-4555-8555-555555555555',current_setting('test.rw')::uuid,null,gen_random_uuid(),'Hello',current_setting('test.rb')::uuid);
@@ -53,7 +82,7 @@ do $$ declare turn record; begin
  perform public.finish_agent_turn('af555555-5555-4555-8555-555555555555',turn.run_id,'Hi.','[]',false,null);
 end $$;
 reset role;
-select extensions.is((select count(*)::integer from public.conversations where workspace_id=current_setting('test.rw')::uuid and agent_id=current_setting('test.rb')::uuid),2,'New inbound and Test conversations persist Agent B');
+select extensions.is((select count(*)::integer from public.conversations where workspace_id=current_setting('test.rw')::uuid and agent_id=current_setting('test.rb')::uuid and channel in ('website_chat','test_agent')),2,'New inbound and Test conversations persist Agent B');
 select extensions.throws_ok($$update public.conversations set agent_id=current_setting('test.rb')::uuid where id=current_setting('test.rconv')::uuid$$,'22023',null,'Conversation identity is immutable even for privileged writes');
 set local role service_role;
 set local request.jwt.claims='{"role":"service_role"}';

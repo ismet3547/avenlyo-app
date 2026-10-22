@@ -1,5 +1,6 @@
 import {
   agentSettingsSchema,
+  fixedPauseReply,
   languageSchema,
   type Language,
   modelResponseSchema,
@@ -356,11 +357,16 @@ export class FrontOfficeRuntime {
         output,
         output.request_human,
       );
-      if (fixedReply && responseLanguage)
-        output.reply = await this.provider.localize(
-          output.reply,
-          responseLanguage,
-        );
+      if (fixedReply && responseLanguage) {
+        output.reply =
+          context.aiMode === "paused" ||
+          !settings.goals.includes("answer_questions")
+            ? fixedPauseReply(
+                responseLanguage,
+                context.channel === "test_agent",
+              )
+            : await this.provider.localize(output.reply, responseLanguage);
+      }
       const safeReply = customerSafeReply(output.reply, Boolean(lead));
       output.reply =
         context.channel === "instagram"

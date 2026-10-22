@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { ActionLink, PageHeader } from "@/components/ui";
 import { TestAgent } from "@/components/conversations";
+import { publishedAgentKnowledge } from "@/lib/agents";
 import { productContext } from "@/lib/product-data";
 export default async function Page({
   searchParams,
@@ -23,26 +24,7 @@ export default async function Page({
     ? agents.data.find((a) => a.id === query.agent)
     : agents.data.find((a) => a.is_default);
   if (!agent) notFound();
-  const bindings =
-    agent.knowledge_mode === "selected"
-      ? await ctx.supabase
-          .from("agent_knowledge_items")
-          .select("knowledge_item_id")
-          .eq("workspace_id", ctx.workspace.id)
-          .eq("agent_id", agent.id)
-      : null;
-  if (bindings?.error) throw new Error("Knowledge scope could not be loaded.");
-  let q = ctx.supabase
-    .from("knowledge_items")
-    .select("id", { count: "exact", head: true })
-    .eq("workspace_id", ctx.workspace.id)
-    .eq("status", "published");
-  if (bindings)
-    q = q.in(
-      "id",
-      bindings.data.map((b) => b.knowledge_item_id),
-    );
-  const knowledge = await q;
+  const published = await publishedAgentKnowledge(agent, ctx.supabase);
   return (
     <>
       <PageHeader
@@ -78,7 +60,7 @@ export default async function Page({
         key={agent.id}
         workspaceId={ctx.workspace.id}
         agentId={agent.id}
-        published={knowledge.error ? null : (knowledge.count ?? 0)}
+        published={published}
       />
     </>
   );

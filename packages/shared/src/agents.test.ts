@@ -73,3 +73,19 @@ describe("Agent V2 boundaries", () => {
     ).toBe(false);
   });
 });
+
+import { customerPauseReplies, fixedPauseReply } from "./fixed-replies.ts";
+import { languageCodes } from "./agents.ts";
+it("has a bounded canonical pause notice for every configured language", () => {
+  for (const code of languageCodes) {
+    expect(
+      Buffer.byteLength(customerPauseReplies[code], "utf8"),
+    ).toBeGreaterThan(20);
+    expect(fixedPauseReply(code, true)).toContain(
+      code === "en" ? "test conversation" : "Test:",
+    );
+    expect(Buffer.byteLength(customerPauseReplies[code], "utf8")).toBeLessThan(
+      1000,
+    );
+  }
+});
