@@ -3,6 +3,9 @@ import {
   agentSettingsSchema,
   defaultSettings,
   knowledgeSchema,
+  knowledgeTypes,
+  businessKnowledgeType,
+  collectionSchema,
   modelResponseSchema,
   runtimeSettings,
   turnSchema,
@@ -99,5 +102,107 @@ describe("bounded business authority", () => {
         workspace_id: "forged",
       }).success,
     ).toBe(false);
+  });
+});
+
+describe("business knowledge model", () => {
+  it.each(knowledgeTypes)("validates %s as a real persisted type", (type) => {
+    expect(
+      knowledgeSchema.parse({
+        type,
+        title: "Logo design",
+        content: type === "pricing" ? "" : "Business information",
+        ...(type === "pricing"
+          ? { price_statement: "Contact us for pricing" }
+          : {}),
+      }).type,
+    ).toBe(type);
+  });
+  it.each(["$50", "Starting at $50", "$50–$100", "Contact us for pricing"])(
+    "supports flexible pricing: %s",
+    (price_statement) => {
+      expect(
+        knowledgeSchema.safeParse({
+          type: "pricing",
+          title: "Design packages",
+          content: "",
+          price_statement,
+          currency: "USD",
+        }).success,
+      ).toBe(true);
+    },
+  );
+  it("requires a pricing statement and rejects irrelevant structured fields", () => {
+    expect(
+      knowledgeSchema.safeParse({
+        type: "pricing",
+        title: "Design packages",
+        content: "Optional conditions",
+      }).success,
+    ).toBe(false);
+    expect(
+      knowledgeSchema.safeParse({
+        type: "faq",
+        title: "Any refunds?",
+        content: "No refunds.",
+        price_statement: "$50",
+      }).success,
+    ).toBe(false);
+    expect(
+      knowledgeSchema.safeParse({
+        type: "policy",
+        title: "Any refunds?",
+        content: "No refunds.",
+        details: "Service only",
+      }).success,
+    ).toBe(false);
+    expect(
+      knowledgeSchema.safeParse({
+        type: "pricing",
+        title: "Design packages",
+        content: "",
+        price_statement: "$50",
+        currency: "dollars",
+      }).success,
+    ).toBe(false);
+  });
+  it("keeps complete Service facts inside the existing embedding input bound", () => {
+    expect(
+      knowledgeSchema.safeParse({
+        type: "service",
+        title: "Service",
+        content: "x".repeat(4000),
+        details: "y".repeat(2000),
+      }).success,
+    ).toBe(true);
+    expect(
+      knowledgeSchema.safeParse({
+        type: "service",
+        title: "Service",
+        content: "x".repeat(4001),
+      }).success,
+    ).toBe(false);
+  });
+  it("keeps legacy Text discoverable as Custom note", () => {
+    expect(businessKnowledgeType("text")).toBe("custom_note");
+    expect(
+      knowledgeSchema.safeParse({
+        type: "text",
+        title: "Legacy title",
+        content: "Legacy content",
+      }).success,
+    ).toBe(true);
+  });
+  it("bounds collections and rejects permission or publication fields", () => {
+    expect(collectionSchema.safeParse({ name: "Sales FAQs" }).success).toBe(
+      true,
+    );
+    expect(
+      collectionSchema.safeParse({ name: "Sales FAQs", publish: true }).success,
+    ).toBe(false);
+    expect(collectionSchema.safeParse({ name: " " }).success).toBe(false);
+    expect(collectionSchema.safeParse({ name: "x".repeat(81) }).success).toBe(
+      false,
+    );
   });
 });

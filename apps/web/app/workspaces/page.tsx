@@ -1,48 +1,45 @@
-import { Brand } from "@/components/brand";
+import { ArrowRight } from "lucide-react";
 import { requireUser } from "@/lib/workspace";
-import { WorkspaceForm } from "@/components/workspace-form";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { signOut } from "../auth/actions";
 import { switchWorkspace } from "./actions";
-export default async function WorkspacesPage() {
-  const { supabase } = await requireUser();
-  const { data } = await supabase
+import { Brand, Panel, PageHeader, Avatar } from "@/components/ui";
+import { WorkspaceForm } from "@/components/product-forms";
+export default async function Page() {
+  const ctx = await requireUser();
+  const spaces = await ctx.supabase
     .from("workspaces")
     .select("id,name")
     .order("created_at");
+  if (spaces.error) throw new Error("Your workspaces could not be loaded.");
   return (
-    <main className="mx-auto max-w-xl px-6 py-16">
-      <div className="flex items-center justify-between">
-        <Brand />
-        <form action={signOut}>
-          <Button variant="ghost" size="sm">
-            Sign out
-          </Button>
-        </form>
-      </div>
-      <h1 className="mt-12 text-3xl font-semibold tracking-tight">
-        Your workspaces
-      </h1>
-      <p className="mt-3 text-sm text-muted-foreground">
-        Each business has its own knowledge, conversations and leads.
-      </p>
-      {data?.length ? (
-        <div className="mt-7 space-y-2">
-          {data.map((w) => (
+    <main className="workspace-page">
+      <Brand />
+      <PageHeader
+        title="A place for your business."
+        description="Choose a workspace, or create a fresh one for your team."
+      />
+      {spaces.data.length > 0 && (
+        <div className="workspace-choices">
+          {spaces.data.map((w) => (
             <form action={switchWorkspace} key={w.id}>
               <input type="hidden" name="workspaceId" value={w.id} />
-              <Button variant="outline" className="h-12 w-full justify-start">
-                {w.name}
-              </Button>
+              <button className="workspace-choice">
+                <Avatar name={w.name} />
+                <span>
+                  <strong>{w.name}</strong>
+                  <p>Open workspace</p>
+                </span>
+                <ArrowRight aria-hidden="true" />
+              </button>
             </form>
           ))}
         </div>
-      ) : null}
-      <Card className="mt-8 p-6">
-        <h2 className="font-semibold">Create a workspace</h2>
+      )}
+      <Panel
+        title="Create a workspace"
+        description="A little setup. A lot more clarity."
+      >
         <WorkspaceForm />
-      </Card>
+      </Panel>
     </main>
   );
 }

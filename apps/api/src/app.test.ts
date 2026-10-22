@@ -67,6 +67,8 @@ async function setup(
     denied?: boolean;
     existing?: boolean;
     knowledgeRole?: string;
+    knowledgeChanged?: boolean;
+    runtimeContent?: string;
   } = {},
 ) {
   const user = client(
@@ -90,6 +92,7 @@ async function setup(
       knowledge_items: {
         title: "Custom services",
         content: "We offer custom design.",
+        runtime_content: options.runtimeContent ?? "We offer custom design.",
         revision: 1,
       },
     },
@@ -120,9 +123,11 @@ async function setup(
               ],
               error: null,
             }
-        : name === "finish_agent_turn"
-          ? { data: response, error: null }
-          : { data: null, error: null },
+        : name === "publish_knowledge_item" && options.knowledgeChanged
+          ? { data: null, error: { code: "40001" } }
+          : name === "finish_agent_turn"
+            ? { data: response, error: null }
+            : { data: null, error: null },
     ),
   } as unknown as SupabaseClient<Database>;
   const app = await buildApp({
@@ -238,6 +243,39 @@ describe("API authorization and bounded ingress", () => {
       ).statusCode,
     ).toBe(403);
     expect(provider.embed).not.toHaveBeenCalled();
+  });
+  it("embeds canonical structured pricing and preserves revision checks", async () => {
+    const runtimeContent =
+      "Price: Starting at $50\nCurrency: USD\nConditions: Two revisions included.";
+    const { app, service } = await setup({ runtimeContent });
+    const result = await app.inject({
+      method: "POST",
+      url: `/v1/knowledge/${conversation}/publish`,
+      headers: { authorization: `Bearer ${token}` },
+      payload: { workspaceId: workspace },
+    });
+    expect(result.statusCode).toBe(200);
+    expect(provider.embed).toHaveBeenCalledWith(
+      `Custom services\n${runtimeContent}`,
+    );
+    expect(service.rpc).toHaveBeenCalledWith(
+      "publish_knowledge_item",
+      expect.objectContaining({
+        actor_id: actor,
+        expected_revision: 1,
+        target_workspace_id: workspace,
+      }),
+    );
+  });
+  it("rejects publication when content changes during embedding", async () => {
+    const { app } = await setup({ knowledgeChanged: true });
+    const result = await app.inject({
+      method: "POST",
+      url: `/v1/knowledge/${conversation}/publish`,
+      headers: { authorization: `Bearer ${token}` },
+      payload: { workspaceId: workspace },
+    });
+    expect(result.statusCode).toBe(409);
   });
   it("rejects malformed JSON without leaking parser details", async () => {
     const { app } = await setup();

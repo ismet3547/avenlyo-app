@@ -1,18 +1,17 @@
 "use client";
-import { Button } from "@/components/ui/button";
-export default function AppError({ reset }: { reset: () => void }) {
+import { RotateCcw } from "lucide-react";
+import { Button, Panel } from "@/components/ui";
+export default function ErrorState({ reset }: { reset: () => void }) {
   return (
-    <div className="max-w-lg rounded-xl border border-border bg-card p-8">
-      <h1 className="text-xl font-semibold">
-        We could not load this workspace
-      </h1>
-      <p className="mt-3 text-sm leading-6 text-muted-foreground">
-        Your connection or workspace access may have changed. Try again to
-        reload the page.
-      </p>
-      <Button className="mt-6" onClick={reset}>
-        Try again
-      </Button>
-    </div>
+    <Panel>
+      <div className="standalone-state">
+        <h1>A moment to reconnect.</h1>
+        <p>We couldn’t load this part of your workspace. Please try again.</p>
+        <Button onClick={reset}>
+          <RotateCcw aria-hidden="true" />
+          Try again
+        </Button>
+      </div>
+    </Panel>
   );
 }

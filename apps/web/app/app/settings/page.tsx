@@ -1,37 +1,52 @@
-import { requireWorkspace } from "@/lib/workspace";
-import { PageHeader } from "@/components/page-header";
-import { Card } from "@/components/ui/card";
-import { BusinessForm } from "@/components/business-form";
-import { dateLabel } from "@/lib/utils";
-export default async function SettingsPage() {
-  const ctx = await requireWorkspace();
+import { ShieldCheck } from "lucide-react";
+import { productContext } from "@/lib/product-data";
+import { PageHeader, Panel, Badge } from "@/components/ui";
+import { BusinessForm } from "@/components/product-forms";
+export default async function Page() {
+  const ctx = await productContext();
   return (
     <>
       <PageHeader
-        title="Workspace settings"
-        description="The essentials for your business and its independent workspace."
+        title="Settings"
+        description="Manage your business profile and account."
       />
-      <Card className="max-w-2xl p-6">
-        <h2 className="mb-6 text-sm font-semibold">Business information</h2>
-        <BusinessForm
-          name={ctx.workspace.name}
-          editable={ctx.role === "owner"}
-        />
-        <dl className="mt-8 space-y-4 border-t border-border pt-6 text-xs">
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="text-muted-foreground">Workspace ID</dt>
-            <dd className="break-all font-mono">{ctx.workspace.id}</dd>
-          </div>
-          <div className="flex justify-between">
-            <dt className="text-muted-foreground">Your role</dt>
-            <dd className="capitalize">{ctx.role}</dd>
-          </div>
-          <div className="flex justify-between">
-            <dt className="text-muted-foreground">Created</dt>
-            <dd>{dateLabel(ctx.workspace.created_at)}</dd>
-          </div>
-        </dl>
-      </Card>
+      <div className="form-layout">
+        <div className="stack">
+          <Panel
+            title="Your business"
+            description="How your business appears in this workspace."
+          >
+            <BusinessForm
+              name={ctx.workspace.name}
+              editable={ctx.role === "owner"}
+            />
+          </Panel>
+          <Panel title="Your account">
+            <dl className="detail-dl">
+              <div>
+                <dt>Email address</dt>
+                <dd>{ctx.user.email}</dd>
+              </div>
+              <div>
+                <dt>Workspace role</dt>
+                <dd>
+                  <Badge tone="accent">
+                    {ctx.role === "owner" ? "Owner" : "Team member"}
+                  </Badge>
+                </dd>
+              </div>
+            </dl>
+          </Panel>
+        </div>
+        <Panel className="help-copy">
+          <ShieldCheck aria-hidden="true" />
+          <h3>Your workspace, protected.</h3>
+          <p>
+            Only active members can access this workspace. Business settings and
+            agent configuration are managed by its owner.
+          </p>
+        </Panel>
+      </div>
     </>
   );
 }

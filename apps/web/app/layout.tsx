@@ -3,11 +3,12 @@ import type { ReactNode } from "react";
 import "./globals.css";
 export const metadata: Metadata = {
   title: {
-    default: "Avenlyo · Your AI front office",
+    default: "Avenlyo — Customer workspace",
     template: "%s · Avenlyo",
   },
   description:
-    "Turn your business knowledge into helpful answers and useful inquiries.",
+    "Customer conversations, AI agent and business knowledge in one workspace.",
+  robots: { index: false, follow: false },
 };
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

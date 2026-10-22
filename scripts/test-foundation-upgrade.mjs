@@ -45,6 +45,8 @@ const snapshot = `select jsonb_build_object(
  'testCount',(select count(*) from public.conversations where channel='test_agent'),
  'leadCount',(select count(*) from public.leads)
  )`;
+const knowledgeSnapshot = `select coalesce(jsonb_agg(jsonb_build_array(id,workspace_id,type,title,content,status,revision,embedding::text,created_at,updated_at) order by id)::text,'[]') from public.knowledge_items`;
+const knowledgeBefore = sql(knowledgeSnapshot);
 const before = JSON.parse(sql(snapshot));
 assert(
   before.testCount > 0 && before.leadCount > 0,
@@ -55,6 +57,18 @@ const applied = spawnSync("supabase", ["migration", "up", "--local"], {
 });
 assert.equal(applied.status, 0, "Additive local upgrade failed");
 const after = JSON.parse(sql(snapshot));
+assert.equal(
+  sql(knowledgeSnapshot),
+  knowledgeBefore,
+  "Existing Knowledge records changed during the additive upgrade",
+);
+assert.equal(
+  sql(
+    "select count(*) from public.knowledge_items where type in ('text','faq') and runtime_content<>content",
+  ),
+  "0",
+  "Legacy Text/FAQ runtime representation changed",
+);
 assert.deepEqual(
   after,
   before,

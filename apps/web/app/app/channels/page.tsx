@@ -1,207 +1,155 @@
-import { Globe, MessageCircle, ArrowUpRight } from "lucide-react";
-import Link from "next/link";
-import { PageHeader } from "@/components/page-header";
-import {
-  WebsiteChannelForm,
-  EmbedSnippet,
-  DisconnectInstagram,
-  ConnectionManagement,
-} from "@/components/channel-forms";
-import { requireWorkspace } from "@/lib/workspace";
+import { ChevronDown, Code2, ShieldCheck } from "lucide-react";
 import { websiteOriginSchema } from "@avenlyo-app/shared";
-export default async function ChannelsPage() {
-  const ctx = await requireWorkspace();
-  const connections = await ctx.supabase
+import { productContext } from "@/lib/product-data";
+import { Badge, ChannelIcon, PageHeader, Panel } from "@/components/ui";
+import {
+  DisconnectInstagram,
+  EmbedSnippet,
+  WebsiteConfiguration,
+} from "@/components/product-forms";
+export default async function Page() {
+  const ctx = await productContext();
+  const result = await ctx.supabase
     .from("channel_connections")
     .select("*")
     .eq("workspace_id", ctx.workspace.id);
-  if (connections.error) throw new Error("Channels could not be loaded");
-  const website = connections.data.find((c) => c.channel === "website_chat");
-  const instagram = connections.data.find((c) => c.channel === "instagram");
+  if (result.error) throw new Error("Channels could not be loaded.");
+  const website = result.data.find((c) => c.channel === "website_chat"),
+    instagram = result.data.find((c) => c.channel === "instagram"),
+    editable = ctx.role === "owner";
+  const connected = Boolean(
+    instagram?.enabled &&
+      instagram.status === "connected" &&
+      instagram.verified_at,
+  );
   const publicUrl = websiteOriginSchema.parse(
     process.env.AVENLYO_PUBLIC_API_URL ?? "http://localhost:4001",
   );
-  const local = new URL(publicUrl).protocol === "http:";
-  const connected =
-    instagram?.enabled &&
-    instagram.status === "connected" &&
-    Boolean(instagram.verified_at);
-  const websiteState = !website?.enabled
-    ? "Disabled"
-    : website.last_activity_at
-      ? "Active"
-      : "Ready";
-  const instagramState = connected
-    ? "Connected"
-    : instagram?.status === "needs_attention"
-      ? "Needs attention"
-      : instagram?.status === "disconnected"
-        ? "Disconnected"
-        : instagram
-          ? "Managed setup required"
-          : "Not configured";
+  const snippet = website
+    ? `<script src="${publicUrl}/widget.js" data-avenlyo-channel="${website.public_id}" defer></script>`
+    : "";
   return (
-    <div className="max-w-[1120px]">
+    <>
       <PageHeader
         title="Channels"
-        description="Connect the places where customers contact your business. One agent, with your team in control."
+        description="Connect your website and Instagram to receive conversations."
       />
-      <div className="border-t border-border">
-        <section
-          className="connection-row"
-          aria-labelledby="website-channel-heading"
-        >
-          <div className="flex items-start gap-4">
-            <Globe aria-hidden className="mt-1 size-5 text-primary" />
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2
-                  id="website-channel-heading"
-                  className="text-base font-semibold"
-                >
-                  Website Chat
-                </h2>
-                <span
-                  className="status-text"
-                  data-tone={website?.enabled ? "success" : undefined}
-                >
-                  {websiteState}
-                </span>
-              </div>
-              <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
-                Handle inquiries directly on your website, with a clear handoff
-                to your team.
-              </p>
-              <div className="mt-5">
-                <h3 className="text-xs font-semibold">Approved sites</h3>
-                {website?.approved_origins.length ? (
-                  <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-[13px]">
-                    {website.approved_origins.map((origin) => (
-                      <li key={origin} className="break-all">
-                        {origin}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="mt-2 text-[13px] text-muted-foreground">
-                    Approve your website’s origin to get started.
-                  </p>
-                )}
-              </div>
-              <ConnectionManagement
-                label="Manage Website Chat"
-                initialOpen={!website?.enabled}
-              >
-                <WebsiteChannelForm
-                  enabled={website?.enabled ?? false}
-                  origins={
-                    website?.approved_origins ??
-                    (local ? ["http://localhost:3001"] : [])
-                  }
-                  editable={ctx.role === "owner"}
-                />
-                {website && (
-                  <EmbedSnippet
-                    snippet={
-                      '<script async src="' +
-                      publicUrl +
-                      '/widget.js" data-avenlyo-channel="' +
-                      website.public_id +
-                      '"></script>'
-                    }
-                  />
-                )}
-                {website && local && (
-                  <Link
-                    href={"/chat-demo?channel=" + website.public_id}
-                    target="_blank"
-                    className="mt-4 inline-flex items-center gap-2 text-xs font-medium text-primary"
-                  >
-                    Open local widget demo
-                    <ArrowUpRight className="size-3" aria-hidden />
-                  </Link>
-                )}
-              </ConnectionManagement>
+      <div className="channel-cards">
+        <Panel>
+          <div className="channel-card-heading">
+            <ChannelIcon channel="website_chat" />
+            <div>
+              <h2>Website Chat</h2>
+              <p>A friendly welcome, right on your website.</p>
             </div>
+            <Badge tone={website?.enabled ? "success" : "neutral"} dot>
+              {website?.enabled
+                ? website.last_activity_at
+                  ? "Active"
+                  : "Ready"
+                : "Not connected"}
+            </Badge>
           </div>
-        </section>
-        <section
-          className="connection-row"
-          aria-labelledby="instagram-channel-heading"
-        >
-          <div className="flex items-start gap-4">
-            <MessageCircle aria-hidden className="mt-1 size-5 text-primary" />
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2
-                  id="instagram-channel-heading"
-                  className="text-base font-semibold"
-                >
-                  Instagram
-                </h2>
-                <span
-                  className="status-text"
-                  data-tone={
-                    connected
-                      ? "success"
-                      : instagram?.status === "needs_attention"
-                        ? "attention"
-                        : undefined
-                  }
-                >
-                  {instagramState}
+          <p className="channel-description">
+            Answer questions while interest is fresh. Your agent helps visitors
+            find what they need, then brings your team in when it matters.
+          </p>
+          {website?.approved_origins.length ? (
+            <dl className="channel-facts">
+              <div>
+                <dt>Approved websites</dt>
+                <dd>
+                  {website.approved_origins.map((origin) => (
+                    <p key={origin}>{origin}</p>
+                  ))}
+                </dd>
+              </div>
+            </dl>
+          ) : null}
+          <WebsiteConfiguration channel={website} editable={editable} />
+          {website && (
+            <details className="disclosure">
+              <summary>
+                <span className="row">
+                  <Code2 aria-hidden="true" />
+                  Install on your website
                 </span>
+                <ChevronDown aria-hidden="true" />
+              </summary>
+              <div className="panel-body">
+                <p className="muted small" style={{ marginBottom: 15 }}>
+                  Add this snippet before your website’s closing body tag. Your
+                  channel must be enabled for visitors to use it.
+                </p>
+                <EmbedSnippet code={snippet} />
               </div>
-              <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
-                Use the same Avenlyo agent for customer-initiated Instagram
-                messages.
-              </p>
-              <div className="mt-5">
-                <h3 className="text-xs font-semibold">
-                  {connected ? "Professional account" : "Managed setup"}
-                </h3>
-                {connected ? (
-                  <p className="mt-2 text-[13px]">
-                    {instagram?.provider_username
-                      ? "@" + instagram.provider_username
-                      : "Connected professional account"}
-                  </p>
-                ) : (
-                  <p className="mt-2 max-w-xl text-[13px] leading-6 text-muted-foreground">
-                    A verified professional account, messaging access and
-                    webhook setup are required. Your Avenlyo operator connects
-                    the correct account for this workspace.
-                  </p>
-                )}
-              </div>
-              {instagram && (
-                <ConnectionManagement label="Connection details">
-                  {connected && (
-                    <p className="break-all text-[13px]">
-                      Professional account · {instagram.provider_account_id}
-                    </p>
-                  )}
-                  <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
-                    Replies follow Instagram’s supported messaging window.
-                    Delivery failures and unconfirmed sends are visible in
-                    Inbox.
-                  </p>
-                  {instagram.status !== "disconnected" && (
-                    <DisconnectInstagram editable={ctx.role === "owner"} />
-                  )}
-                </ConnectionManagement>
-              )}
+            </details>
+          )}
+        </Panel>
+        <Panel>
+          <div className="channel-card-heading">
+            <ChannelIcon channel="instagram" />
+            <div>
+              <h2>Instagram</h2>
+              <p>Thoughtful answers, in their DMs.</p>
             </div>
+            <Badge
+              tone={
+                connected
+                  ? "success"
+                  : instagram?.status === "needs_attention"
+                    ? "warning"
+                    : "neutral"
+              }
+              dot
+            >
+              {connected
+                ? "Connected"
+                : instagram?.status === "needs_attention"
+                  ? "Needs attention"
+                  : "Not connected"}
+            </Badge>
           </div>
-        </section>
+          <p className="channel-description">
+            Bring Instagram conversations into the same inbox. Help customers
+            with your business knowledge and hand off to a person when needed.
+          </p>
+          <dl className="channel-facts">
+            <div>
+              <dt>Account</dt>
+              <dd>
+                {instagram?.provider_username
+                  ? `@${instagram.provider_username}`
+                  : "No account connected"}
+              </dd>
+            </div>
+            <div>
+              <dt>Setup</dt>
+              <dd>Managed connection</dd>
+            </div>
+          </dl>
+          <div
+            className="panel-body"
+            style={{ borderTop: "1px solid var(--border)" }}
+          >
+            {connected ? (
+              <DisconnectInstagram editable={editable} />
+            ) : (
+              <div className="notice">
+                {instagram?.status === "needs_attention"
+                  ? "This connection needs a review. Ask your workspace administrator to verify the Instagram account."
+                  : "Ask your workspace administrator to arrange an Instagram connection. Once verified, its status will appear here."}
+              </div>
+            )}
+          </div>
+        </Panel>
       </div>
-      <Link
-        href="/app/inbox"
-        className="mt-6 inline-flex items-center gap-2 text-[13px] font-medium text-primary"
-      >
-        Open Inbox
-        <ArrowUpRight aria-hidden className="size-3.5" />
-      </Link>
-    </div>
+      <div className="panel-body">
+        <p className="section-note">
+          <ShieldCheck aria-hidden="true" />
+          Your team can take over any conversation from the Inbox.
+        </p>
+      </div>
+    </>
   );
 }

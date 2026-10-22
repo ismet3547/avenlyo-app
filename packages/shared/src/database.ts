@@ -10,6 +10,8 @@ export type Workspace = {
   name: string;
   slug: string;
   created_at: string;
+  onboarding_completed_at: string | null;
+  first_channel_activated_at: string | null;
 };
 export type Member = {
   workspace_id: string;
@@ -30,12 +32,24 @@ export type SettingsRow = {
 export type KnowledgeItem = {
   id: string;
   workspace_id: string;
-  type: "text" | "faq";
+  type: import("./schemas.ts").KnowledgeType | "text";
+  price_statement: string;
+  currency: string;
+  details: string;
+  collection_id: string | null;
+  runtime_content: string;
   title: string;
   content: string;
   status: "draft" | "published" | "archived";
   revision: number;
   embedding: string | null;
+  created_at: string;
+  updated_at: string;
+};
+export type KnowledgeCollection = {
+  id: string;
+  workspace_id: string;
+  name: string;
   created_at: string;
   updated_at: string;
 };
@@ -195,6 +209,7 @@ export type Database = {
       workspace_members: Table<Member>;
       agent_settings: Table<SettingsRow>;
       knowledge_items: Table<KnowledgeItem>;
+      knowledge_collections: Table<KnowledgeCollection>;
       conversations: Table<Conversation>;
       messages: Table<Message>;
       leads: Table<Lead>;
@@ -223,6 +238,12 @@ export type Database = {
     };
     Views: Record<never, never>;
     Functions: {
+      sync_onboarding: RPC<{ target_workspace_id: string }, Json>;
+      complete_onboarding_without_channel: RPC<
+        { target_workspace_id: string },
+        string
+      >;
+      home_snapshot: RPC<{ target_workspace_id: string }, Json>;
       configure_website_channel: RPC<
         {
           target_workspace_id: string;
@@ -364,6 +385,29 @@ export type Database = {
       save_agent_settings: RPC<
         { target_workspace_id: string; settings: Json },
         undefined
+      >;
+      save_knowledge_collection: RPC<
+        {
+          target_workspace_id: string;
+          target_collection_id: string | null;
+          collection_name: string;
+        },
+        string
+      >;
+      save_business_knowledge: RPC<
+        {
+          target_workspace_id: string;
+          target_item_id: string | null;
+          item_type: string;
+          item_title: string;
+          item_content: string;
+          expected_revision: number | null;
+          item_price_statement: string;
+          item_currency: string;
+          item_details: string;
+          item_collection_id: string | null;
+        },
+        string
       >;
       save_knowledge_item: RPC<
         {

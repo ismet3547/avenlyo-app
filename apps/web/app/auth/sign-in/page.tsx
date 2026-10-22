@@ -1,13 +1,17 @@
-import { AuthForm } from "@/components/auth-form";
-import { authConfigured } from "@/lib/supabase/server";
-export default function SignInPage() {
+import Link from "next/link";
+import { AuthForm } from "@/components/product-forms";
+export default function Page() {
   return (
-    <>
-      <h2 className="text-3xl font-semibold tracking-tight">Welcome back</h2>
-      <p className="mt-3 text-sm leading-6 text-muted-foreground">
-        Sign in to your AI front office.
-      </p>
-      <AuthForm mode="sign-in" configured={authConfigured()} />
-    </>
+    <div className="auth-form-card">
+      <h1>Sign in to Avenlyo</h1>
+      <p>Sign in to your Avenlyo workspace.</p>
+      <AuthForm mode="signin" />
+      <div className="auth-bottom">
+        New to Avenlyo?<Link href="/auth/sign-up">Create an account</Link>
+      </div>
+      <div className="auth-note">
+        Your conversations. Your knowledge. Your workspace.
+      </div>
+    </div>
   );
 }

@@ -1,18 +1,17 @@
-import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { ActionLink, Brand } from "@/components/ui";
 export default function NotFound() {
   return (
-    <main className="mx-auto max-w-lg px-6 py-24">
-      <p className="text-sm font-medium text-primary">404</p>
-      <h1 className="mt-3 text-3xl font-semibold">This page is unavailable</h1>
-      <p className="mt-3 text-muted-foreground">
-        It may not exist in your current workspace.
+    <main className="standalone-state">
+      <Brand />
+      <h1>This page has wandered off.</h1>
+      <p>
+        The page may have moved, or you may need to switch workspaces to see it.
       </p>
-      <Link
-        className="mt-6 inline-block text-sm text-primary underline"
-        href="/app"
-      >
-        Back to overview
-      </Link>
+      <ActionLink href="/app">
+        <ArrowLeft aria-hidden="true" />
+        Back to your workspace
+      </ActionLink>
     </main>
   );
 }
