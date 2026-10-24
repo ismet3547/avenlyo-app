@@ -1,36 +1,9 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  Check,
-  CircleHelp,
-  FileText,
-  Globe2,
-  Camera,
-  MessageSquare,
-  Sparkles,
-} from "lucide-react";
+import { channelLabels } from "@avenlyo-app/shared";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-export function Brand({ compact = false }: { compact?: boolean }) {
-  return (
-    <span className="brand">
-      <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
-        <rect width="32" height="32" rx="10" fill="currentColor" />
-        <path
-          d="m9 22 7-13 7 13M12 18h8"
-          stroke="white"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-      {!compact && (
-        <span>
-          avenlyo<span className="brand-period">.</span>
-        </span>
-      )}
-    </span>
-  );
+export function Brand() {
+  return <span className="brand">Avenlyo</span>;
 }
 export function Button({
   variant = "primary",
@@ -68,19 +41,12 @@ export function ActionLink({
 }
 export function Badge({
   children,
-  tone = "neutral",
-  dot = false,
 }: {
   children: ReactNode;
   tone?: "neutral" | "success" | "warning" | "accent" | "danger";
   dot?: boolean;
 }) {
-  return (
-    <span className={`badge badge-${tone}`}>
-      {dot && <span className="status-dot" />}
-      {children}
-    </span>
-  );
+  return <span className="badge">{children}</span>;
 }
 export function PageHeader({
   title,
@@ -133,24 +99,14 @@ export function EmptyState({
   title,
   description,
   action,
-  icon = "messages",
 }: {
   title: string;
   description: string;
   action?: ReactNode;
   icon?: "messages" | "knowledge" | "help";
 }) {
-  const Icon =
-    icon === "knowledge"
-      ? FileText
-      : icon === "help"
-        ? CircleHelp
-        : MessageSquare;
   return (
     <div className="empty-state">
-      <span className="empty-icon">
-        <Icon aria-hidden="true" />
-      </span>
       <h3>{title}</h3>
       <p>{description}</p>
       {action}
@@ -173,63 +129,7 @@ export function Notice({
     </div>
   );
 }
-export function ChannelIcon({ channel }: { channel: string }) {
-  const Icon =
-    channel === "instagram"
-      ? Camera
-      : channel === "test_agent"
-        ? Sparkles
-        : Globe2;
-  return (
-    <span className={`channel-icon channel-${channel}`}>
-      <Icon aria-hidden="true" />
-    </span>
-  );
-}
-export function Avatar({
-  name,
-  small = false,
-}: {
-  name: string;
-  small?: boolean;
-}) {
-  return (
-    <span
-      className={`avatar ${small ? "avatar-small" : ""}`}
-      aria-hidden="true"
-    >
-      {name
-        .split(/\s+/)
-        .slice(0, 2)
-        .map((s) => s[0])
-        .join("")
-        .toUpperCase()}
-    </span>
-  );
-}
-export function Step({
-  done,
-  number,
-  title,
-  description,
-  href,
-}: {
-  done: boolean;
-  number: number;
-  title: string;
-  description: string;
-  href: string;
-}) {
-  return (
-    <Link className={`setup-step ${done ? "is-complete" : ""}`} href={href}>
-      <span className="step-number">
-        {done ? <Check aria-hidden="true" /> : number}
-      </span>
-      <span>
-        <strong>{title}</strong>
-        <span className="step-description">{description}</span>
-      </span>
-      <ArrowRight className="step-arrow" aria-hidden="true" />
-    </Link>
-  );
+export function ChannelLabel({ channel }: { channel: string }) {
+  const label = channelLabels[channel as keyof typeof channelLabels] ?? channel;
+  return <span className="small">{label}</span>;
 }

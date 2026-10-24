@@ -4,16 +4,12 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import {
   ArrowLeft,
   ArrowRight,
-  BookOpen,
   ChevronUp,
   History,
   LoaderCircle,
   RotateCcw,
   Search,
   Send,
-  ShieldCheck,
-  Sparkles,
-  UserRound,
 } from "lucide-react";
 import type {
   InboxItem,
@@ -22,16 +18,7 @@ import type {
   Message,
   TurnResult,
 } from "@avenlyo-app/shared";
-import {
-  Avatar,
-  Badge,
-  Brand,
-  Button,
-  ChannelIcon,
-  EmptyState,
-  Notice,
-  Panel,
-} from "./ui";
+import { Badge, Button, ChannelLabel, EmptyState, Notice, Panel } from "./ui";
 import {
   dateLabel,
   qualificationLabel,
@@ -65,13 +52,6 @@ export function MessageTimeline({
           key={message.id}
           className={`message ${(perspective === "customer" ? message.role === "customer" : message.role !== "customer") ? "message-self" : ""} ${message.role === "human" ? "message-human" : ""}`}
         >
-          <span className="message-avatar">
-            {message.role === "assistant" ? (
-              <Sparkles aria-hidden="true" />
-            ) : (
-              <UserRound aria-hidden="true" />
-            )}
-          </span>
           <div className="message-body">
             <div className="message-meta">
               <strong>
@@ -88,10 +68,6 @@ export function MessageTimeline({
             <div className="message-bubble">{message.content}</div>
             {messageSources(message).length > 0 && (
               <div className="message-source">
-                <BookOpen
-                  aria-hidden="true"
-                  style={{ width: 11, height: 11 }}
-                />
                 {messageSources(message).join(" · ")}
               </div>
             )}
@@ -367,10 +343,9 @@ export function InboxView({
                 aria-current={item.id === selected ? "page" : undefined}
               >
                 <div className="row">
-                  <Avatar name={item.customerRef || "Visitor"} small />
                   <strong>{item.customerRef || "Website visitor"}</strong>
                   <span className="push-right">
-                    <ChannelIcon channel={item.channel} />
+                    <ChannelLabel channel={item.channel} />
                   </span>
                 </div>
                 <p>{item.preview || "New conversation"}</p>
@@ -434,7 +409,6 @@ export function InboxView({
                 >
                   <ArrowLeft aria-hidden="true" />
                 </Link>
-                <Avatar name={name} />
                 <div>
                   <h2>{name}</h2>
                   <p>
@@ -755,12 +729,9 @@ export function TestAgent({
     <div className={`test-layout ${focused ? "focused-test" : ""}`}>
       <Panel className="inbox-thread test-thread">
         <div className="thread-header">
-          <span className="message-avatar">
-            <Sparkles aria-hidden="true" />
-          </span>
           <div>
-            <h2>Your AI front office</h2>
-            <p>A safe place to see it in action.</p>
+            <h2>Test conversation</h2>
+            <p>Messages here stay separate from customer conversations.</p>
           </div>
           <Badge tone="accent">Test mode</Badge>
         </div>
@@ -776,11 +747,10 @@ export function TestAgent({
           </div>
         ) : (
           <div className="test-welcome">
-            {!focused && <Brand />}
             <h2>
               {focused
                 ? "See how your agent responds."
-                : "Take your agent for a spin."}
+                : "Ask a test question."}
             </h2>
             <p>
               Ask a question like a customer would. Your agent will answer using
@@ -936,21 +906,12 @@ export function TestAgent({
               </div>
             )}
           </Panel>
-          <Panel className="help-copy">
-            <ShieldCheck aria-hidden="true" />
-            <h3>A real conversation, without the pressure.</h3>
-            <p>
-              Try different questions, check the answers and refine your
-              knowledge. Test messages never contact customers.
-            </p>
-            <Link
-              className="text-link"
-              href={screenHref("/app/knowledge", preview)}
-            >
-              Review knowledge
-              <ArrowRight aria-hidden="true" />
-            </Link>
-          </Panel>
+          <Link
+            className="text-link"
+            href={screenHref("/app/knowledge", preview)}
+          >
+            Review knowledge
+          </Link>
           <Link
             className="button button-secondary"
             href={screenHref("/app/conversations", preview)}

@@ -400,6 +400,33 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     exact: true,
   });
   await expect(drawer).toBeVisible();
+  // The stripped shell retains every real product destination on mobile.
+  for (const [label, href] of [
+    ["Home", "/app"],
+    ["Inbox", "/app/inbox"],
+    ["Leads", "/app/leads"],
+    ["Agent", "/app/agent"],
+    ["Knowledge", "/app/knowledge"],
+    ["Channels", "/app/channels"],
+    ["Test agent", "/app/test-agent"],
+    ["Test history", "/app/conversations"],
+    ["Settings", "/app/settings"],
+  ]) {
+    await expect(
+      drawer
+        .getByRole("navigation", { name: "Main navigation" })
+        .getByRole("link", { name: label, exact: true }),
+    ).toHaveAttribute("href", href);
+  }
+  await expect(
+    drawer.getByRole("button", { name: "Sign out", exact: true }),
+  ).toBeEnabled();
+  await expect(
+    drawer.getByRole("link", {
+      name: "Choose or create workspace",
+      exact: true,
+    }),
+  ).toHaveAttribute("href", "/workspaces");
   await capturePage({
     path: "test-results/screenshots/mobile-navigation-390.png",
     fullPage: false,
@@ -482,23 +509,51 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
               .evaluate((node) => getComputedStyle(node).overflowY),
           ).toBe("visible");
       }
+      if (name === "leads" && width === 768) {
+        const records = page.locator(".record-list > li");
+        await expect(records).toHaveCount(1);
+        const search = page.getByRole("searchbox", {
+          name: "Search leads",
+          exact: true,
+        });
+        await search.fill("no-matching-customer");
+        await expect(records).toHaveCount(0);
+        await search.fill("Alex");
+        await expect(records).toHaveCount(1);
+        await page
+          .getByLabel("Qualification", { exact: true })
+          .selectOption("qualified");
+        await expect(records).toHaveCount(0);
+        await page
+          .getByLabel("Qualification", { exact: true })
+          .selectOption("needs_human");
+        await expect(records).toHaveCount(1);
+        await page
+          .getByLabel("Qualification", { exact: true })
+          .selectOption("");
+        await search.clear();
+        await expect(records).toContainText("Website Chat");
+        await expect(
+          records.getByRole("link", { name: "View lead", exact: true }),
+        ).toBeVisible();
+      }
       if (name === "knowledge") {
         const main = await page.locator("#main-content").boundingBox();
         const heading = await page
           .getByRole("heading", { name: "Knowledge", exact: true })
           .boundingBox();
         expect(heading!.y - main!.y).toBeGreaterThanOrEqual(
-          width <= 700 ? 20 : 36,
+          width <= 700 ? 16 : 24,
         );
         expect(heading!.y - main!.y).toBeLessThanOrEqual(
-          width <= 700 ? 22 : 40,
+          width <= 700 ? 18 : 26,
         );
         const inset = await page.locator("#main-content").evaluate((node) => ({
           horizontal: parseFloat(getComputedStyle(node).paddingLeft),
           bottom: parseFloat(getComputedStyle(node).paddingBottom),
         }));
-        expect(inset.horizontal).toBe(width <= 700 ? 18 : 32);
-        expect(inset.bottom).toBe(width <= 700 ? 28 : 48);
+        expect(inset.horizontal).toBe(width <= 700 ? 16 : 24);
+        expect(inset.bottom).toBe(width <= 700 ? 16 : 24);
       }
       expect(
         await page.evaluate(
@@ -506,7 +561,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
         ),
         `No overflow at ${width}px: ${name}`,
       ).toBe(true);
-      if (width === 1440 || width === 768 || width === 390)
+      if ([1440, 1024, 768, 390].includes(width))
         await capturePage({
           path: `test-results/screenshots/product-${name}-${width}.png`,
           fullPage: true,

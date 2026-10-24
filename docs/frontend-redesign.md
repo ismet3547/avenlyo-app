@@ -22,7 +22,7 @@ Captured from the actual application during CI: [Inbox](design-preview/inbox-des
 
 ## Development preview
 
-`pnpm dev:web` exposes `/preview` in development only, using labeled fictional fixtures with persistence and sending disabled. Production returns 404. This supplements real-data testing.
+The former development-only `/preview` visual experiment was removed in the [frontend skeleton reset](frontend-skeleton-reset.md). Review the real product routes instead.
 
 ## Verification
 

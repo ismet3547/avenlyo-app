@@ -9,9 +9,6 @@ export default function Page() {
       <div className="auth-bottom">
         New to Avenlyo?<Link href="/auth/sign-up">Create an account</Link>
       </div>
-      <div className="auth-note">
-        Your conversations. Your knowledge. Your workspace.
-      </div>
     </div>
   );
 }
