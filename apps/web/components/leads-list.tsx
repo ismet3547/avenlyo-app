@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowUpRight, Search } from "lucide-react";
 import { channelLabels, type Lead } from "@avenlyo-app/shared";
-import { Avatar, Badge, EmptyState, Panel } from "./ui";
+import { Badge, EmptyState, Panel } from "./ui";
 import { dateLabel, qualificationLabel, screenHref } from "@/lib/presentation";
 export function LeadsList({
   leads,
@@ -76,7 +76,6 @@ export function LeadsList({
                         className="row"
                         href={screenHref(`/app/leads/${lead.id}`, preview)}
                       >
-                        <Avatar name={lead.name || lead.company || "Visitor"} />
                         <span>
                           <strong>
                             {lead.name || lead.company || "New customer"}

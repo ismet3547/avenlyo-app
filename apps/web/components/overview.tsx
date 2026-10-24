@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, Check, Inbox, TriangleAlert } from "lucide-react";
 import type { ChannelConnection } from "@avenlyo-app/shared";
-import { ActionLink, Avatar } from "./ui";
+import { ActionLink } from "./ui";
 import { screenHref } from "@/lib/presentation";
 import {
   channelHasIssue,
@@ -40,9 +39,7 @@ export function Overview({
               conversations.
             </p>
           </div>
-          <ActionLink href={href("/app/channels")}>
-            Connect channel <ArrowRight aria-hidden="true" />
-          </ActionLink>
+          <ActionLink href={href("/app/channels")}>Connect channel</ActionLink>
         </header>
       </div>
     );
@@ -62,26 +59,21 @@ export function Overview({
               : "Reconnect a channel to receive customer conversations."}
           </p>
         </div>
-        <ActionLink href={href("/app/inbox")}>
-          <Inbox aria-hidden="true" />
-          Open Inbox
-        </ActionLink>
+        <ActionLink href={href("/app/inbox")}>Open Inbox</ActionLink>
       </header>
       {!online && !alerts.length && (
         <div className="home-alert" role="alert">
-          <TriangleAlert aria-hidden="true" />
           <div>
             <strong>Customer channels are offline</strong>
             <p>Customer messages cannot reach Avenlyo.</p>
           </div>
           <Link className="text-link" href={href("/app/channels")}>
-            Review connection <ArrowRight aria-hidden="true" />
+            Review connection
           </Link>
         </div>
       )}
       {alerts.map((channel) => (
         <div className="home-alert" role="alert" key={channel.id}>
-          <TriangleAlert aria-hidden="true" />
           <div>
             <strong>
               {channel.channel === "website_chat"
@@ -92,7 +84,7 @@ export function Overview({
             <p>Customer messages may not reach Avenlyo.</p>
           </div>
           <Link className="text-link" href={href("/app/channels")}>
-            Review connection <ArrowRight aria-hidden="true" />
+            Review connection
           </Link>
         </div>
       ))}
@@ -110,7 +102,6 @@ export function Overview({
                     className="home-conversation"
                     href={href(`/app/inbox/${item.id}`)}
                   >
-                    <Avatar name={customerName(item)} small />
                     <div className="home-conversation-copy">
                       <h3>{customerName(item)}</h3>
                       <p>
@@ -127,9 +118,7 @@ export function Overview({
                         </time>
                       </span>
                     </div>
-                    <span className="home-open">
-                      Open <ArrowRight aria-hidden="true" />
-                    </span>
+                    <span className="home-open">Open</span>
                   </Link>
                 </li>
               ))}
@@ -140,13 +129,11 @@ export function Overview({
                 href={href("/app/inbox")}
               >
                 View all {data.attentionCount} in Inbox{" "}
-                <ArrowRight aria-hidden="true" />
               </Link>
             )}
           </>
         ) : (
           <div className="home-no-action">
-            <Check aria-hidden="true" />
             <div>
               <strong>No action needed</strong>
               <p>
@@ -171,7 +158,6 @@ export function Overview({
                   className="home-conversation"
                   href={href(`/app/inbox/${item.id}`)}
                 >
-                  <Avatar name={customerName(item)} small />
                   <div className="home-conversation-copy">
                     <h3>{customerName(item)}</h3>
                     <p>{item.preview ? `“${item.preview}”` : item.activity}</p>
@@ -200,7 +186,7 @@ export function Overview({
           </div>
         )}
         <Link className="text-link home-all" href={href("/app/inbox")}>
-          View all in Inbox <ArrowRight aria-hidden="true" />
+          View all in Inbox
         </Link>
       </section>
     </div>

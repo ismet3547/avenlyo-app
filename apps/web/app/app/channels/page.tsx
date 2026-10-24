@@ -2,7 +2,7 @@ import { ChevronDown, Code2, ShieldCheck } from "lucide-react";
 import { websiteOriginSchema } from "@avenlyo-app/shared";
 import { ChannelAgentAssignment } from "@/components/channel-agent-assignment";
 import { productContext } from "@/lib/product-data";
-import { Badge, ChannelIcon, PageHeader, Panel } from "@/components/ui";
+import { Badge, PageHeader, Panel } from "@/components/ui";
 import {
   DisconnectInstagram,
   EmbedSnippet,
@@ -45,7 +45,6 @@ export default async function Page() {
       <div className="channel-cards">
         <Panel>
           <div className="channel-card-heading">
-            <ChannelIcon channel="website_chat" />
             <div>
               <h2>Website Chat</h2>
               <p>A friendly welcome, right on your website.</p>
@@ -100,7 +99,6 @@ export default async function Page() {
         </Panel>
         <Panel>
           <div className="channel-card-heading">
-            <ChannelIcon channel="instagram" />
             <div>
               <h2>Instagram</h2>
               <p>Thoughtful answers, in their DMs.</p>

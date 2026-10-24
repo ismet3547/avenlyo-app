@@ -400,6 +400,33 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     exact: true,
   });
   await expect(drawer).toBeVisible();
+  // The stripped shell retains every real product destination on mobile.
+  for (const [label, href] of [
+    ["Home", "/app"],
+    ["Inbox", "/app/inbox"],
+    ["Leads", "/app/leads"],
+    ["Agent", "/app/agent"],
+    ["Knowledge", "/app/knowledge"],
+    ["Channels", "/app/channels"],
+    ["Test agent", "/app/test-agent"],
+    ["Test history", "/app/conversations"],
+    ["Settings", "/app/settings"],
+  ]) {
+    await expect(
+      drawer
+        .getByRole("navigation", { name: "Main navigation" })
+        .getByRole("link", { name: label, exact: true }),
+    ).toHaveAttribute("href", href);
+  }
+  await expect(
+    drawer.getByRole("button", { name: "Sign out", exact: true }),
+  ).toBeEnabled();
+  await expect(
+    drawer.getByRole("link", {
+      name: "Choose or create workspace",
+      exact: true,
+    }),
+  ).toHaveAttribute("href", "/workspaces");
   await capturePage({
     path: "test-results/screenshots/mobile-navigation-390.png",
     fullPage: false,
@@ -488,17 +515,17 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
           .getByRole("heading", { name: "Knowledge", exact: true })
           .boundingBox();
         expect(heading!.y - main!.y).toBeGreaterThanOrEqual(
-          width <= 700 ? 20 : 36,
+          width <= 700 ? 16 : 24,
         );
         expect(heading!.y - main!.y).toBeLessThanOrEqual(
-          width <= 700 ? 22 : 40,
+          width <= 700 ? 18 : 26,
         );
         const inset = await page.locator("#main-content").evaluate((node) => ({
           horizontal: parseFloat(getComputedStyle(node).paddingLeft),
           bottom: parseFloat(getComputedStyle(node).paddingBottom),
         }));
-        expect(inset.horizontal).toBe(width <= 700 ? 18 : 32);
-        expect(inset.bottom).toBe(width <= 700 ? 28 : 48);
+        expect(inset.horizontal).toBe(width <= 700 ? 16 : 24);
+        expect(inset.bottom).toBe(width <= 700 ? 16 : 24);
       }
       expect(
         await page.evaluate(
@@ -506,7 +533,7 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
         ),
         `No overflow at ${width}px: ${name}`,
       ).toBe(true);
-      if (width === 1440 || width === 768 || width === 390)
+      if ([1440, 1024, 768, 390].includes(width))
         await capturePage({
           path: `test-results/screenshots/product-${name}-${width}.png`,
           fullPage: true,
