@@ -1,4 +1,3 @@
-import { ShieldCheck } from "lucide-react";
 import { productContext } from "@/lib/product-data";
 import { PageHeader, Panel, Badge } from "@/components/ui";
 import { BusinessForm } from "@/components/product-forms";
@@ -38,14 +37,10 @@ export default async function Page() {
             </dl>
           </Panel>
         </div>
-        <Panel className="help-copy">
-          <ShieldCheck aria-hidden="true" />
-          <h3>Your workspace, protected.</h3>
-          <p>
-            Only active members can access this workspace. Business settings and
-            agent configuration are managed by its owner.
-          </p>
-        </Panel>
+        <p className="small muted">
+          Only active members can access this workspace. Business settings and
+          agent configuration are managed by its owner.
+        </p>
       </div>
     </>
   );

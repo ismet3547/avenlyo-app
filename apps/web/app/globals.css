@@ -264,6 +264,7 @@ small,
   gap: 12px;
 }
 .row,
+.conversation-title,
 .page-actions,
 .agent-selection-tools,
 .agent-row-summary,
@@ -333,6 +334,9 @@ small,
 }
 .mobile-topbar {
   display: none;
+}
+.mobile-drawer > button {
+  margin-right: 12px;
 }
 .mobile-drawer {
   width: min(320px, 100vw);
@@ -409,6 +413,9 @@ small,
   padding-block: 10px;
   border-bottom: 1px solid var(--border);
 }
+dt {
+  flex-shrink: 0;
+}
 dd {
   margin: 0;
 }
@@ -436,22 +443,6 @@ dd {
 .search-field > input,
 .knowledge-search > input {
   min-width: 0;
-}
-.table-wrap {
-  max-width: 100%;
-  overflow-x: auto;
-}
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-.data-table th,
-.data-table td {
-  padding: 12px 8px;
-  border-bottom: 1px solid var(--border);
-  vertical-align: top;
-  overflow-wrap: anywhere;
 }
 .list-footer {
   padding-block: 12px;
@@ -546,6 +537,7 @@ dd {
 .knowledge-creation-choice > span {
   display: block;
 }
+.record-list,
 .home-list,
 .knowledge-list,
 .knowledge-collection-list,
@@ -554,12 +546,14 @@ dd {
   padding: 0;
   margin: 0;
 }
+.record-list > li,
 .home-list li,
 .knowledge-list > li,
 .knowledge-collection-list li {
   border-bottom: 1px solid var(--border);
 }
 .home-conversation,
+.conversation-row,
 .agent-library-row,
 .knowledge-row,
 .knowledge-creation-choice,
@@ -603,8 +597,17 @@ dd {
 summary {
   padding-block: 12px;
 }
+summary .row {
+  display: inline-flex;
+}
 summary > svg {
   display: none;
+}
+.agent-row-summary {
+  align-items: flex-start;
+}
+.knowledge-creation-choice span span {
+  display: block;
 }
 .agent-library-row {
   border-bottom: 1px solid var(--border);
@@ -883,29 +886,6 @@ dialog::backdrop {
   .toolbar > select {
     width: 100%;
   }
-  .data-table,
-  .data-table tbody,
-  .data-table tr,
-  .data-table td {
-    display: block;
-    width: 100%;
-  }
-  .data-table thead,
-  [data-hide-mobile] {
-    display: none !important;
-  }
-  .data-table tr {
-    padding-block: 12px;
-    border-bottom: 1px solid var(--border);
-  }
-  .data-table td {
-    padding: 4px 0;
-    border: 0;
-  }
-  .data-table td[data-mobile-label]::before {
-    content: attr(data-mobile-label) ": ";
-    color: var(--muted);
-  }
   .agent-library-row,
   .knowledge-row {
     flex-wrap: wrap;
@@ -964,4 +944,11 @@ dialog::backdrop {
     max-height: none;
     overflow: visible;
   }
+}
+
+.record-list > li {
+  padding-block: 12px;
+}
+.record-list h2 {
+  font-size: 16px;
 }

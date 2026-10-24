@@ -1,9 +1,9 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowUpRight, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { channelLabels, type Lead } from "@avenlyo-app/shared";
-import { Badge, EmptyState, Panel } from "./ui";
+import { EmptyState, Panel } from "./ui";
 import { dateLabel, qualificationLabel, screenHref } from "@/lib/presentation";
 export function LeadsList({
   leads,
@@ -54,93 +54,41 @@ export function LeadsList({
       </div>
       <Panel>
         {filtered.length ? (
-          <div className="table-wrap">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Customer</th>
-                  <th>Inquiry</th>
-                  <th>Qualification</th>
-                  <th>Source</th>
-                  <th>Added</th>
-                  <th>
-                    <span className="sr-only">Open</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((lead) => (
-                  <tr key={lead.id}>
-                    <td>
-                      <Link
-                        className="row"
-                        href={screenHref(`/app/leads/${lead.id}`, preview)}
-                      >
-                        <span>
-                          <strong>
-                            {lead.name || lead.company || "New customer"}
-                          </strong>
-                          <span
-                            className="muted small"
-                            style={{
-                              display: "block",
-                              marginTop: 3,
-                              overflowWrap: "anywhere",
-                            }}
-                          >
-                            {lead.email ||
-                              lead.phone ||
-                              "No contact details yet"}
-                          </span>
-                        </span>
-                      </Link>
-                    </td>
-                    <td className="muted" data-hide-mobile>
-                      <span
-                        style={{
-                          display: "block",
-                          maxWidth: 260,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {lead.summary}
-                      </span>
-                    </td>
-                    <td>
-                      <Badge
-                        tone={
-                          lead.qualification === "qualified"
-                            ? "success"
-                            : lead.qualification === "needs_human"
-                              ? "warning"
-                              : "neutral"
-                        }
-                      >
-                        {qualificationLabel[lead.qualification]}
-                      </Badge>
-                    </td>
-                    <td className="muted" data-mobile-label="Source">
-                      {channelLabels[lead.source]}
-                    </td>
-                    <td className="muted" data-hide-mobile>
-                      {dateLabel(lead.created_at)}
-                    </td>
-                    <td>
-                      <Link
-                        className="text-link"
-                        href={screenHref(`/app/leads/${lead.id}`, preview)}
-                      >
-                        View lead
-                        <ArrowUpRight aria-hidden="true" />
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ul className="record-list">
+            {filtered.map((lead) => (
+              <li key={lead.id}>
+                <h2>
+                  <Link href={screenHref(`/app/leads/${lead.id}`, preview)}>
+                    {lead.name || lead.company || "New customer"}
+                  </Link>
+                </h2>
+                <p className="small muted">
+                  {lead.email || lead.phone || "No contact details yet"}
+                </p>
+                <p>{lead.summary}</p>
+                <dl className="detail-dl">
+                  <div>
+                    <dt>Qualification</dt>
+                    <dd>{qualificationLabel[lead.qualification]}</dd>
+                  </div>
+                  <div>
+                    <dt>Source</dt>
+                    <dd>{channelLabels[lead.source]}</dd>
+                  </div>
+                  <div>
+                    <dt>Added</dt>
+                    <dd>{dateLabel(lead.created_at)}</dd>
+                  </div>
+                </dl>
+                <Link
+                  className="text-link"
+                  href={screenHref(`/app/leads/${lead.id}`, preview)}
+                >
+                  View lead
+                </Link>
+              </li>
+            ))}
+          </ul>
         ) : (
           <EmptyState
             title={

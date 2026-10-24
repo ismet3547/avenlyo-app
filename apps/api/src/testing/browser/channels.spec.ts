@@ -509,6 +509,34 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
               .evaluate((node) => getComputedStyle(node).overflowY),
           ).toBe("visible");
       }
+      if (name === "leads" && width === 768) {
+        const records = page.locator(".record-list > li");
+        await expect(records).toHaveCount(1);
+        const search = page.getByRole("searchbox", {
+          name: "Search leads",
+          exact: true,
+        });
+        await search.fill("no-matching-customer");
+        await expect(records).toHaveCount(0);
+        await search.fill("Alex");
+        await expect(records).toHaveCount(1);
+        await page
+          .getByLabel("Qualification", { exact: true })
+          .selectOption("qualified");
+        await expect(records).toHaveCount(0);
+        await page
+          .getByLabel("Qualification", { exact: true })
+          .selectOption("needs_human");
+        await expect(records).toHaveCount(1);
+        await page
+          .getByLabel("Qualification", { exact: true })
+          .selectOption("");
+        await search.clear();
+        await expect(records).toContainText("Website Chat");
+        await expect(
+          records.getByRole("link", { name: "View lead", exact: true }),
+        ).toBeVisible();
+      }
       if (name === "knowledge") {
         const main = await page.locator("#main-content").boundingBox();
         const heading = await page

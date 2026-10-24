@@ -18,15 +18,7 @@ import type {
   Message,
   TurnResult,
 } from "@avenlyo-app/shared";
-import {
-  Badge,
-  Brand,
-  Button,
-  ChannelLabel,
-  EmptyState,
-  Notice,
-  Panel,
-} from "./ui";
+import { Badge, Button, ChannelLabel, EmptyState, Notice, Panel } from "./ui";
 import {
   dateLabel,
   qualificationLabel,
@@ -755,11 +747,10 @@ export function TestAgent({
           </div>
         ) : (
           <div className="test-welcome">
-            {!focused && <Brand />}
             <h2>
               {focused
                 ? "See how your agent responds."
-                : "Take your agent for a spin."}
+                : "Ask a test question."}
             </h2>
             <p>
               Ask a question like a customer would. Your agent will answer using

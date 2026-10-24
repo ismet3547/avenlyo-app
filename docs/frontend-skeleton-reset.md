@@ -27,7 +27,8 @@ Home still derives READY/LIVE/offline from the same model and data.
 ## Shared foundation
 
 `apps/web/app/globals.css` is the only application stylesheet. It replaces 4,785
-lines of shared/Agent/Knowledge styling with a neutral foundation. White surfaces,
+lines of shared/Agent/Knowledge styling with 954 lines of neutral shared primitives
+and essential interaction structure (about 80% fewer CSS lines). White surfaces,
 near-black text, gray metadata/borders, a system sans-serif stack, 28/20/16px
 headings, 15px body, simple controls, native focus outlines, dialogs, and basic
 responsive structure replace route-specific typography, brand colors, shadows,
@@ -40,7 +41,8 @@ Pages share a 1200px container with 24px desktop / 16px mobile padding. Componen
 class names remain as workflow/test hooks; they do not load separate themes.
 
 Only necessary interaction structure remains: Inbox list/thread/context columns,
-mobile conversation switching, source labels, composer, Agent summary rows and
+mobile conversation switching, plain responsive lead records, source labels,
+composer, Agent summary rows and
 tabs, Knowledge lists/filter placement, and native dialogs/popovers. Existing
 keyboard handling, focus restoration, Escape, dirty-edit guards, actions, validation,
 search/filter state, pagination, polling, retry and handoff controls are retained.
@@ -54,7 +56,8 @@ acceptance and all five production-server browser flows.
 
 Behavioral assertions are retained. The only replaced visual constants are the old
 Knowledge-specific page insets, now the shared 24/16px container. Browser coverage
-also checks all nine mobile navigation destinations, workspace/account access,
+also checks lead search/qualification filtering at 768px, all nine mobile
+navigation destinations, workspace/account access,
 Escape/focus restoration and page overflow. Product captures now include 1024px
 alongside 1440/768/390; Agent and Knowledge flows retain their existing responsive
 and dialog/keyboard coverage. Final exact results, HEAD and CI links are recorded
@@ -89,3 +92,34 @@ Inspect 1440/1024/768/390px. The result is deliberately plain and unfinished.
   not part of the shipped frontend.
 - The public embedded website widget is owned by the API bundle and is unchanged;
   changing that separate surface would require a separately scoped pass.
+
+## Changed files
+
+- `apps/api/src/testing/browser/channels.spec.ts`
+- `apps/web/app/app/agent/agent.css`
+- `apps/web/app/app/agent/layout.tsx`
+- `apps/web/app/app/channels/page.tsx`
+- `apps/web/app/app/knowledge/knowledge.css`
+- `apps/web/app/app/knowledge/layout.tsx`
+- `apps/web/app/app/knowledge/loading.tsx`
+- `apps/web/app/app/loading.tsx`
+- `apps/web/app/app/settings/page.tsx`
+- `apps/web/app/auth/sign-in/page.tsx`
+- `apps/web/app/globals.css`
+- `apps/web/app/preview/fixtures.ts`
+- `apps/web/app/preview/page.tsx`
+- `apps/web/app/workspaces/page.tsx`
+- `apps/web/components/app-shell.tsx`
+- `apps/web/components/conversations.tsx`
+- `apps/web/components/leads-list.tsx`
+- `apps/web/components/overview.tsx`
+- `apps/web/components/ui.tsx`
+- `apps/web/public/fonts/OFL.txt`
+- `apps/web/public/fonts/manrope-bold.ttf`
+- `apps/web/public/fonts/manrope-regular.ttf`
+- `docs/frontend-redesign.md`
+- `docs/frontend-skeleton-reset.md`
+
+The installed Next.js package also emitted a local security-upgrade advisory.
+Dependency upgrades are outside this presentation reset; the plain CI build passes.
+That advisory should be assessed separately before production rollout.
