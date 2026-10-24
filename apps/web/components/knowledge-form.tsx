@@ -53,11 +53,13 @@ export function KnowledgeForm({
               ))}
             </div>
           </fieldset>
-          <label
-            className="block text-sm font-medium"
-            htmlFor="knowledge-title"
-          >
-            {type === "faq" ? "Question" : "Title"}
+          <div>
+            <label
+              className="block text-sm font-medium"
+              htmlFor="knowledge-title"
+            >
+              {type === "faq" ? "Question" : "Title"}
+            </label>
             <Input
               id="knowledge-title"
               name="title"
@@ -73,12 +75,14 @@ export function KnowledgeForm({
                   : "Custom design services"
               }
             />
-          </label>
-          <label
-            className="block text-sm font-medium"
-            htmlFor="knowledge-content"
-          >
-            {type === "faq" ? "Answer" : "Content"}
+          </div>
+          <div>
+            <label
+              className="block text-sm font-medium"
+              htmlFor="knowledge-content"
+            >
+              {type === "faq" ? "Answer" : "Content"}
+            </label>
             <Textarea
               id="knowledge-content"
               name="content"
@@ -94,7 +98,7 @@ export function KnowledgeForm({
                   : "Describe what your business offers, including any important limits or details."
               }
             />
-          </label>
+          </div>
           <p className="rounded-lg bg-muted p-3 text-xs leading-5 text-muted-foreground">
             Saved items are drafts. Review and publish from Knowledge before
             your agent can use them. Editing a published item returns it to
