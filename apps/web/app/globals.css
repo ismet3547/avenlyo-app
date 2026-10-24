@@ -22,7 +22,7 @@
   --card: #fff;
   --primary: #5453d8;
   --muted: #f2f3f8;
-  --muted-foreground: #707587;
+  --muted-foreground: #5e6678;
   --border: #e5e7ef;
 }
 * {
@@ -59,5 +59,43 @@ select {
   *::after {
     transition-duration: 0s !important;
     animation-duration: 0s !important;
+  }
+}
+
+:where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+:where(input, textarea, select):disabled {
+  cursor: not-allowed;
+  background: var(--muted);
+}
+:where(main, section, article, .grid > *, .flex > *) {
+  min-width: 0;
+}
+:where(h1, h2, h3, p, dd) {
+  overflow-wrap: anywhere;
+}
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  transform: translateY(-200%);
+  border-radius: 0.5rem;
+  background: white;
+  padding: 0.75rem 1rem;
+  color: var(--primary);
+  box-shadow: 0 2px 12px #20232e22;
+}
+.skip-link:focus {
+  transform: none;
+}
+::backdrop {
+  overscroll-behavior: contain;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }

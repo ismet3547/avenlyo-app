@@ -15,14 +15,14 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           <p className="text-xs font-semibold uppercase tracking-[.16em] text-primary">
             A clearer front office
           </p>
-          <h1 className="mt-5 text-5xl font-semibold leading-[1.12] tracking-[-.05em]">
+          <h2 className="mt-5 text-5xl font-semibold leading-[1.12] tracking-[-.05em]">
             Good questions.
             <br />
             Useful answers.
             <br />
             <span className="text-primary">Real opportunities.</span>
-          </h1>
-          <p className="mt-6 max-w-sm text-base leading-7 text-[#72758f]">
+          </h2>
+          <p className="mt-6 max-w-sm text-base leading-7 text-muted-foreground">
             Give Avenlyo your business knowledge. Help customers understand your
             services and take the next step.
           </p>
@@ -41,7 +41,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
             </p>
           </div>
         </div>
-        <p className="text-xs text-[#72758f]">
+        <p className="text-xs text-muted-foreground">
           Your business. Your knowledge. Your team.
         </p>
       </section>

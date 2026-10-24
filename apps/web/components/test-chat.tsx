@@ -78,8 +78,7 @@ export function TestChat({
       const result = (await response.json()) as TurnResult & { code?: string };
       if (!response.ok) {
         const unknown =
-          response.status >= 500 ||
-          result.code === "TURN_PROCESSING";
+          response.status >= 500 || result.code === "TURN_PROCESSING";
         setRetry(unknown);
         if (!unknown) request.current = null;
         setError(
@@ -87,11 +86,11 @@ export function TestChat({
             ? "The agent is not available yet. Ask your workspace administrator to check its configuration."
             : response.status === 401
               ? "Your session expired. Sign in again to continue your saved tests."
-            : response.status === 429
-              ? "Too many messages were sent. Wait a moment, then try again."
-            : unknown
-              ? "We could not confirm the result yet. Retry this same message safely."
-              : "This message could not be completed. Review the saved conversation before trying again.",
+              : response.status === 429
+                ? "Too many messages were sent. Wait a moment, then try again."
+                : unknown
+                  ? "We could not confirm the result yet. Retry this same message safely."
+                  : "This message could not be completed. Review the saved conversation before trying again.",
         );
         return;
       }
@@ -110,9 +109,12 @@ export function TestChat({
         // Keep the composer locked until the server page remounts with that ID;
         // otherwise a fast second input can be lost during router.replace().
         setRouteSyncing(true);
-        router.replace(`/app/test-agent?conversation=${result.conversationId}`, {
-          scroll: false,
-        });
+        router.replace(
+          `/app/test-agent?conversation=${result.conversationId}`,
+          {
+            scroll: false,
+          },
+        );
       } else if (result.needsHuman) {
         // Refresh server-owned handoff state so the paused banner/action appear.
         router.refresh();
@@ -150,12 +152,23 @@ export function TestChat({
           aria-label="Test conversation messages"
           onScroll={(event) => {
             const node = event.currentTarget;
-            followLatest.current = node.scrollHeight - node.scrollTop - node.clientHeight < 80;
+            followLatest.current =
+              node.scrollHeight - node.scrollTop - node.clientHeight < 80;
           }}
           aria-busy={pending}
           className="max-h-[55dvh] min-h-[260px] space-y-5 overflow-y-auto overscroll-contain p-4 sm:max-h-[560px] sm:min-h-[340px] sm:p-7"
         >
-          {partialHistory && id && <p className="text-xs leading-5 text-muted-foreground">Showing the latest 100 messages. <Link className="text-primary underline" href={`/app/conversations/${id}`}>Read earlier messages</Link></p>}
+          {partialHistory && id && (
+            <p className="text-xs leading-5 text-muted-foreground">
+              Showing the latest 100 messages.{" "}
+              <Link
+                className="text-primary underline"
+                href={`/app/conversations/${id}`}
+              >
+                Read earlier messages
+              </Link>
+            </p>
+          )}
           {!messages.length && (
             <div className="mx-auto max-w-sm py-10 text-center">
               <MessageSquare
@@ -189,7 +202,7 @@ export function TestChat({
                 className={`max-w-[90%] rounded-xl px-4 py-3 ${message.role === "customer" ? "bg-primary text-white" : "border border-border bg-[#fafafe]"}`}
               >
                 <p
-                  className={`mb-1.5 text-[10px] font-semibold uppercase tracking-wider ${message.role === "customer" ? "text-white/70" : "text-muted-foreground"}`}
+                  className={`mb-1.5 text-xs font-semibold uppercase tracking-wider ${message.role === "customer" ? "text-white" : "text-muted-foreground"}`}
                 >
                   {message.role === "customer" ? "Test customer" : "Avenlyo"}
                 </p>
@@ -224,17 +237,30 @@ export function TestChat({
             onChange={(e) => setContent(e.target.value)}
             maxLength={2000}
             disabled={pending || retry || routeSyncing || paused}
-            placeholder={paused ? "Resume test AI above to continue." : "Type a customer question…"}
+            placeholder={
+              paused
+                ? "Resume test AI above to continue."
+                : "Type a customer question…"
+            }
             aria-describedby="test-message-help"
           />
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-            <p id="test-message-help" className="text-xs leading-5 text-muted-foreground">
-              {paused ? "AI paused · resume above to continue" : "Test only · saved in this workspace"}
+            <p
+              id="test-message-help"
+              className="text-xs leading-5 text-muted-foreground"
+            >
+              {paused
+                ? "AI paused · resume above to continue"
+                : "Test only · saved in this workspace"}
             </p>
             <Button
               size="sm"
               type="submit"
-              disabled={pending || routeSyncing || (!retry && (paused || !content.trim()))}
+              disabled={
+                pending ||
+                routeSyncing ||
+                (!retry && (paused || !content.trim()))
+              }
             >
               {retry ? <RotateCcw aria-hidden /> : <ArrowUp aria-hidden />}
               {retry
@@ -254,7 +280,14 @@ export function TestChat({
               {error}
             </p>
           )}
-          {error && <Link href={id ? `/app/conversations/${id}` : "/app/conversations"} className="mt-3 inline-block text-sm text-primary underline">Check saved conversations</Link>}
+          {error && (
+            <Link
+              href={id ? `/app/conversations/${id}` : "/app/conversations"}
+              className="mt-3 inline-block text-sm text-primary underline"
+            >
+              Check saved conversations
+            </Link>
+          )}
         </form>
       </section>
       <aside className="space-y-4">

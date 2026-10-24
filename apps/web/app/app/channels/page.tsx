@@ -28,6 +28,12 @@ export default async function ChannelsPage() {
     instagram?.enabled &&
     instagram.status === "connected" &&
     Boolean(instagram.verified_at);
+  const demoOrigin = new URL(
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001",
+  ).origin;
+  const canDemo = Boolean(
+    website?.enabled && website.approved_origins.includes(demoOrigin),
+  );
   const websiteState = !website?.enabled
     ? "Disabled"
     : website.last_activity_at
@@ -37,9 +43,11 @@ export default async function ChannelsPage() {
     ? "Connected"
     : instagram?.status === "needs_attention"
       ? "Needs attention"
-      : instagram
-        ? "Managed setup required"
-        : "Not configured";
+      : instagram?.status === "disconnected"
+        ? "Disconnected"
+        : instagram
+          ? "Managed setup required"
+          : "Not configured";
   return (
     <>
       <PageHeader
@@ -47,7 +55,7 @@ export default async function ChannelsPage() {
         description="Your agent settings and published knowledge power every channel. Real customer conversations come together in Inbox."
       />
       <div className="grid items-start gap-5 xl:grid-cols-2">
-        <Card className="min-w-0 p-6">
+        <Card className="min-w-0 p-5 sm:p-6">
           <div className="flex items-center justify-between">
             <span className="grid size-11 place-items-center rounded-xl border border-border bg-muted">
               <Globe className="size-5" aria-hidden />
@@ -83,18 +91,36 @@ export default async function ChannelsPage() {
               snippet={`<script async src="${publicUrl}/widget.js" data-avenlyo-channel="${website.public_id}"></script>`}
             />
           )}
-          {website && local && (
+          {website && local && canDemo && (
             <Link
               href={`/chat-demo?channel=${website.public_id}`}
               target="_blank"
+              rel="noopener noreferrer"
               className="mt-4 inline-flex items-center gap-2 text-xs font-medium text-primary"
             >
               Open local widget demo
               <ArrowUpRight className="size-3" aria-hidden />
             </Link>
           )}
+          {website && local && (
+            <p className="mt-3 text-xs leading-6 text-muted-foreground">
+              {canDemo
+                ? "The local demo creates a real Website Chat thread in Inbox. Use Test Agent for isolated tests."
+                : `To use the local demo, enable Website Chat and save ${demoOrigin} as an approved origin.`}
+            </p>
+          )}
+          {website?.enabled && (
+            <p className="mt-4 text-sm leading-6 text-muted-foreground">
+              Next: install the snippet on an approved website, then check
+              incoming conversations in{" "}
+              <Link href="/app/inbox" className="text-primary underline">
+                Inbox
+              </Link>
+              .
+            </p>
+          )}
         </Card>
-        <Card className="min-w-0 p-6">
+        <Card className="min-w-0 p-5 sm:p-6">
           <div className="flex items-center justify-between">
             <span className="grid size-11 place-items-center rounded-xl border border-border bg-muted">
               <MessageCircle className="size-5" aria-hidden />
@@ -116,6 +142,22 @@ export default async function ChannelsPage() {
             Reply to supported customer-initiated direct messages through the
             same agent, with human replies from Inbox.
           </p>
+          {instagram?.status === "needs_attention" && (
+            <p
+              role="status"
+              className="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900"
+            >
+              This connection needs operator attention. Ask your Avenlyo
+              operator to review messaging permissions and reconnect the
+              verified account for {ctx.workspace.name}. Check failed deliveries
+              in Inbox.
+            </p>
+          )}
+          {ctx.role !== "owner" && (
+            <p className="mt-4 text-xs leading-5 text-muted-foreground">
+              You have member access. Channel changes require a workspace owner.
+            </p>
+          )}
           {connected ? (
             <div className="mt-6 rounded-lg border border-emerald-100 bg-emerald-50/60 p-4">
               <p className="text-sm font-semibold">
@@ -140,7 +182,10 @@ export default async function ChannelsPage() {
             failures and unconfirmed sends are visible in Inbox.
           </p>
           {instagram && instagram.status !== "disconnected" && (
-            <DisconnectInstagram workspaceId={ctx.workspace.id} editable={ctx.role === "owner"} />
+            <DisconnectInstagram
+              workspaceId={ctx.workspace.id}
+              editable={ctx.role === "owner"}
+            />
           )}
         </Card>
       </div>

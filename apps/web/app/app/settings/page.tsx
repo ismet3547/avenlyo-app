@@ -13,6 +13,12 @@ export default async function SettingsPage() {
       />
       <Card className="max-w-2xl p-6">
         <h2 className="mb-6 text-sm font-semibold">Business information</h2>
+        {ctx.role !== "owner" && (
+          <p className="mb-5 rounded-lg bg-muted p-3 text-sm leading-6 text-muted-foreground">
+            You have member access. Only workspace owners can change business
+            settings.
+          </p>
+        )}
         <BusinessForm
           workspaceId={ctx.workspace.id}
           name={ctx.workspace.name}

@@ -13,6 +13,8 @@ describe("workspace-bound forms", () => {
     expect(workspaceFormError(form, "workspace-b")?.status).toBe("error");
   });
   it("does not silently retarget a missing workspace", () => {
-    expect(workspaceFormError(new FormData(), "workspace-b")?.status).toBe("error");
+    expect(workspaceFormError(new FormData(), "workspace-b")?.status).toBe(
+      "error",
+    );
   });
 });

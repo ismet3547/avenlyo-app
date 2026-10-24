@@ -3,6 +3,8 @@ import {
   ArrowRight,
   BookOpen,
   Check,
+  Cable,
+  FlaskConical,
   MessageSquare,
   Sparkles,
   UsersRound,
@@ -14,8 +16,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 export default async function Overview() {
   const { supabase, workspace } = await requireWorkspace();
-  const [knowledge, conversations, qualified, human, agent, channels] = await Promise.all(
-    [
+  const [knowledge, conversations, qualified, human, agent, channels, tests] =
+    await Promise.all([
       supabase
         .from("knowledge_items")
         .select("id", { count: "exact", head: true })
@@ -34,108 +36,165 @@ export default async function Overview() {
         .from("conversations")
         .select("id", { count: "exact", head: true })
         .eq("workspace_id", workspace.id)
-        .eq("status", "needs_human"),
+        .eq("ai_mode", "paused"),
       supabase
         .from("agent_settings")
         .select("setup_brief,updated_at")
         .eq("workspace_id", workspace.id)
         .single(),
-      supabase.from("channel_connections").select("id", {count: "exact", head: true}).eq("workspace_id", workspace.id).eq("enabled", true),
-    ],
-  );
+      supabase
+        .from("channel_connections")
+        .select("channel,enabled,status,verified_at,approved_origins")
+        .eq("workspace_id", workspace.id),
+      supabase
+        .from("conversations")
+        .select("id", { count: "exact", head: true })
+        .eq("workspace_id", workspace.id)
+        .eq("channel", "test_agent"),
+    ]);
   const published = knowledge.error ? null : (knowledge.count ?? 0);
-  const configured = Boolean(
-    agent.data &&
-      (agent.data.setup_brief.trim() ||
-        new Date(agent.data.updated_at) > new Date(workspace.created_at)),
-  );
+  const reviewed = agent.error
+    ? null
+    : Boolean(
+        agent.data &&
+          (agent.data.setup_brief.trim() ||
+            new Date(agent.data.updated_at) > new Date(workspace.created_at)),
+      );
+  const channelCount = channels.error
+    ? null
+    : channels.data.filter(
+        (c) =>
+          c.enabled &&
+          (c.channel === "website_chat"
+            ? c.approved_origins.length > 0
+            : c.status === "connected" && Boolean(c.verified_at)),
+      ).length;
+  const steps = [
+    {
+      title: "Review your agent",
+      description:
+        "Choose its goals, tone and contact fields. Default settings already work.",
+      href: "/app/agent",
+      action: "Review settings",
+      complete: reviewed,
+      label: "Optional",
+      icon: Sparkles,
+    },
+    {
+      title: "Publish business knowledge",
+      description:
+        "Add a service description or FAQ. Drafts are unavailable to the agent.",
+      href: published
+        ? "/app/knowledge?status=published"
+        : "/app/knowledge/new",
+      action: published ? "Review knowledge" : "Add knowledge",
+      complete: published === null ? null : published > 0,
+      label: "For business answers",
+      icon: BookOpen,
+    },
+    {
+      title: "Try a customer question",
+      description:
+        "Check answers and lead collection in an isolated, saved test conversation.",
+      href: "/app/test-agent",
+      action: "Test agent",
+      complete: tests.error ? null : (tests.count ?? 0) > 0,
+      label: "Recommended",
+      icon: FlaskConical,
+    },
+    {
+      title: "Connect a customer channel",
+      description:
+        "Install Website Chat or ask your operator to connect Instagram.",
+      href: "/app/channels",
+      action: "Manage channels",
+      complete: channelCount === null ? null : channelCount > 0,
+      label: "For customer messages",
+      icon: Cable,
+    },
+  ];
+  const completed = steps.filter((step) => step.complete).length;
+  const unavailable = steps.some((step) => step.complete === null);
   return (
     <>
       <PageHeader
         eyebrow={workspace.name}
         title="Your AI front office"
-        description="A place for better answers, useful inquiries, and a clear view of every conversation."
+        description="Turn business knowledge into useful answers, and keep customer conversations close to your team."
         action={
           <Button asChild>
-            <Link href="/app/test-agent">
-              <Sparkles aria-hidden />
-              Test agent
+            <Link href="/app/inbox">
+              <MessageSquare aria-hidden />
+              Open Inbox
             </Link>
           </Button>
         }
       />
-      <section className="grid gap-4 lg:grid-cols-3">
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <span className="grid size-9 place-items-center rounded-lg bg-[#efeffd] text-primary">
-              <Sparkles className="size-4" aria-hidden />
-            </span>
-            <Badge
-              className={
-                configured
-                  ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-                  : ""
-              }
-            >
-              {configured ? "Configured" : "Needs setup"}
-            </Badge>
+      <section aria-labelledby="setup-heading">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 id="setup-heading" className="text-lg font-semibold">
+              {completed === steps.length
+                ? "Your workspace is ready"
+                : "Get ready for customers"}
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+              Follow these steps at your own pace. Return here whenever you need
+              to finish setup.
+            </p>
           </div>
-          <h2 className="mt-5 font-semibold">Your agent</h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Set its goals, tone and the details that make an inquiry useful.
-          </p>
-          <Link
-            className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-primary"
-            href="/app/agent"
-          >
-            Configure agent
-            <ArrowRight className="size-3" aria-hidden />
-          </Link>
-        </Card>
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <span className="grid size-9 place-items-center rounded-lg bg-[#eff7f2] text-emerald-700">
-              <BookOpen className="size-4" aria-hidden />
-            </span>
-            <Badge>
-              {published === null ? "Unavailable" : `${published} published`}
-            </Badge>
-          </div>
-          <h2 className="mt-5 font-semibold">Business knowledge</h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Add services and FAQs. Your agent uses only what you publish.
-          </p>
-          <Link
-            className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-primary"
-            href="/app/knowledge/new"
-          >
-            Add knowledge
-            <ArrowRight className="size-3" aria-hidden />
-          </Link>
-        </Card>
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <span className="grid size-9 place-items-center rounded-lg bg-muted text-muted-foreground">
-              <MessageSquare className="size-4" aria-hidden />
-            </span>
-            <Badge>{channels.error ? "Unavailable" : `${channels.count ?? 0} enabled`}</Badge>
-          </div>
-          <h2 className="mt-5 font-semibold">Customer channels</h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Website Chat and managed Instagram conversations, with your team in Inbox.
-          </p>
-          <Link
-            className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-primary"
-            href="/app/channels"
-          >
-            View channels
-            <ArrowRight className="size-3" aria-hidden />
-          </Link>
-        </Card>
+          <Badge>
+            {unavailable
+              ? "Some setup data unavailable"
+              : `${completed} of 4 completed`}
+          </Badge>
+        </div>
+        <ol className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {steps.map((step, index) => (
+            <li key={step.title} className="flex">
+              <Card className="flex w-full flex-col p-5">
+                <div className="flex items-center justify-between gap-2">
+                  <span
+                    className={`grid size-9 place-items-center rounded-lg ${step.complete ? "bg-emerald-50 text-emerald-800" : "bg-primary/10 text-primary"}`}
+                  >
+                    {step.complete ? (
+                      <Check aria-hidden className="size-4" />
+                    ) : (
+                      <step.icon aria-hidden className="size-4" />
+                    )}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    Step {index + 1}
+                  </span>
+                </div>
+                <h3 className="mt-5 text-sm font-semibold">{step.title}</h3>
+                <p className="mt-2 flex-1 text-sm leading-6 text-muted-foreground">
+                  {step.description}
+                </p>
+                <p className="mt-4 text-xs font-medium text-muted-foreground">
+                  {step.complete === null
+                    ? "Status unavailable"
+                    : step.complete
+                      ? "Completed"
+                      : step.label}
+                </p>
+                <Link
+                  href={step.href}
+                  className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary"
+                >
+                  {step.action}
+                  <ArrowRight aria-hidden className="size-4" />
+                </Link>
+              </Card>
+            </li>
+          ))}
+        </ol>
       </section>
-      <section className="mt-8">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold">Workspace activity</h2>
+      <section className="mt-8" aria-labelledby="activity-heading">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="activity-heading" className="text-lg font-semibold">
+            Workspace activity
+          </h2>
           <Badge>All channels · includes tests</Badge>
         </div>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
@@ -143,48 +202,57 @@ export default async function Overview() {
             {
               title: "Conversations",
               value: conversations.error ? "—" : (conversations.count ?? 0),
+              href: "/app/conversations",
               icon: MessageSquare,
             },
             {
               title: "Qualified leads",
               value: qualified.error ? "—" : (qualified.count ?? 0),
+              href: "/app/leads?qualification=qualified",
               icon: UsersRound,
             },
             {
-              title: "Needs human",
+              title: "Paused conversations",
               value: human.error ? "—" : (human.count ?? 0),
+              href: "/app/conversations?state=paused",
               icon: UsersRound,
             },
-          ].map(({ title, value, icon: Icon }) => (
-            <Card key={title} className="p-5">
-              <p className="flex items-center justify-between text-sm text-muted-foreground">
-                {title}
-                <Icon aria-hidden className="size-4" />
-              </p>
-              <p className="mt-4 text-3xl font-semibold tracking-tight">
-                {value}
-              </p>
-            </Card>
+          ].map(({ title, value, href, icon: Icon }) => (
+            <Link
+              href={href}
+              key={title}
+              className="rounded-xl transition-shadow hover:shadow-sm"
+            >
+              <Card className="h-full p-5">
+                <p className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
+                  {title}
+                  <Icon aria-hidden className="size-4" />
+                </p>
+                <p className="mt-4 text-3xl font-semibold tracking-tight">
+                  {value}
+                </p>
+                <p className="mt-3 text-xs text-primary">View details →</p>
+              </Card>
+            </Link>
           ))}
         </div>
       </section>
-      <Card className="mt-8 flex flex-wrap items-center justify-between gap-5 bg-[#f0f0fc] p-6">
-        <div>
+      <Card className="mt-8 flex flex-wrap items-center justify-between gap-5 bg-primary/5 p-5 sm:p-6">
+        <div className="max-w-2xl">
           <h2 className="font-semibold">
-            A useful first conversation starts with good knowledge.
+            {published
+              ? "Keep your answers useful as your business grows."
+              : "Start with the information customers ask for most."}
           </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            No website required. Add a service description and a FAQ, then try a
-            customer question.
-          </p>
-          <p className="mt-4 flex items-center gap-2 text-xs text-primary">
-            <Check className="size-3.5" aria-hidden />
-            Published knowledge stays under your control.
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            {published
+              ? "Review published knowledge when services change. Test an answer before relying on it in customer conversations."
+              : "No website is required. Add a service description and a FAQ, publish them, then try a customer question."}
           </p>
         </div>
-        <Button variant="outline" asChild>
-          <Link href="/app/knowledge/new">
-            Add your first item
+        <Button asChild variant="outline">
+          <Link href={published ? "/app/test-agent" : "/app/knowledge/new"}>
+            {published ? "Test an answer" : "Add your first item"}
             <ArrowRight aria-hidden />
           </Link>
         </Button>

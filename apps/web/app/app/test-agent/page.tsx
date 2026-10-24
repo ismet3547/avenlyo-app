@@ -49,7 +49,8 @@ export default async function TestAgentPage({
         .eq("conversation_id", authorizedId)
         .maybeSingle()
     : null;
-  if (messages?.error || lead?.error) throw new Error("The saved test could not be loaded");
+  if (messages?.error || lead?.error)
+    throw new Error("The saved test could not be loaded");
   return (
     <>
       <PageHeader
@@ -66,13 +67,23 @@ export default async function TestAgentPage({
         }
       />
       {conversation?.data?.ai_mode === "paused" && (
-        <ResumeTest workspaceId={ctx.workspace.id} conversationId={authorizedId!} />
+        <ResumeTest
+          workspaceId={ctx.workspace.id}
+          conversationId={authorizedId!}
+        />
       )}
       <TestChat
         key={`${ctx.workspace.id}:${authorizedId ?? "new"}`}
         workspaceId={ctx.workspace.id}
         conversationId={authorizedId}
-        initialMessages={messages?.data ? [...messages.data].reverse().map(m => ({role: m.role === "customer" ? "customer" : "assistant", content: m.content})) : []}
+        initialMessages={
+          messages?.data
+            ? [...messages.data].reverse().map((m) => ({
+                role: m.role === "customer" ? "customer" : "assistant",
+                content: m.content,
+              }))
+            : []
+        }
         initialLeadId={lead?.data?.id ?? null}
         paused={conversation?.data?.ai_mode === "paused"}
         partialHistory={messages?.data?.length === 100}

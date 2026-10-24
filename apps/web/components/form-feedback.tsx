@@ -1,7 +1,13 @@
 import type { FormState } from "@/app/auth/actions";
 import { cn } from "@/lib/utils";
 
-export function FormFeedback({ state, className }: { state: FormState; className?: string }) {
+export function FormFeedback({
+  state,
+  className,
+}: {
+  state: FormState;
+  className?: string;
+}) {
   if (!state.message) return null;
   return (
     <p

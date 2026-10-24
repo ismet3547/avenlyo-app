@@ -1,3 +1,4 @@
+import { z } from "zod";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
@@ -14,13 +15,15 @@ export default async function LeadDetail({
 }) {
   const ctx = await requireWorkspace();
   const { id } = await params;
+  if (!z.uuid().safeParse(id).success) notFound();
   const result = await ctx.supabase
     .from("leads")
     .select("*")
     .eq("workspace_id", ctx.workspace.id)
     .eq("id", id)
     .single();
-  if (result.error) notFound();
+  if (result.error?.code === "PGRST116") notFound();
+  if (result.error) throw new Error("Lead could not be loaded");
   const lead = result.data;
   return (
     <>
@@ -35,20 +38,33 @@ export default async function LeadDetail({
         description={`Customer-stated details from ${channelLabels[lead.source]}.`}
         action={
           <Button asChild variant="outline">
-            <Link href={lead.source === "test_agent" ? `/app/conversations/${lead.conversation_id}` : `/app/inbox/${lead.conversation_id}`}>
+            <Link
+              href={
+                lead.source === "test_agent"
+                  ? `/app/conversations/${lead.conversation_id}`
+                  : `/app/inbox/${lead.conversation_id}`
+              }
+            >
               View conversation
               <ArrowUpRight aria-hidden />
             </Link>
           </Button>
         }
       />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
+      {lead.qualification !== "qualified" && (
+        <p className="mb-5 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+          {lead.qualification === "needs_human"
+            ? "This inquiry needs your team. Open the original conversation to review its context and continue helping the customer."
+            : "More information is needed to qualify this inquiry. Review the original conversation for the details still being collected."}
+        </p>
+      )}
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
         <Card className="p-6">
           <h2 className="text-sm font-semibold">Inquiry summary</h2>
           <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-muted-foreground">
             {lead.summary}
           </p>
-          <dl className="mt-7 grid grid-cols-2 gap-5 border-t border-border pt-6">
+          <dl className="mt-7 grid grid-cols-1 sm:grid-cols-2 gap-5 border-t border-border pt-6">
             <div>
               <dt className="text-xs text-muted-foreground">Intent</dt>
               <dd className="mt-2 text-sm font-medium">Service inquiry</dd>
@@ -67,7 +83,9 @@ export default async function LeadDetail({
             </div>
             <div>
               <dt className="text-xs text-muted-foreground">Source</dt>
-              <dd className="mt-2 text-sm font-medium">{channelLabels[lead.source]}</dd>
+              <dd className="mt-2 text-sm font-medium">
+                {channelLabels[lead.source]}
+              </dd>
             </div>
             <div>
               <dt className="text-xs text-muted-foreground">Status</dt>
@@ -93,7 +111,8 @@ export default async function LeadDetail({
             ))}
           </dl>
           <p className="mt-6 border-t border-border pt-4 text-xs leading-5 text-muted-foreground">
-            These details are customer-stated and are not verified identity. Review the linked conversation before following up.
+            These details are customer-stated and are not verified identity.
+            Review the linked conversation before following up.
           </p>
         </Card>
       </div>

@@ -171,6 +171,10 @@ test("anonymous website visitor, real Inbox handoff and human reply work on desk
     .click();
   await expect(page.getByRole("status")).toContainText("AI remains paused");
   await page.getByRole("button", { name: "Resume AI", exact: true }).click();
+  await page
+    .getByRole("dialog", { name: "Resume AI for this conversation?" })
+    .getByRole("button", { name: "Resume AI", exact: true })
+    .click();
   await expect(page.getByText("AI active", { exact: true })).toBeVisible();
   await visitor
     .getByLabel("Your message", { exact: true })

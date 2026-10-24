@@ -3,13 +3,16 @@ import { WorkspaceForm } from "@/components/workspace-form";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { signOut } from "../auth/actions";
-import { switchWorkspace } from "./actions";
+import { cookies } from "next/headers";
+import { WorkspaceButton } from "@/components/workspace-switcher";
 export default async function WorkspacesPage() {
   const { supabase } = await requireUser();
-  const { data } = await supabase
+  const selected = (await cookies()).get("avenlyo-app-workspace")?.value;
+  const { data, error } = await supabase
     .from("workspaces")
     .select("id,name")
     .order("created_at");
+  if (error) throw new Error("Workspaces could not be loaded");
   return (
     <main className="mx-auto max-w-xl px-6 py-16">
       <div className="flex items-center justify-between">
@@ -29,12 +32,11 @@ export default async function WorkspacesPage() {
       {data?.length ? (
         <div className="mt-7 space-y-2">
           {data.map((w) => (
-            <form action={switchWorkspace} key={w.id}>
-              <input type="hidden" name="workspaceId" value={w.id} />
-              <Button variant="outline" className="h-12 w-full justify-start">
-                {w.name}
-              </Button>
-            </form>
+            <WorkspaceButton
+              key={w.id}
+              workspace={w}
+              current={w.id === selected}
+            />
           ))}
         </div>
       ) : null}

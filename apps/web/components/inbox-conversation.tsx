@@ -2,10 +2,7 @@
 import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ArrowUp, UserRound, Play, LogOut, RefreshCw } from "lucide-react";
-import {
-  channelLabels,
-  type InboxThread,
-} from "@avenlyo-app/shared";
+import { channelLabels, type InboxThread } from "@avenlyo-app/shared";
 import { PageHeader } from "./page-header";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -31,7 +28,9 @@ export function InboxConversation({
   const [loadingEarlier, setLoadingEarlier] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [retry, setRetry] = useState(false);
-  const request = useRef<{ clientMessageId: string; content: string } | null>(null);
+  const request = useRef<{ clientMessageId: string; content: string } | null>(
+    null,
+  );
   const busy = useRef(false);
   const earlierBusy = useRef(false);
   const generation = useRef(0);
@@ -45,17 +44,26 @@ export function InboxConversation({
     const node = thread.current;
     if (!node) return;
     if (anchor.current) {
-      node.scrollTop = anchor.current.top + node.scrollHeight - anchor.current.height;
+      node.scrollTop =
+        anchor.current.top + node.scrollHeight - anchor.current.height;
       anchor.current = null;
     } else if (followLatest.current) node.scrollTop = node.scrollHeight;
   }, [snapshot.messages]);
   async function refresh(before?: string, signal?: AbortSignal) {
     const version = generation.current;
     const sequence = ++readSequence.current;
-    const response = await fetch(`/api/inbox/${id}${before ? `?before=${before}` : ""}`, { cache: "no-store", signal });
+    const response = await fetch(
+      `/api/inbox/${id}${before ? `?before=${before}` : ""}`,
+      { cache: "no-store", signal },
+    );
     if (!response.ok) throw new Error("Thread unavailable");
-    const next = await response.json() as InboxThread;
-    if (signal?.aborted || version !== generation.current || sequence < lastRead.current) return;
+    const next = (await response.json()) as InboxThread;
+    if (
+      signal?.aborted ||
+      version !== generation.current ||
+      sequence < lastRead.current
+    )
+      return;
     lastRead.current = sequence;
     setSnapshot((previous) => mergeInboxThread(previous, next));
     setLiveError("");
@@ -66,15 +74,31 @@ export function InboxConversation({
     let polling = false;
     const controller = new AbortController();
     const timer = setInterval(async () => {
-      if (polling || busy.current || earlierBusy.current || document.visibilityState === "hidden") return;
+      if (
+        polling ||
+        busy.current ||
+        earlierBusy.current ||
+        earlierBusy.current ||
+        document.visibilityState === "hidden"
+      )
+        return;
       polling = true;
       try {
         await refresh(undefined, controller.signal);
       } catch {
-        if (!stopped) setLiveError("Live updates are unavailable. Refresh the conversation to check its current state.");
-      } finally { polling = false; }
+        if (!stopped)
+          setLiveError(
+            "Live updates are unavailable. Refresh the conversation to check its current state.",
+          );
+      } finally {
+        polling = false;
+      }
     }, 4000);
-    return () => { stopped = true; controller.abort(); clearInterval(timer); };
+    return () => {
+      stopped = true;
+      controller.abort();
+      clearInterval(timer);
+    };
   }, [id]);
   const c = snapshot.conversation;
   const mine = c.assignee_id === actorId;
@@ -82,11 +106,16 @@ export function InboxConversation({
   const instagram = c.channel === "instagram";
   const bytes = new TextEncoder().encode(content.trim()).length;
   async function refreshConfirmed() {
-    try { await refresh(); }
-    catch { setLiveError("Your action was saved. The latest thread could not be loaded; refresh to check it. Do not resend a confirmed reply."); }
+    try {
+      await refresh();
+    } catch {
+      setLiveError(
+        "Your action was saved. The latest thread could not be loaded; refresh to check it. Do not resend a confirmed reply.",
+      );
+    }
   }
   async function action(operation: "claim" | "release" | "resume") {
-    if (busy.current || retry) return;
+    if (busy.current || earlierBusy.current || retry) return;
     busy.current = true;
     generation.current++;
     setPending(true);
@@ -94,19 +123,40 @@ export function InboxConversation({
     setNotice("");
     try {
       const response = await fetch(`/api/inbox/${id}`, {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ operation }),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ operation }),
       });
       if (!response.ok) throw new Error("Team action unavailable");
-      setNotice(operation === "resume" ? "AI explicitly resumed for the next customer message." : operation === "release" ? "Conversation released. AI remains paused." : "Conversation claimed. AI remains paused.");
+      setNotice(
+        operation === "resume"
+          ? "AI explicitly resumed for the next customer message."
+          : operation === "release"
+            ? "Conversation released. AI remains paused."
+            : "Conversation claimed. AI remains paused.",
+      );
       await refreshConfirmed();
     } catch {
-      setError("We could not confirm this change. Refresh the conversation before trying again; another team member may have changed its ownership.");
-    } finally { busy.current = false; setPending(false); }
+      setError(
+        "We could not confirm this change. Refresh the conversation before trying again; another team member may have changed its ownership.",
+      );
+    } finally {
+      busy.current = false;
+      setPending(false);
+    }
   }
   async function reply(event: React.FormEvent) {
     event.preventDefault();
-    if (busy.current || (!request.current && (!mine || !content.trim() || (instagram && bytes > 1000)))) return;
-    request.current ??= { clientMessageId: crypto.randomUUID(), content: content.trim() };
+    if (
+      busy.current ||
+      (!request.current &&
+        (!mine || !content.trim() || (instagram && bytes > 1000)))
+    )
+      return;
+    request.current ??= {
+      clientMessageId: crypto.randomUUID(),
+      content: content.trim(),
+    };
     const submitted = request.current;
     busy.current = true;
     generation.current++;
@@ -115,27 +165,52 @@ export function InboxConversation({
     setNotice("");
     try {
       const response = await fetch(`/api/inbox/${id}`, {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ operation: "reply", ...submitted }),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ operation: "reply", ...submitted }),
       });
       if (!response.ok) {
-        if (response.status >= 500 || response.status === 429) throw new Error("Unconfirmed reply");
+        if (response.status >= 500 || response.status === 429)
+          throw new Error("Unconfirmed reply");
         request.current = null;
         setRetry(false);
-        setError(response.status === 401 ? "Your session expired. Sign in again before replying." : "Your reply was not accepted. Refresh to check your access and claim, then try again.");
+        setError(
+          response.status === 401
+            ? "Your session expired. Sign in again before replying."
+            : "Your reply was not accepted. Refresh to check your access and claim, then try again.",
+        );
         return;
       }
-      const result = await response.json() as { saved: boolean; messageId: string; delivery: { status: string } };
-      if (!result.saved || !result.messageId || !result.delivery) throw new Error("Unconfirmed reply");
+      const result = (await response.json()) as {
+        saved: boolean;
+        messageId: string;
+        delivery: { status: string };
+      };
+      if (!result.saved || !result.messageId || !result.delivery)
+        throw new Error("Unconfirmed reply");
       request.current = null;
       setContent("");
       setRetry(false);
-      setNotice(result.delivery.status === "available" ? "Human reply saved and available to the website visitor. AI remains paused." : result.delivery.status === "sent" ? "Human reply accepted by Instagram. AI remains paused." : result.delivery.status === "unknown" ? "Reply saved. Instagram delivery is unconfirmed; check the thread before sending another reply. AI remains paused." : "Reply saved. Check its delivery state in the thread. AI remains paused.");
+      setNotice(
+        result.delivery.status === "available"
+          ? "Human reply saved and available to the website visitor. AI remains paused."
+          : result.delivery.status === "sent"
+            ? "Human reply accepted by Instagram. AI remains paused."
+            : result.delivery.status === "unknown"
+              ? "Reply saved. Instagram delivery is unconfirmed; check the thread before sending another reply. AI remains paused."
+              : "Reply saved. Check its delivery state in the thread. AI remains paused.",
+      );
       followLatest.current = true;
       await refreshConfirmed();
     } catch {
       setRetry(true);
-      setError("The reply result is unconfirmed. Retry uses the same message to avoid a duplicate. Check the thread before creating another reply.");
-    } finally { busy.current = false; setPending(false); }
+      setError(
+        "The reply result is unconfirmed. Retry uses the same message to avoid a duplicate. Check the thread before creating another reply.",
+      );
+    } finally {
+      busy.current = false;
+      setPending(false);
+    }
   }
   async function loadEarlier() {
     if (earlierBusy.current || busy.current) return;
@@ -143,10 +218,20 @@ export function InboxConversation({
     generation.current++;
     setLoadingEarlier(true);
     followLatest.current = false;
-    if (thread.current) anchor.current = { top: thread.current.scrollTop, height: thread.current.scrollHeight };
-    try { await refresh(snapshot.messages[0]?.id); }
-    catch { anchor.current = null; setLiveError("Earlier messages could not be loaded. Try again."); }
-    finally { earlierBusy.current = false; setLoadingEarlier(false); }
+    if (thread.current)
+      anchor.current = {
+        top: thread.current.scrollTop,
+        height: thread.current.scrollHeight,
+      };
+    try {
+      await refresh(snapshot.messages[0]?.id);
+    } catch {
+      anchor.current = null;
+      setLiveError("Earlier messages could not be loaded. Try again.");
+    } finally {
+      earlierBusy.current = false;
+      setLoadingEarlier(false);
+    }
   }
   return (
     <>
@@ -202,7 +287,9 @@ export function InboxConversation({
                 disabled={pending || loadingEarlier}
                 onClick={() => void loadEarlier()}
               >
-                {loadingEarlier ? "Loading earlier messages…" : "Load earlier messages"}
+                {loadingEarlier
+                  ? "Loading earlier messages…"
+                  : "Load earlier messages"}
               </Button>
             )}
             {!snapshot.messages.length && (
@@ -278,16 +365,23 @@ export function InboxConversation({
               className="mt-3"
             />
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-              <p id="human-reply-help" className="text-xs text-muted-foreground">
-                {retry ? "Retry checks the original reply; it does not create another message." : instagram
-                  ? `${bytes}/1000 bytes · Instagram reply window applies.`
-                  : "Your reply appears in the visitor’s chat."}
+              <p
+                id="human-reply-help"
+                className="text-xs text-muted-foreground"
+              >
+                {retry
+                  ? "Retry checks the original reply; it does not create another message."
+                  : instagram
+                    ? `${bytes}/1000 bytes · Instagram reply window applies.`
+                    : "Your reply appears in the visitor’s chat."}
               </p>
               <Button
                 type="submit"
                 size="sm"
                 disabled={
-                  pending || (!retry && (!mine || !content.trim() || (instagram && bytes > 1000)))
+                  pending ||
+                  (!retry &&
+                    (!mine || !content.trim() || (instagram && bytes > 1000)))
                 }
               >
                 <ArrowUp aria-hidden />
@@ -311,7 +405,7 @@ export function InboxConversation({
               <Button
                 size="sm"
                 variant="outline"
-                disabled={pending || other || retry}
+                disabled={pending || loadingEarlier || other || retry}
                 onClick={() => void action("claim")}
               >
                 <UserRound aria-hidden />
@@ -322,7 +416,7 @@ export function InboxConversation({
               <Button
                 size="sm"
                 variant="outline"
-                disabled={pending || retry}
+                disabled={pending || loadingEarlier || retry}
                 onClick={() => void action("release")}
               >
                 <LogOut aria-hidden />
@@ -332,7 +426,7 @@ export function InboxConversation({
             {c.ai_mode === "paused" && (
               <ConfirmButton
                 size="sm"
-                disabled={pending || other || retry}
+                disabled={pending || loadingEarlier || other || retry}
                 title="Resume AI for this conversation?"
                 description="This releases your claim and lets AI answer the next customer message. Saved human replies keep their existing delivery state."
                 confirmLabel="Resume AI"
@@ -343,11 +437,27 @@ export function InboxConversation({
               </ConfirmButton>
             )}
           </div>
-          <Button className="mt-4 w-full" size="sm" variant="ghost" disabled={pending || refreshing || loadingEarlier} onClick={async () => {
-            setRefreshing(true);
-            try { await refresh(); } catch { setLiveError("The conversation could not be refreshed. Try again when your connection is restored."); }
-            finally { setRefreshing(false); }
-          }}><RefreshCw aria-hidden />{refreshing ? "Refreshing…" : "Refresh conversation"}</Button>
+          <Button
+            className="mt-4 w-full"
+            size="sm"
+            variant="ghost"
+            disabled={pending || refreshing || loadingEarlier}
+            onClick={async () => {
+              setRefreshing(true);
+              try {
+                await refresh();
+              } catch {
+                setLiveError(
+                  "The conversation could not be refreshed. Try again when your connection is restored.",
+                );
+              } finally {
+                setRefreshing(false);
+              }
+            }}
+          >
+            <RefreshCw aria-hidden />
+            {refreshing ? "Refreshing…" : "Refresh conversation"}
+          </Button>
           {instagram && (
             <p className="mt-5 border-t border-border pt-4 text-xs leading-6 text-muted-foreground">
               V1 replies must be within 24 hours of the customer’s last
@@ -382,7 +492,14 @@ export function InboxConversation({
           )}
         </Card>
       </div>
-      {liveError && <p role="alert" className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">{liveError}</p>}
+      {liveError && (
+        <p
+          role="alert"
+          className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900"
+        >
+          {liveError}
+        </p>
+      )}
       {error && (
         <p role="alert" className="mt-4 text-sm leading-6 text-red-700">
           {error}

@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     );
   return NextResponse.redirect(
     new URL(
-      "/auth/sign-in",
+      "/auth/sign-in?notice=confirmation-failed",
       process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001",
     ),
   );

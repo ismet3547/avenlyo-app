@@ -1,8 +1,11 @@
 "use client";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import Link from "next/link";
 import { knowledgeOperation } from "@/app/app/knowledge/actions";
 import type { FormState } from "@/app/auth/actions";
 import { Button } from "./ui/button";
+import { ConfirmButton } from "./confirm-button";
+import { FormFeedback } from "./form-feedback";
 export function KnowledgeActions({
   id,
   status,
@@ -16,14 +19,25 @@ export function KnowledgeActions({
     message: "",
     status: "idle",
   } as FormState);
+  const [intent, setIntent] = useState("");
   return (
     <div className="mt-4">
-      <form action={action} className="flex flex-wrap gap-2">
-      <input type="hidden" name="workspaceId" value={workspaceId} />
+      <form
+        action={action}
+        className="flex flex-wrap gap-2"
+        onSubmit={(event) =>
+          setIntent(
+            (event.nativeEvent as SubmitEvent).submitter?.getAttribute(
+              "value",
+            ) ?? "",
+          )
+        }
+      >
+        <input type="hidden" name="workspaceId" value={workspaceId} />
         <input type="hidden" name="id" value={id} />
         {status !== "published" ? (
           <Button size="sm" name="intent" value="publish" disabled={pending}>
-            Publish
+            {pending && intent === "publish" ? "Publishing…" : "Publish"}
           </Button>
         ) : (
           <Button
@@ -37,41 +51,50 @@ export function KnowledgeActions({
           </Button>
         )}
         {status !== "archived" && (
-          <Button
+          <ConfirmButton
             size="sm"
             variant="ghost"
             name="intent"
             value="archived"
             disabled={pending}
+            title="Archive this knowledge?"
+            description="Your agent will stop using this item. You can review and publish it again from Archived items."
+            confirmLabel="Archive item"
           >
             Archive
-          </Button>
+          </ConfirmButton>
         )}
-        <details className="self-center">
-          <summary className="cursor-pointer px-2 text-xs text-muted-foreground">
-            Delete
-          </summary>
-          <span className="mt-2 inline-flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 p-2 text-xs text-red-700">
-            Permanently delete?
-            <Button
-              size="sm"
-              variant="destructive"
-              name="intent"
-              value="delete"
-              disabled={pending}
-            >
-              Confirm delete
-            </Button>
-          </span>
-        </details>
+        <ConfirmButton
+          size="sm"
+          variant="destructive"
+          name="intent"
+          value="delete"
+          disabled={pending}
+          title="Permanently delete this item?"
+          description="This removes the knowledge and makes it unavailable to your agent. This cannot be undone."
+          confirmLabel="Confirm delete"
+        >
+          Delete
+        </ConfirmButton>
       </form>
-      {state.message && (
+      {pending && (
         <p
           role="status"
-          className={`mt-3 text-xs ${state.status === "error" ? "text-red-700" : "text-emerald-700"}`}
+          className="mt-3 text-xs leading-5 text-muted-foreground"
         >
-          {state.message}
+          {intent === "publish"
+            ? "Preparing knowledge for your agent. Keep this page open until publication is confirmed."
+            : "Updating knowledge…"}
         </p>
+      )}
+      {!pending && <FormFeedback state={state} className="mt-3" />}
+      {!pending && state.status === "success" && intent === "publish" && (
+        <Link
+          href="/app/test-agent"
+          className="mt-3 inline-block text-sm font-medium text-primary underline"
+        >
+          Test published knowledge →
+        </Link>
       )}
     </div>
   );

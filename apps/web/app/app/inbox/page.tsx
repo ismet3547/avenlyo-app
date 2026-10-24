@@ -1,3 +1,5 @@
+import { RefreshList } from "@/components/refresh-list";
+import { QueryError } from "@/components/query-error";
 import Link from "next/link";
 import { Globe, MessageCircle, UserRound, ArrowRight } from "lucide-react";
 import { channelLabels, type InboxItem } from "@avenlyo-app/shared";
@@ -36,15 +38,26 @@ export default async function InboxPage({
           </Button>
         }
       />
+      <RefreshList />
       {result.error ? (
-        <p role="alert">Inbox could not be loaded.</p>
+        <QueryError message="Inbox could not be loaded. Try again to check the latest customer conversations." />
       ) : !conversations?.length ? (
         <EmptyState
-          title="Your next conversation starts here"
-          description="Enable Website Chat or complete managed Instagram setup. Real customer messages will appear here; Test Agent conversations stay in Conversations."
+          title={
+            page
+              ? "No more conversations on this page"
+              : "Your next conversation starts here"
+          }
+          description={
+            page
+              ? "Return to the previous page or open the latest conversations."
+              : "Enable Website Chat or complete managed Instagram setup. Real customer messages will appear here; Test Agent conversations stay in Conversations."
+          }
           action={
             <Button asChild>
-              <Link href="/app/channels">Set up a channel</Link>
+              <Link href={page ? "/app/inbox" : "/app/channels"}>
+                {page ? "Latest conversations" : "Set up a channel"}
+              </Link>
             </Button>
           }
         />
@@ -69,7 +82,7 @@ export default async function InboxPage({
                         ? `Website visitor · ${c.customerRef.slice(0, 8)}`
                         : c.customerRef}
                     </p>
-                    <time className="text-[10px] text-muted-foreground">
+                    <time className="text-xs text-muted-foreground">
                       {dateLabel(c.updatedAt)}
                     </time>
                   </div>
@@ -80,9 +93,13 @@ export default async function InboxPage({
                     <span className="mr-1 text-xs text-muted-foreground">
                       {channelLabels[c.channel]}
                     </span>
-                    {c.aiMode === "paused" && (
+                    {c.aiMode === "paused" ? (
                       <Badge className="border-amber-100 bg-amber-50 text-amber-800">
                         Needs human · AI paused
+                      </Badge>
+                    ) : (
+                      <Badge className="border-emerald-100 bg-emerald-50 text-emerald-800">
+                        AI active
                       </Badge>
                     )}
                     {c.qualification && (

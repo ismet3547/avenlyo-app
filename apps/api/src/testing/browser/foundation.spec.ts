@@ -127,7 +127,9 @@ test("new user completes the independent foundation flow on desktop and mobile",
     page.getByText("alex@example.test", { exact: true }),
   ).toBeVisible();
   await expect(page.getByText("Qualified", { exact: true })).toBeVisible();
-  await expect(page.getByText("Test Agent", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("main").getByText("Test Agent", { exact: true }),
+  ).toBeVisible();
   await page.screenshot({ path: `${shots}/lead-desktop.png`, fullPage: true });
   await page
     .getByRole("link", { name: "View conversation", exact: true })
