@@ -573,3 +573,27 @@ test("invalid saved test URLs fail visibly and auth callback failure explains re
     "confirmation link could not be verified",
   );
 });
+
+test("mobile Inbox exposes claiming before a long thread and keeps AI paused after replying", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 760 });
+  await page.goto(`/app/inbox/${ids.inbox}`);
+  const claim = page.getByRole("button", {
+    name: "Claim conversation",
+    exact: true,
+  });
+  await expect(claim).toBeInViewport();
+  await claim.click();
+  await expect(page.getByText("Claimed by you", { exact: true })).toBeVisible();
+  await page.getByLabel("Your human reply").fill("A reply from mobile.");
+  await page
+    .getByRole("button", { name: "Send human reply", exact: true })
+    .click();
+  await expect(page.getByRole("status")).toContainText(
+    "available to the website visitor",
+  );
+  await expect(
+    page.getByText("Needs human · AI paused", { exact: true }),
+  ).toBeVisible();
+});

@@ -53,3 +53,5 @@ Primary references reviewed on 24 October 2026:
 - https://github.com/fastify/fast-uri/security/advisories/GHSA-w74x-v6f9-j3xg
 
 **F18 / High — delivery states on historical Inbox pages.** `apps/api/src/channels/routes.ts` fetched the latest 100 delivery records independently of the requested message page. Loading earlier messages could therefore omit failed/unconfirmed delivery labels. The minimal backend read change fetches delivery records for the actual page's message IDs, with the existing workspace and conversation scopes. The client retains already loaded delivery records. No delivery operation or policy changes.
+
+**F19 / Medium — mobile claim discoverability.** CI screenshots at 320px confirmed that the ownership card could place the required claim action below a long thread and the disabled reply composer. Claim now appears in the conversation header before messages, with the same conflict/pending guards. A mobile browser regression verifies it is initially visible and can unlock a human reply without resuming AI. Frontend only.

@@ -242,6 +242,19 @@ export function InboxConversation({
           (instagram ? "Instagram conversation" : "Website conversation")
         }
         description={`Customer channel reference · ${c.external_customer_ref?.slice(0, 32) ?? ""}`}
+        action={
+          !mine ? (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={pending || loadingEarlier || other || retry}
+              onClick={() => void action("claim")}
+            >
+              <UserRound aria-hidden />
+              {other ? "Already claimed" : "Claim conversation"}
+            </Button>
+          ) : undefined
+        }
       />
       <div className="mb-5 flex flex-wrap gap-2">
         <Badge
@@ -401,17 +414,6 @@ export function InboxConversation({
             AI explicitly when your team is ready.
           </p>
           <div className="mt-5 flex flex-col gap-3">
-            {!mine && (
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={pending || loadingEarlier || other || retry}
-                onClick={() => void action("claim")}
-              >
-                <UserRound aria-hidden />
-                {other ? "Already claimed" : "Claim conversation"}
-              </Button>
-            )}
             {mine && (
               <Button
                 size="sm"
