@@ -196,11 +196,15 @@ test("knowledge preserves a rejected draft and completes publish, edit, archive 
     "Our team can help on weekdays from 9am to 5pm.",
   );
   await page.getByRole("button", { name: "Save draft", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Draft saved");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Draft saved" }),
+  ).toBeVisible();
   const itemId = new URL(page.url()).searchParams.get("item")!;
   const item = () => page.locator(`[id="knowledge-${itemId}"]`);
   await item().getByRole("button", { name: "Publish", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Published.");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Published." }),
+  ).toBeVisible();
   await item().getByRole("link", { name: "Edit item" }).click();
   await expect(
     page.getByText("Saving unpublishes this item.", { exact: false }),
@@ -221,13 +225,17 @@ test("knowledge preserves a rejected draft and completes publish, edit, archive 
     .getByRole("dialog", { name: "Archive this knowledge?" })
     .getByRole("button", { name: "Archive item", exact: true })
     .click();
-  await expect(page.getByRole("status")).toContainText("Item archived");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Item archived" }),
+  ).toBeVisible();
   await item().getByRole("button", { name: "Delete", exact: true }).click();
   await page
     .getByRole("dialog", { name: "Permanently delete this item?" })
     .getByRole("button", { name: "Confirm delete", exact: true })
     .click();
-  await expect(page.getByRole("status")).toContainText("permanently deleted");
+  await expect(
+    page.getByRole("status").filter({ hasText: "permanently deleted" }),
+  ).toBeVisible();
   const state = await (
     await request.get(`${fixtureUrl}/__fixture/state`)
   ).json();
