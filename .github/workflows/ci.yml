@@ -80,3 +80,25 @@ jobs:
           retention-days: 7
       - if: always()
         run: supabase stop --no-backup
+  frontend:
+    name: Frontend workflows and responsive layouts
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:frontend
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-workflow-qa
+          path: test-results/frontend/
+          retention-days: 7

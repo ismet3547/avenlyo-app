@@ -303,7 +303,7 @@ export async function registerChannelRoutes(
         `created_at.lt.${boundary.data.created_at},and(created_at.eq.${boundary.data.created_at},id.lt.${boundary.data.id})`,
       );
     }
-    const [messages, lead, deliveries, notifications] = await Promise.all([
+    const [messages, lead, notifications] = await Promise.all([
       messageQuery
         .order("created_at", { ascending: false })
         .order("id", { ascending: false })
@@ -315,20 +315,27 @@ export async function registerChannelRoutes(
         .eq("conversation_id", params.data.id)
         .maybeSingle(),
       user
-        .from("message_deliveries")
-        .select("*")
-        .eq("workspace_id", body.data.workspaceId)
-        .eq("conversation_id", params.data.id)
-        .order("created_at", { ascending: false })
-        .limit(100),
-      user
         .from("business_notifications")
         .select("id,kind,status,error_code")
         .eq("workspace_id", body.data.workspaceId)
         .eq("conversation_id", params.data.id),
     ]);
-    if (messages.error || lead.error || deliveries.error || notifications.error)
+    if (messages.error || lead.error || notifications.error)
       throw new RuntimeError("INBOX_UNAVAILABLE", 503);
+    // Delivery truth must follow the requested message page, including history.
+    // Retain both tenant and conversation scopes; no delivery is retried here.
+    const deliveries = messages.data.length
+      ? await user
+          .from("message_deliveries")
+          .select("*")
+          .eq("workspace_id", body.data.workspaceId)
+          .eq("conversation_id", params.data.id)
+          .in(
+            "message_id",
+            messages.data.map((message) => message.id),
+          )
+      : { data: [], error: null };
+    if (deliveries.error) throw new RuntimeError("INBOX_UNAVAILABLE", 503);
     return {
       conversation: conversation.data,
       messages: [...messages.data].reverse(),

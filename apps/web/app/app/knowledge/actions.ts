@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { knowledgeSchema } from "@avenlyo-app/shared";
 import { requireWorkspace } from "@/lib/workspace";
+import { workspaceFormError } from "@/lib/workspace-form";
 import { callApi } from "@/lib/api";
 import type { FormState } from "@/app/auth/actions";
 export async function saveKnowledge(
@@ -11,6 +12,8 @@ export async function saveKnowledge(
   form: FormData,
 ): Promise<FormState> {
   const ctx = await requireWorkspace();
+  const workspaceError = workspaceFormError(form, ctx.workspace.id);
+  if (workspaceError) return workspaceError;
   const parsed = knowledgeSchema.safeParse({
     type: form.get("type"),
     title: form.get("title"),
@@ -40,7 +43,7 @@ export async function saveKnowledge(
     item_content: parsed.data.content,
     expected_revision: revision.data,
   });
-  if (result.error)
+  if (result.error || !result.data)
     return {
       status: "error",
       message:
@@ -48,13 +51,17 @@ export async function saveKnowledge(
     };
   revalidatePath("/app/knowledge");
   revalidatePath("/app");
-  redirect("/app/knowledge?notice=draft-saved");
+  redirect(
+    `/app/knowledge?notice=draft-saved&item=${result.data}#knowledge-${result.data}`,
+  );
 }
 export async function knowledgeOperation(
   _state: FormState,
   form: FormData,
 ): Promise<FormState> {
   const ctx = await requireWorkspace();
+  const workspaceError = workspaceFormError(form, ctx.workspace.id);
+  if (workspaceError) return workspaceError;
   const parsed = z
     .object({
       id: z.uuid(),
@@ -72,7 +79,11 @@ export async function knowledgeOperation(
       return {
         status: "error",
         message:
-          "Publishing failed. Check API/OpenAI setup and owner access. The item has not been newly published.",
+          result.status === 409
+            ? "This item changed while publishing. Refresh and review the latest draft before trying again."
+            : result.status >= 500
+              ? "Publication could not be confirmed. Refresh to check the current status before trying again. If it remains unavailable, contact your workspace administrator."
+              : "This item could not be published. Check your owner access, then try again.",
       };
   } else {
     const result =
@@ -94,15 +105,20 @@ export async function knowledgeOperation(
   }
   revalidatePath("/app/knowledge");
   revalidatePath("/app");
-  return {
-    status: "success",
-    message:
-      intent === "publish"
-        ? "Published. Your agent can now use this item."
-        : intent === "delete"
-          ? "Item deleted."
-          : intent === "draft"
-            ? "Unpublished. Your agent will no longer use this item."
-            : "Item archived.",
-  };
+  if (intent === "delete") redirect("/app/knowledge?notice=deleted");
+  const status =
+    intent === "publish"
+      ? "published"
+      : intent === "archived"
+        ? "archived"
+        : "draft";
+  const notice =
+    intent === "publish"
+      ? "published"
+      : intent === "archived"
+        ? "archived"
+        : "unpublished";
+  redirect(
+    `/app/knowledge?status=${status}&notice=${notice}&item=${id}#knowledge-${id}`,
+  );
 }

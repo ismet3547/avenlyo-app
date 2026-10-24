@@ -7,8 +7,8 @@ export default function AppError({ reset }: { reset: () => void }) {
         We could not load this workspace
       </h1>
       <p className="mt-3 text-sm leading-6 text-muted-foreground">
-        Check that local Supabase is running and the foundation migration has
-        been applied.
+        The workspace service is temporarily unavailable. Try again. If the
+        problem continues, contact your workspace administrator.
       </p>
       <Button className="mt-6" onClick={reset}>
         Try again

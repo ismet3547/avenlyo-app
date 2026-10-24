@@ -13,7 +13,11 @@ const variants = cva(
         ghost: "hover:bg-muted text-muted-foreground",
         destructive: "bg-red-50 text-red-700 hover:bg-red-100",
       },
-      size: { default: "h-10 px-4", sm: "h-8 px-3 text-xs", icon: "size-9" },
+      size: {
+        default: "min-h-11 px-4 py-2.5",
+        sm: "min-h-11 px-3 py-2 text-xs sm:min-h-9",
+        icon: "size-11 shrink-0",
+      },
     },
     defaultVariants: { variant: "default", size: "default" },
   },

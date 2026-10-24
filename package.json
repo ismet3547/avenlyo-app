@@ -23,7 +23,8 @@
     "test:browser": "playwright test",
     "test:channels": "pnpm --filter @avenlyo-app/api exec tsx src/testing/channels-acceptance.ts",
     "instagram:provision": "pnpm --filter @avenlyo-app/api exec tsx src/channels/provision-cli.ts",
-    "db:test:upgrade": "node scripts/test-foundation-upgrade.mjs"
+    "db:test:upgrade": "node scripts/test-foundation-upgrade.mjs",
+    "test:frontend": "playwright test --config playwright.frontend.config.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
@@ -34,5 +35,11 @@
     "typescript-eslint": "8.71.2",
     "vitest": "5.0.4"
   },
-  "type": "module"
+  "type": "module",
+  "pnpm": {
+    "overrides": {
+      "fast-uri@3.1.8": "3.1.9",
+      "fast-uri@4.2.2": "4.2.3"
+    }
+  }
 }

@@ -8,7 +8,7 @@ export type FormState = {
   status: "idle" | "error" | "success";
 };
 const credentials = z.object({
-  email: z.email().max(254),
+  email: z.string().trim().pipe(z.email().max(254)),
   password: z.string().min(8).max(128),
 });
 export async function signIn(
@@ -28,7 +28,8 @@ export async function signIn(
   if (!supabase)
     return {
       status: "error",
-      message: "Configure local Supabase using the .env.example files first.",
+      message:
+        "Sign-in is temporarily unavailable. Please try again later or contact your administrator.",
     };
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error)
@@ -56,7 +57,8 @@ export async function signUp(
   if (!supabase)
     return {
       status: "error",
-      message: "Configure local Supabase using the .env.example files first.",
+      message:
+        "Sign-in is temporarily unavailable. Please try again later or contact your administrator.",
     };
   const origin = new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001",
@@ -75,7 +77,7 @@ export async function signUp(
   return {
     status: "success",
     message:
-      "Check your email to confirm your account. Locally, open the mail inbox at http://localhost:55324.",
+      "Check your email to confirm your account, then return here to sign in.",
   };
 }
 export async function signOut() {

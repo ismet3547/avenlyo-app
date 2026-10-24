@@ -2,12 +2,15 @@
 import { revalidatePath } from "next/cache";
 import { workspaceSchema } from "@avenlyo-app/shared";
 import { requireWorkspace } from "@/lib/workspace";
+import { workspaceFormError } from "@/lib/workspace-form";
 import type { FormState } from "@/app/auth/actions";
 export async function renameBusiness(
   _state: FormState,
   form: FormData,
 ): Promise<FormState> {
   const ctx = await requireWorkspace();
+  const workspaceError = workspaceFormError(form, ctx.workspace.id);
+  if (workspaceError) return workspaceError;
   const parsed = workspaceSchema.safeParse({ name: form.get("name") });
   if (!parsed.success)
     return {

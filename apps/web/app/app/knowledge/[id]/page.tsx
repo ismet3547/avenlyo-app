@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireWorkspace } from "@/lib/workspace";
 import { PageHeader } from "@/components/page-header";
@@ -18,11 +19,17 @@ export default async function EditKnowledge({
   if (item.error || ctx.role !== "owner") notFound();
   return (
     <>
+      <Link
+        href="/app/knowledge"
+        className="mb-5 inline-block py-2 text-sm text-muted-foreground hover:text-primary"
+      >
+        ← All knowledge
+      </Link>
       <PageHeader
         title="Edit knowledge"
         description="Changes are saved as a draft. Publish again after reviewing the updated information."
       />
-      <KnowledgeForm item={item.data} />
+      <KnowledgeForm workspaceId={ctx.workspace.id} item={item.data} />
     </>
   );
 }

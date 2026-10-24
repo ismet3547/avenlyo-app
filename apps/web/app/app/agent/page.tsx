@@ -1,3 +1,4 @@
+import { QueryError } from "@/components/query-error";
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { agentSettingsSchema } from "@avenlyo-app/shared";
@@ -14,9 +15,13 @@ export default async function AgentPage() {
     .single();
   if (result.error)
     return (
-      <p>
-        Agent settings are unavailable. Check your local database migrations.
-      </p>
+      <>
+        <PageHeader
+          title="Agent settings"
+          description="Configure your agent’s goals, tone and contact collection."
+        />
+        <QueryError message="Agent settings could not be loaded. Try again before making changes." />
+      </>
     );
   const settings = agentSettingsSchema.parse({
     tone: result.data.tone,
@@ -40,7 +45,11 @@ export default async function AgentPage() {
           </Button>
         }
       />
-      <AgentForm settings={settings} editable={ctx.role === "owner"} />
+      <AgentForm
+        workspaceId={ctx.workspace.id}
+        settings={settings}
+        editable={ctx.role === "owner"}
+      />
     </>
   );
 }

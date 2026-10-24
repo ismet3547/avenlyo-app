@@ -36,16 +36,25 @@ export async function createWorkspace(
   await selectCookie(result.data);
   redirect("/app");
 }
-export async function switchWorkspace(form: FormData) {
+export async function switchWorkspace(
+  _state: FormState,
+  form: FormData,
+): Promise<FormState> {
   const { supabase } = await requireUser();
   const id = z.uuid().safeParse(form.get("workspaceId"));
-  if (!id.success) return;
+  if (!id.success)
+    return { status: "error", message: "Choose an available workspace." };
   const result = await supabase
     .from("workspaces")
     .select("id")
     .eq("id", id.data)
     .single();
-  if (result.error) return;
+  if (result.error)
+    return {
+      status: "error",
+      message:
+        "This workspace could not be opened. Refresh the list to check your access, then try again.",
+    };
   await selectCookie(result.data.id);
   redirect("/app");
 }

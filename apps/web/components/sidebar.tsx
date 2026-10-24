@@ -10,6 +10,7 @@ import {
   BookOpen,
   Cable,
   Settings,
+  FlaskConical,
   ArrowUpRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -19,16 +20,18 @@ const nav = [
   { href: "/app/leads", label: "Leads", icon: UsersRound },
   { href: "/app/conversations", label: "Conversations", icon: MessageSquare },
   { href: "/app/agent", label: "Agent", icon: Sparkles },
+  { href: "/app/test-agent", label: "Test Agent", icon: FlaskConical },
   { href: "/app/knowledge", label: "Knowledge", icon: BookOpen },
   { href: "/app/channels", label: "Channels", icon: Cable },
   { href: "/app/settings", label: "Settings", icon: Settings },
 ];
-export function Sidebar() {
+export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const path = usePathname();
   return (
     <>
       <Link
         href="/app"
+        onClick={onNavigate}
         className="mb-8 flex items-center gap-2.5 px-3 text-xl font-semibold tracking-tight"
       >
         <span className="grid size-8 place-items-center rounded-lg bg-primary text-white">
@@ -36,7 +39,7 @@ export function Sidebar() {
         </span>
         Avenlyo
       </Link>
-      <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[.15em] text-muted-foreground">
+      <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-[.15em] text-muted-foreground">
         Workspace
       </p>
       <nav aria-label="Main navigation" className="space-y-1">
@@ -44,16 +47,16 @@ export function Sidebar() {
           const active =
             href === "/app"
               ? path === href
-              : path.startsWith(href) ||
-                (href === "/app/agent" && path === "/app/test-agent");
+              : path === href || path.startsWith(`${href}/`);
           return (
             <Link
               key={href}
+              onClick={onNavigate}
               href={href}
               aria-current={active ? "page" : undefined}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted",
-                active ? "bg-[#efeffd] text-primary" : "text-[#73788a]",
+                active ? "bg-[#efeffd] text-primary" : "text-muted-foreground",
                 i === 4 && "mt-6",
               )}
             >
@@ -66,6 +69,7 @@ export function Sidebar() {
       <div className="mt-auto pt-8">
         <Link
           href="/app/test-agent"
+          onClick={onNavigate}
           className="block rounded-xl border border-border bg-gradient-to-b from-white to-muted p-4"
         >
           <span className="flex items-center justify-between text-sm font-semibold">
