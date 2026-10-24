@@ -129,7 +129,7 @@ test("a stale form in another tab cannot rename the newly selected workspace", a
   await other.getByRole("button", { name: "Switch", exact: true }).click();
   await expect(other).toHaveURL(/\/app$/);
   await page.getByRole("button", { name: "Save changes", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText(
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
     "active workspace changed",
   );
   await expect(page.getByLabel("Business name", { exact: true })).toHaveValue(
@@ -153,9 +153,7 @@ test("agent goals explain disabled contact collection and save a valid supported
   await page
     .getByRole("checkbox", { name: /Collect contact details/ })
     .uncheck();
-  await expect(
-    page.getByRole("checkbox", { name: "Email", exact: true }),
-  ).toBeDisabled();
+  await expect(page.getByRole("checkbox", { name: /^email$/i })).toBeDisabled();
   await expect(
     page.getByText("Internal planning note", { exact: false }),
   ).toBeVisible();
@@ -188,7 +186,9 @@ test("knowledge preserves a rejected draft and completes publish, edit, archive 
     data: { failNextSave: true },
   });
   await page.getByRole("button", { name: "Save draft", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText("Could not save");
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+    "Could not save",
+  );
   await expect(page.getByLabel("Title", { exact: true })).toHaveValue(
     "Customer support hours",
   );
@@ -336,7 +336,9 @@ test("failed test resume is reported and a later confirmed resume unlocks the co
   await page
     .getByRole("button", { name: "Resume test AI", exact: true })
     .click();
-  await expect(page.getByRole("alert")).toContainText("could not be resumed");
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+    "could not be resumed",
+  );
   await expect(page.getByLabel("Customer message")).toBeDisabled();
   await page
     .getByRole("button", { name: "Resume test AI", exact: true })
@@ -367,7 +369,9 @@ test("a confirmed human reply stays confirmed when the subsequent refresh fails"
   await expect(page.getByRole("status")).toContainText(
     "available to the website visitor",
   );
-  await expect(page.getByRole("alert")).toContainText("Your action was saved");
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+    "Your action was saved",
+  );
   await expect(page.getByLabel("Your human reply")).toBeEnabled();
   await expect(page.getByLabel("Your human reply")).toHaveValue("");
   await expect(
@@ -382,7 +386,7 @@ test("a confirmed human reply stays confirmed when the subsequent refresh fails"
       exact: true,
     }),
   ).toBeVisible();
-  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(page.getByRole("main").getByRole("alert")).toHaveCount(0);
   const state = await (
     await request.get(`${fixtureUrl}/__fixture/state`)
   ).json();
@@ -493,7 +497,9 @@ test("channel validation preserves input, clipboard failure has a fallback and d
   await page
     .getByRole("button", { name: "Save Website Chat", exact: true })
     .click();
-  await expect(page.getByRole("alert")).toContainText("exact HTTPS origins");
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+    "exact HTTPS origins",
+  );
   await expect(page.getByLabel("Approved website origins")).toHaveValue(
     "https://example.com/invalid-path",
   );
@@ -563,7 +569,7 @@ test("invalid saved test URLs fail visibly and auth callback failure explains re
     page.getByRole("heading", { name: "This page is unavailable" }),
   ).toBeVisible();
   await page.goto("/auth/callback");
-  await expect(page.getByRole("alert")).toContainText(
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
     "confirmation link could not be verified",
   );
 });
