@@ -12,10 +12,12 @@ export function WebsiteChannelForm({
   enabled,
   origins,
   editable,
+  workspaceId,
 }: {
   enabled: boolean;
   origins: string[];
   editable: boolean;
+  workspaceId: string;
 }) {
   const [state, action, pending] = useActionState(saveWebsiteChannel, {
     message: "",
@@ -23,6 +25,7 @@ export function WebsiteChannelForm({
   } as FormState);
   return (
     <form action={action} className="mt-6 space-y-5">
+      <input type="hidden" name="workspaceId" value={workspaceId} />
       <label className="flex items-center gap-3 text-sm font-medium">
         <input
           type="checkbox"
@@ -99,13 +102,14 @@ export function EmbedSnippet({ snippet }: { snippet: string }) {
     </div>
   );
 }
-export function DisconnectInstagram({ editable }: { editable: boolean }) {
+export function DisconnectInstagram({ editable, workspaceId }: { editable: boolean; workspaceId: string }) {
   const [state, action, pending] = useActionState(disconnectInstagram, {
     message: "",
     status: "idle",
   } as FormState);
   return (
     <form action={action} className="mt-5">
+      <input type="hidden" name="workspaceId" value={workspaceId} />
       <Button size="sm" variant="outline" disabled={!editable || pending}>
         Disconnect Instagram
       </Button>

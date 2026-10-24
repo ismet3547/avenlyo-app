@@ -8,7 +8,7 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
-export function KnowledgeForm({ item }: { item?: KnowledgeItem }) {
+export function KnowledgeForm({ item, workspaceId }: { item?: KnowledgeItem; workspaceId: string }) {
   const [type, setType] = useState(item?.type ?? "text");
   const [state, action, pending] = useActionState(saveKnowledge, {
     message: "",
@@ -16,6 +16,7 @@ export function KnowledgeForm({ item }: { item?: KnowledgeItem }) {
   } as FormState);
   return (
     <form action={action} className="max-w-3xl">
+      <input type="hidden" name="workspaceId" value={workspaceId} />
       <Card className="space-y-6 p-6">
         <input type="hidden" name="id" value={item?.id ?? ""} />
         <input type="hidden" name="revision" value={item?.revision ?? ""} />

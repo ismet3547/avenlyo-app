@@ -22,7 +22,7 @@ export default async function EditKnowledge({
         title="Edit knowledge"
         description="Changes are saved as a draft. Publish again after reviewing the updated information."
       />
-      <KnowledgeForm item={item.data} />
+      <KnowledgeForm workspaceId={ctx.workspace.id} item={item.data} />
     </>
   );
 }

@@ -129,7 +129,7 @@ export default async function KnowledgePage({
                     Edit item
                     <ArrowUpRight className="size-3" aria-hidden />
                   </Link>
-                  <KnowledgeActions id={item.id} status={item.status} />
+                  <KnowledgeActions workspaceId={ctx.workspace.id} id={item.id} status={item.status} />
                 </>
               )}
             </Card>

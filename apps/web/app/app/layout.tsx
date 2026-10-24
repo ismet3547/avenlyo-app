@@ -65,7 +65,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             </form>
           </div>
         </header>
-        <main className="mx-auto max-w-[1240px] px-5 py-8 lg:px-10 lg:py-10">
+        <main key={ctx.workspace.id} id="main-content" className="mx-auto max-w-[1240px] px-5 py-8 lg:px-10 lg:py-10">
           {children}
         </main>
       </div>

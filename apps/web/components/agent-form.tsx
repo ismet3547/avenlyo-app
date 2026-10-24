@@ -31,9 +31,11 @@ const options = [
 export function AgentForm({
   settings,
   editable,
+  workspaceId,
 }: {
   settings: AgentSettings;
   editable: boolean;
+  workspaceId: string;
 }) {
   const [state, action, pending] = useActionState(saveAgent, {
     message: "",
@@ -41,6 +43,7 @@ export function AgentForm({
   } as FormState);
   return (
     <form action={action} className="max-w-3xl space-y-5">
+      <input type="hidden" name="workspaceId" value={workspaceId} />
       <Card className="p-6">
         <label htmlFor="setup-brief" className="text-sm font-semibold">
           What should Avenlyo help your customers with?

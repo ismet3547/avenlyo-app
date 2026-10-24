@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { knowledgeSchema } from "@avenlyo-app/shared";
 import { requireWorkspace } from "@/lib/workspace";
+import { workspaceFormError } from "@/lib/workspace-form";
 import { callApi } from "@/lib/api";
 import type { FormState } from "@/app/auth/actions";
 export async function saveKnowledge(
@@ -11,6 +12,8 @@ export async function saveKnowledge(
   form: FormData,
 ): Promise<FormState> {
   const ctx = await requireWorkspace();
+  const workspaceError = workspaceFormError(form, ctx.workspace.id);
+  if (workspaceError) return workspaceError;
   const parsed = knowledgeSchema.safeParse({
     type: form.get("type"),
     title: form.get("title"),
@@ -55,6 +58,8 @@ export async function knowledgeOperation(
   form: FormData,
 ): Promise<FormState> {
   const ctx = await requireWorkspace();
+  const workspaceError = workspaceFormError(form, ctx.workspace.id);
+  if (workspaceError) return workspaceError;
   const parsed = z
     .object({
       id: z.uuid(),

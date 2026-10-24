@@ -6,8 +6,10 @@ import { Button } from "./ui/button";
 export function KnowledgeActions({
   id,
   status,
+  workspaceId,
 }: {
   id: string;
+  workspaceId: string;
   status: "draft" | "published" | "archived";
 }) {
   const [state, action, pending] = useActionState(knowledgeOperation, {
@@ -17,6 +19,7 @@ export function KnowledgeActions({
   return (
     <div className="mt-4">
       <form action={action} className="flex flex-wrap gap-2">
+      <input type="hidden" name="workspaceId" value={workspaceId} />
         <input type="hidden" name="id" value={id} />
         {status !== "published" ? (
           <Button size="sm" name="intent" value="publish" disabled={pending}>

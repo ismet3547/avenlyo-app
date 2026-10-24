@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -25,11 +25,15 @@ export function TestChat({
   conversationId,
   initialMessages,
   initialLeadId,
+  paused = false,
+  partialHistory = false,
 }: {
   workspaceId: string;
   conversationId: string | null;
   initialMessages: ChatMessage[];
   initialLeadId: string | null;
+  paused?: boolean;
+  partialHistory?: boolean;
 }) {
   const router = useRouter();
   const [messages, setMessages] = useState(initialMessages);
@@ -41,8 +45,15 @@ export function TestChat({
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(false);
   const request = useRef<RequestInput | null>(null);
+  const sending = useRef(false);
+  const thread = useRef<HTMLDivElement>(null);
+  const followLatest = useRef(true);
+  useEffect(() => {
+    if (thread.current && followLatest.current)
+      thread.current.scrollTop = thread.current.scrollHeight;
+  }, [messages, pending]);
   async function send() {
-    if (pending) return;
+    if (sending.current || routeSyncing || (paused && !retry)) return;
     if (!request.current) {
       if (!content.trim()) return;
       request.current = {
@@ -54,6 +65,8 @@ export function TestChat({
     }
     const submitted = request.current;
     if (!submitted) return;
+    sending.current = true;
+    followLatest.current = true;
     setPending(true);
     setError("");
     try {
@@ -65,16 +78,20 @@ export function TestChat({
       const result = (await response.json()) as TurnResult & { code?: string };
       if (!response.ok) {
         const unknown =
-          result.code === "API_UNAVAILABLE" ||
+          response.status >= 500 ||
           result.code === "TURN_PROCESSING";
         setRetry(unknown);
         if (!unknown) request.current = null;
         setError(
           result.code === "AGENT_NOT_CONFIGURED"
-            ? "Test Agent needs the local API, Supabase and OpenAI configuration."
+            ? "The agent is not available yet. Ask your workspace administrator to check its configuration."
+            : response.status === 401
+              ? "Your session expired. Sign in again to continue your saved tests."
+            : response.status === 429
+              ? "Too many messages were sent. Wait a moment, then try again."
             : unknown
               ? "We could not confirm the result yet. Retry this same message safely."
-              : "This turn could not be completed. Check the API setup, then try a new message.",
+              : "This message could not be completed. Review the saved conversation before trying again.",
         );
         return;
       }
@@ -106,14 +123,15 @@ export function TestChat({
         "Connection interrupted. Retry the same message to check its result.",
       );
     } finally {
+      sending.current = false;
       setPending(false);
     }
   }
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
       <section className="overflow-hidden rounded-xl border border-border bg-white shadow-xs">
-        <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
+          <div className="flex min-w-0 items-center gap-3">
             <span className="grid size-8 place-items-center rounded-lg bg-[#efeffd] text-primary">
               <Sparkles aria-hidden className="size-4" />
             </span>
@@ -127,10 +145,17 @@ export function TestChat({
           <Badge>Test mode</Badge>
         </div>
         <div
-          aria-live="polite"
+          ref={thread}
+          role="log"
+          aria-label="Test conversation messages"
+          onScroll={(event) => {
+            const node = event.currentTarget;
+            followLatest.current = node.scrollHeight - node.scrollTop - node.clientHeight < 80;
+          }}
           aria-busy={pending}
-          className="max-h-[560px] min-h-[340px] space-y-5 overflow-y-auto p-5 sm:p-7"
+          className="max-h-[55dvh] min-h-[260px] space-y-5 overflow-y-auto overscroll-contain p-4 sm:max-h-[560px] sm:min-h-[340px] sm:p-7"
         >
+          {partialHistory && id && <p className="text-xs leading-5 text-muted-foreground">Showing the latest 100 messages. <Link className="text-primary underline" href={`/app/conversations/${id}`}>Read earlier messages</Link></p>}
           {!messages.length && (
             <div className="mx-auto max-w-sm py-10 text-center">
               <MessageSquare
@@ -168,7 +193,7 @@ export function TestChat({
                 >
                   {message.role === "customer" ? "Test customer" : "Avenlyo"}
                 </p>
-                <p className="whitespace-pre-wrap text-sm leading-6">
+                <p className="whitespace-pre-wrap break-words text-sm leading-6 [overflow-wrap:anywhere]">
                   {message.content}
                 </p>
               </div>
@@ -198,17 +223,18 @@ export function TestChat({
             value={content}
             onChange={(e) => setContent(e.target.value)}
             maxLength={2000}
-            disabled={pending || retry || routeSyncing}
-            placeholder="Type a customer question…"
+            disabled={pending || retry || routeSyncing || paused}
+            placeholder={paused ? "Resume test AI above to continue." : "Type a customer question…"}
+            aria-describedby="test-message-help"
           />
-          <div className="mt-3 flex items-center justify-between gap-3">
-            <p className="text-[10px] text-muted-foreground">
-              Test conversation · saved in this workspace
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+            <p id="test-message-help" className="text-xs leading-5 text-muted-foreground">
+              {paused ? "AI paused · resume above to continue" : "Test only · saved in this workspace"}
             </p>
             <Button
               size="sm"
               type="submit"
-              disabled={pending || routeSyncing || !content.trim()}
+              disabled={pending || routeSyncing || (!retry && (paused || !content.trim()))}
             >
               {retry ? <RotateCcw aria-hidden /> : <ArrowUp aria-hidden />}
               {retry
@@ -228,6 +254,7 @@ export function TestChat({
               {error}
             </p>
           )}
+          {error && <Link href={id ? `/app/conversations/${id}` : "/app/conversations"} className="mt-3 inline-block text-sm text-primary underline">Check saved conversations</Link>}
         </form>
       </section>
       <aside className="space-y-4">

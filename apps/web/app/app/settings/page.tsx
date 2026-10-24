@@ -14,6 +14,7 @@ export default async function SettingsPage() {
       <Card className="max-w-2xl p-6">
         <h2 className="mb-6 text-sm font-semibold">Business information</h2>
         <BusinessForm
+          workspaceId={ctx.workspace.id}
           name={ctx.workspace.name}
           editable={ctx.role === "owner"}
         />

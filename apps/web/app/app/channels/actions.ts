@@ -2,12 +2,15 @@
 import { revalidatePath } from "next/cache";
 import { websiteConfigurationSchema } from "@avenlyo-app/shared";
 import { requireWorkspace } from "@/lib/workspace";
+import { workspaceFormError } from "@/lib/workspace-form";
 import type { FormState } from "@/app/auth/actions";
 export async function saveWebsiteChannel(
   _state: FormState,
   form: FormData,
 ): Promise<FormState> {
   const ctx = await requireWorkspace();
+  const workspaceError = workspaceFormError(form, ctx.workspace.id);
+  if (workspaceError) return workspaceError;
   const parsed = websiteConfigurationSchema.safeParse({
     enabled: form.get("enabled") === "on",
     origins: String(form.get("origins") ?? "")
@@ -33,6 +36,7 @@ export async function saveWebsiteChannel(
         "Could not save this channel. Workspace owner access and exact origins are required.",
     };
   revalidatePath("/app/channels");
+  revalidatePath("/app");
   return {
     status: "success",
     message: parsed.data.enabled
@@ -42,9 +46,11 @@ export async function saveWebsiteChannel(
 }
 export async function disconnectInstagram(
   _state: FormState,
+  form: FormData,
 ): Promise<FormState> {
-  void _state;
   const ctx = await requireWorkspace();
+  const workspaceError = workspaceFormError(form, ctx.workspace.id);
+  if (workspaceError) return workspaceError;
   const result = await ctx.supabase.rpc("disconnect_instagram_channel", {
     target_workspace_id: ctx.workspace.id,
   });
@@ -54,6 +60,7 @@ export async function disconnectInstagram(
       message: "Could not disconnect. Workspace owner access is required.",
     };
   revalidatePath("/app/channels");
+  revalidatePath("/app");
   return {
     status: "success",
     message:

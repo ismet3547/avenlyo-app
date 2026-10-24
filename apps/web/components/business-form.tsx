@@ -7,9 +7,11 @@ import { Button } from "./ui/button";
 export function BusinessForm({
   name,
   editable,
+  workspaceId,
 }: {
   name: string;
   editable: boolean;
+  workspaceId: string;
 }) {
   const [state, action, pending] = useActionState(renameBusiness, {
     message: "",
@@ -17,6 +19,7 @@ export function BusinessForm({
   } as FormState);
   return (
     <form action={action}>
+      <input type="hidden" name="workspaceId" value={workspaceId} />
       <label htmlFor="business-name" className="text-sm font-medium">
         Business name
       </label>

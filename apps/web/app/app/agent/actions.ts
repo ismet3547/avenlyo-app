@@ -2,12 +2,15 @@
 import { revalidatePath } from "next/cache";
 import { agentSettingsSchema, type Json } from "@avenlyo-app/shared";
 import { requireWorkspace } from "@/lib/workspace";
+import { workspaceFormError } from "@/lib/workspace-form";
 import type { FormState } from "@/app/auth/actions";
 export async function saveAgent(
   _state: FormState,
   form: FormData,
 ): Promise<FormState> {
   const ctx = await requireWorkspace();
+  const workspaceError = workspaceFormError(form, ctx.workspace.id);
+  if (workspaceError) return workspaceError;
   const parsed = agentSettingsSchema.safeParse({
     tone: form.get("tone"),
     goals: [...form.getAll("goals"), "human_handoff"],

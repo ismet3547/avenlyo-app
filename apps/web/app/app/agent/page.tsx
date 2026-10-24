@@ -40,7 +40,7 @@ export default async function AgentPage() {
           </Button>
         }
       />
-      <AgentForm settings={settings} editable={ctx.role === "owner"} />
+      <AgentForm workspaceId={ctx.workspace.id} settings={settings} editable={ctx.role === "owner"} />
     </>
   );
 }

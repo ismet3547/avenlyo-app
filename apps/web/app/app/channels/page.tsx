@@ -70,6 +70,7 @@ export default async function ChannelsPage() {
             clear handoff to your team.
           </p>
           <WebsiteChannelForm
+            workspaceId={ctx.workspace.id}
             enabled={website?.enabled ?? false}
             origins={
               website?.approved_origins ??
@@ -139,7 +140,7 @@ export default async function ChannelsPage() {
             failures and unconfirmed sends are visible in Inbox.
           </p>
           {instagram && instagram.status !== "disconnected" && (
-            <DisconnectInstagram editable={ctx.role === "owner"} />
+            <DisconnectInstagram workspaceId={ctx.workspace.id} editable={ctx.role === "owner"} />
           )}
         </Card>
       </div>
